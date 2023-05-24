@@ -25,6 +25,29 @@
             displayFollowersList();
         }
 
+        fetch('https://api.twitch.tv/helix/users', {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Client-Id': clientId
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data)
+                fetch(`https://api.twitch.tv/helix/channels/followers?user_id=${data.id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Client-Id': clientId
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data)
+                    })
+            })
+
+
+
         function authenticate() {
             const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=${scope}`;
             window.location.href = authUrl;
@@ -41,7 +64,7 @@
             unfollowedElement.innerHTML = '<h2>Unfollowed:</h2>';
 
             // Twitch APIを使用してフォロワーリストを取得
-            fetch('https://api.twitch.tv/helix/users/follows', {
+            fetch('https://api.twitch.tv/helix/channels/followers', {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
                     'Client-Id': clientId
