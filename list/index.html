@@ -2,105 +2,97 @@
 <html>
 
 <head>
-    <title>Twitch Followers</title>
+    <title>Twitch Follower Checker</title>
+
+    <!-- ag-Grid ライブラリの読み込み -->
+    <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-grid.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-theme-alpine.css" />
+
+    <!-- tabby ライブラリの読み込み -->
+    <script src="https://cdn.jsdelivr.net/gh/cferdinandi/tabby@12/dist/js/tabby.polyfills.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/cferdinandi/tabby@12/dist/css/tabby-ui.min.css">
+
+    <link rel="stylesheet" type="text/css" href="./css/style.css">
+    <script src="./scripts/constants.js"></script>
+    <script src="./scripts/auth.js"></script>
+    <script src="./scripts/followerList.js"></script>
 </head>
 
 <body>
-    <h1>Twitch Followers</h1>
+    <h1>Twitch Follower Checker</h1>
 
-    <button onclick="authenticate()">Authenticate with Twitch</button>
+    <button onclick="authenticate()" id="authenticateButton">Authenticate with Twitch</button>
 
-    <div id="followersList"></div>
+    <div id="mainContainer" style="display: none;">
+        <ul data-tabs>
+            <li><a data-tabby-default href="#follower">Follower List</a></li>
+            <li><a href="#followerDiff">Follower Diff List</a></li>
+        </ul>
 
+        <div id="follower">
+            <h2>Follower List</h2>
+            <!-- 検索機能 -->
+            <div id="search">
+                <input type="text" id="quickFilterInput" placeholder="Search...">
+            </div>
+            <!-- フォロワー一覧 -->
+            <div id="followerList" class="ag-theme-alpine"></div>
+        </div>
+        <div id="followerDiff">
+            <h2>Follower Diff List</h2>
+            <div id="lastCheckedContainer">
+                <button onclick="updateFollowerListInLocalStorage()">Done check</button>
+                <span id="lastCheckedDate"></span>
+            </div>
+            <!-- フォロワー差分一覧 -->
+            <div id="followerDiffLists">
+                <div id="newFollowers" class="ag-theme-alpine">
+                    <span style="font-size: large;">New Followers</span>
+                </div>
+                <div id="unfollowedUsers" class="ag-theme-alpine">
+                    <span style="font-size: large;">Unfollowed Users</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
     <script>
-        const clientId = 'h0pe6dkb6r51jzkk27ujasldoqgio9';
-        const redirectUri = 'https://kagijpn.github.io/twitch-follower-checker/list';
-        const scope = 'moderator:read:followers';
+        // ====== メインロジック ======
+        // リダイレクト処理
+        const hash = window.location.hash.substr(1); // 先頭の#を削除する
+        if (hash) {
+            // URLデコードしてパラメータを取得
+            const params = new URLSearchParams(hash);
 
-        const accessTokenKey = 'twitchAccessToken';
-        const followersListKey = 'twitchFollowersList';
-
-        // 認証をスキップしてフォロワーリストを表示する
-        if (localStorage.getItem(accessTokenKey)) {
-            displayFollowersList();
-        }
-
-        fetch('https://api.twitch.tv/helix/users', {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Client-Id': clientId
+            // パラメータをオブジェクトに変換
+            const hashValues = {};
+            for (const [key, value] of params.entries()) {
+                hashValues[key] = value;
             }
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data)
-                fetch(`https://api.twitch.tv/helix/channels/followers?user_id=${data.id}`, {
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`,
-                        'Client-Id': clientId
-                    }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log(data)
-                    })
-            })
 
-
-
-        function authenticate() {
-            const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=${scope}`;
-            window.location.href = authUrl;
+            // console.log(hashValues);
+            // access_token が存在したら localStorage に保存
+            if (hashValues.access_token) {
+                localStorage.setItem(accessTokenKey, hashValues.access_token);
+            }
         }
 
-        function displayFollowersList() {
-            const accessToken = localStorage.getItem(accessTokenKey);
-            const followersList = localStorage.getItem(followersListKey);
+        // Tab の作成
+        const tabs = new Tabby('[data-tabs]');
 
-            // 差分を表示するための要素
-            const newFollowersElement = document.createElement('div');
-            newFollowersElement.innerHTML = '<h2>New Followers:</h2>';
-            const unfollowedElement = document.createElement('div');
-            unfollowedElement.innerHTML = '<h2>Unfollowed:</h2>';
+        // accessToken が存在＆失効していなかったらリスト表示処理へ
+        if (localStorage.getItem(accessTokenKey) && checkTokenExpired()) {
+            document.getElementById("mainContainer").style.display = 'block';
+            document.getElementById("authenticateButton").disabled = true;
+            display();
+        }
 
-            // Twitch APIを使用してフォロワーリストを取得
-            fetch('https://api.twitch.tv/helix/channels/followers', {
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                    'Client-Id': clientId
-                }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data)
-                    const currentFollowers = data.data.map(follow => follow.to_name);
-
-                    // フォロワーリストの差分を取得
-                    if (followersList) {
-                        const previousFollowers = JSON.parse(followersList);
-
-                        // 新しくフォローした人を取得
-                        const newFollowers = currentFollowers.filter(follower => !previousFollowers.includes(follower));
-                        if (newFollowers.length > 0) {
-                            newFollowersElement.innerHTML += `<ul>${newFollowers.map(follower => `<li>${follower}</li>`).join('')}</ul>`;
-                        }
-
-                        // フォローを解除した人を取得
-                        const unfollowed = previousFollowers.filter(follower => !currentFollowers.includes(follower));
-                        if (unfollowed.length > 0) {
-                            unfollowedElement.innerHTML += `<ul>${unfollowed.map(follower => `<li>${follower}</li>`).join('')}</ul>`;
-                        }
-                    }
-
-                    // フォロワーリストをローカルストレージに保存
-                    localStorage.setItem(followersListKey, JSON.stringify(currentFollowers));
-
-                    // フォロワーリストを表示
-                    const followersListElement = document.getElementById('followersList');
-                    followersListElement.appendChild(newFollowersElement);
-                    followersListElement.appendChild(unfollowedElement);
-                })
-                .catch(error => console.error('Error fetching followers:', error));
+        async function display() {
+            const nowAllFollowers = await getNowAllFollowers();
+            displayFollowerList(nowAllFollowers);
+            displayFollowerDiffList(nowAllFollowers);
+            displayLastCheckedDate();
         }
     </script>
 </body>
