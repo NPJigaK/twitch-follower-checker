@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Twitch Followers</title>
+</head>
+
+<body>
+    <h1>Twitch Followers</h1>
+
+    <button onclick="authenticate()">Authenticate with Twitch</button>
+
+    <div id="followersList"></div>
+
+    <script>
+        const clientId = 'h0pe6dkb6r51jzkk27ujasldoqgio9';
+        const redirectUri = 'https://kagijpn.github.io/twitch-follower-checker/list';
+        const scope = 'user:read:email user:read:follows';
+
+        const accessTokenKey = 'twitchAccessToken';
+        const followersListKey = 'twitchFollowersList';
+
+        // 認証をスキップしてフォロワーリストを表示する
+        if (localStorage.getItem(accessTokenKey)) {
+            displayFollowersList();
+        }
+
+        function authenticate() {
+            const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=${scope}`;
+            window.location.href = authUrl;
+        }
+
+        function displayFollowersList() {
+            const accessToken = localStorage.getItem(accessTokenKey);
+            const followersList = localStorage.getItem(followersListKey);
+
+            // 差分を表示するための要素
+            const newFollowersElement = document.createElement('div');
+            newFollowersElement.innerHTML = '<h2>New Followers:</h2>';
+            const unfollowedElement = document.createElement('div');
+            unfollowedElement.innerHTML = '<h2>Unfollowed:</h2>';
+
+            // Twitch APIを使用してフォロワーリストを取得
+            fetch('https://api.twitch.tv/helix/users/follows', {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Client-Id': clientId
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data)
+                    const currentFollowers = data.data.map(follow => follow.to_name);
+
+                    // フォロワーリストの差分を取得
+                    if (followersList) {
+                        const previousFollowers = JSON.parse(followersList);
+
+                        // 新しくフォローした人を取得
+                        const newFollowers = currentFollowers.filter(follower => !previousFollowers.includes(follower));
+                        if (newFollowers.length > 0) {
+                            newFollowersElement.innerHTML += `<ul>${newFollowers.map(follower => `<li>${follower}</li>`).join('')}</ul>`;
+                        }
+
+                        // フォローを解除した人を取得
+                        const unfollowed = previousFollowers.filter(follower => !currentFollowers.includes(follower));
+                        if (unfollowed.length > 0) {
+                            unfollowedElement.innerHTML += `<ul>${unfollowed.map(follower => `<li>${follower}</li>`).join('')}</ul>`;
+                        }
+                    }
+
+                    // フォロワーリストをローカルストレージに保存
+                    localStorage.setItem(followersListKey, JSON.stringify(currentFollowers));
+
+                    // フォロワーリストを表示
+                    const followersListElement = document.getElementById('followersList');
+                    followersListElement.appendChild(newFollowersElement);
+                    followersListElement.appendChild(unfollowedElement);
+                })
+                .catch(error => console.error('Error fetching followers:', error));
+        }
+    </script>
+</body>
+
+</html>
