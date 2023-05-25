@@ -1,7 +1,18 @@
 const twitchLinkInCellRenderer = (params) =>
   `<a href="https://www.twitch.tv/${params.value}" target="_blank" rel="noopener">${params.value}</a>`;
 const formatToLocaleStringCellRenderer = (params) =>
-  `${new Date(params.value).toLocaleString()}`;
+  `${formatToLocaleString(new Date(params.value))}`;
+
+function formatToLocaleString(date) {
+  return date.toLocaleString(undefined, {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
 
 async function getNowAllFollowers() {
   // Twitch API で認証ユーザー情報を取得
@@ -141,7 +152,7 @@ function displayLastCheckedDate() {
 async function updateFollowerListInLocalStorage() {
   const previousFollowers = sessionStorage.getItem(previousFollowersKey);
   localStorage.setItem(previousFollowersKey, previousFollowers);
-  localStorage.setItem(LastCheckedDate, new Date().toLocaleString());
+  localStorage.setItem(LastCheckedDate, formatToLocaleString(new Date()));
   displayLastCheckedDate();
 }
 
