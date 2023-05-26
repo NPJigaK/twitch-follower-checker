@@ -1,1 +1,1 @@
-# twitch-follower-checker
+# Twitch Follower Checker

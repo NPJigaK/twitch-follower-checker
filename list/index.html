@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Twitch Follower Checker</title>
+
+    <!-- ag-Grid ライブラリの読み込み -->
+    <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-grid.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-theme-alpine.css" />
+
+    <!-- tabby ライブラリの読み込み -->
+    <script src="https://cdn.jsdelivr.net/gh/cferdinandi/tabby@12/dist/js/tabby.polyfills.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/cferdinandi/tabby@12/dist/css/tabby-ui.min.css">
+
+    <link rel="stylesheet" type="text/css" href="./css/style.css">
+    <script src="./scripts/constants.js"></script>
+    <script src="./scripts/auth.js"></script>
+    <script src="./scripts/followerList.js"></script>
+</head>
+
+<body>
+    <h1>Twitch Follower Checker</h1>
+
+    <button onclick="authenticate()" id="authenticateButton">Authenticate with Twitch</button>
+
+    <div id="mainContainer" style="display: none;">
+        <ul data-tabs>
+            <li><a data-tabby-default href="#follower">Follower List</a></li>
+            <li><a href="#followerDiff">Follower Diff List</a></li>
+        </ul>
+
+        <div id="follower">
+            <h2>Follower List</h2>
+            <!-- 検索機能 -->
+            <div id="search">
+                <input type="text" id="quickFilterInput" placeholder="Search...">
+            </div>
+            <!-- フォロワー一覧 -->
+            <div id="followerList" class="ag-theme-alpine"></div>
+        </div>
+        <div id="followerDiff">
+            <h2>Follower Diff List</h2>
+            <div id="lastCheckedContainer">
+                <button onclick="updateFollowerListInLocalStorage()">Done check</button>
+                <span id="lastCheckedDate"></span>
+            </div>
+            <!-- フォロワー差分一覧 -->
+            <div id="followerDiffLists">
+                <div id="newFollowers" class="ag-theme-alpine">
+                    <span style="font-size: large;">New Followers</span>
+                </div>
+                <div id="unfollowedUsers" class="ag-theme-alpine">
+                    <span style="font-size: large;">Unfollowed Users</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <script>
+        // ====== メインロジック ======
+        // リダイレクト処理
+        const hash = window.location.hash.substr(1); // 先頭の#を削除する
+        if (hash) {
+            // URLデコードしてパラメータを取得
+            const params = new URLSearchParams(hash);
+
+            // パラメータをオブジェクトに変換
+            const hashValues = {};
+            for (const [key, value] of params.entries()) {
+                hashValues[key] = value;
+            }
+
+            // console.log(hashValues);
+            // access_token が存在したら localStorage に保存
+            if (hashValues.access_token) {
+                localStorage.setItem(accessTokenKey, hashValues.access_token);
+            }
+        }
+
+        // Tab の作成
+        const tabs = new Tabby('[data-tabs]');
+
+        // accessToken が存在＆失効していなかったらリスト表示処理へ
+        if (localStorage.getItem(accessTokenKey) && checkTokenExpired()) {
+            document.getElementById("mainContainer").style.display = 'block';
+            document.getElementById("authenticateButton").disabled = true;
+            display();
+        }
+
+        async function display() {
+            const nowAllFollowers = await getNowAllFollowers();
+            displayFollowerList(nowAllFollowers);
+            displayFollowerDiffList(nowAllFollowers);
+            displayLastCheckedDate();
+        }
+    </script>
+</body>
+
+</html>

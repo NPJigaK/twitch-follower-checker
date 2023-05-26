@@ -1,0 +1,17 @@
+#followerList {
+  width: 800px;
+}
+
+#newFollowers {
+  width: 540px;
+  display: inline-block;
+}
+
+#unfollowedUsers {
+  width: 260px;
+  display: inline-block;
+}
+
+#lastCheckedContainer {
+  margin-bottom: 20px;
+}
