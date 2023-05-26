@@ -145,14 +145,14 @@ async function displayFollowerDiffList(nowAllFollowers) {
 function displayLastCheckedDate() {
   // Last checked を表示
   document.getElementById("lastCheckedDate").innerText = `Last checked: ${
-    localStorage.getItem(LastCheckedDate) || "none"
+    localStorage.getItem(lastCheckedDate) || "none"
   }`;
 }
 
 async function updateFollowerListInLocalStorage() {
   const previousFollowers = sessionStorage.getItem(previousFollowersKey);
   localStorage.setItem(previousFollowersKey, previousFollowers);
-  localStorage.setItem(LastCheckedDate, formatToLocaleString(new Date()));
+  localStorage.setItem(lastCheckedDate, formatToLocaleString(new Date()));
   displayLastCheckedDate();
 }
 

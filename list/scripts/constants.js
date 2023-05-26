@@ -4,4 +4,4 @@ const scope = "moderator:read:followers";
 
 const accessTokenKey = "twitchAccessToken";
 const previousFollowersKey = "previousFollowersKey";
-const LastCheckedDate = "LastCheckedDate";
+const lastCheckedDate = "lastCheckedDate";
