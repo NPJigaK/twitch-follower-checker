@@ -1,0 +1,52 @@
+:version: 1.0.0
+:tip-caption: :bulb:
+:toc:
+
+= Twitch Follower Checker
+
+The Twitch Follower Checker is a web application that allows you to easily track new followers and unfollows on your Twitch channel.
+
+※ 日本の方向けのドキュメントは link:README_JP.adoc[こちら]！
+
+== Usage
+
+You can use this tool from https://kagijpn.github.io/twitch-follower-checker/list/[here].
+
+=== Authentication with Twitch
+
+Upon first access, click the `Authenticate with Twitch` button to authenticate.
+The list that is displayed will target the users who have been authenticated.
+
+=== Follower List
+
+A list of users currently following your channel will be displayed.
+
+==== User Filtering
+
+By entering text into the Search text box, you can filter users.
+The search targets are `Followed At`, `Display Name`, `User Name`, and `User ID`. +
+For example, if you input `2023/05`, it will narrow down to people who followed in May 2023.
+
+=== Follower Diff List
+
+A list of new followers and those who have unfollowed will be displayed.
+
+==== Confirming Differences
+
+Differences from the Follower List as of the `Last checked` date will be displayed.
+
+When you press the `Done check` button, the `Last checked` date will be updated to the current time. +
+[TIP]
+You do not necessarily have to press the `Done check` button. Press it at any time you want to update the list that becomes the basis for the difference.
+
+== Contribute
+
+We are always accepting bug reports, improvement proposals, and feature proposals. After consideration, we will incorporate them.
+Please https://github.com/KagiJPN/twitch-follower-checker/issues/new[raise an issue] if you can.
+
+In order to update to a better, easier-to-use tool, we sincerely appreciate your cooperation!
+If there is anything else you need to contact us about, please feel free to contact me on https://twitter.com/KagiJPN[my Twitter]!
+
+== License
+
+This project is licensed under the https://github.com/KagiJPN/twitch-follower-checker/blob/main/LICENSE[Apache License 2.0].
