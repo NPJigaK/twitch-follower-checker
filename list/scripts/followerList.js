@@ -40,8 +40,7 @@ async function displayFollowerList(nowAllFollowers) {
         minWidth: 150,
         cellRenderer: formatToLocaleStringCellRenderer,
         getQuickFilterText: (params) => {
-          console.log(params);
-          return formatToLocaleString(params.value.name);
+          return formatToLocaleString(params.value);
         },
       },
       { headerName: "Display Name", field: "user_name", minWidth: 150 },
