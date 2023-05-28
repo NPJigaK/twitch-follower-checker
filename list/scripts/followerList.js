@@ -1,6 +1,6 @@
 const twitchLinkInCellRenderer = (params) =>
   `<a href="https://www.twitch.tv/${params.value}" target="_blank" rel="noopener">${params.value}</a>`;
-const formatToLocaleStringCellRenderer = (params) =>
+const formatToLocaleStringValueFormatter = (params) =>
   `${formatToLocaleString(new Date(params.value))}`;
 
 function formatToLocaleString(date) {
@@ -38,7 +38,7 @@ async function displayFollowerList(nowAllFollowers) {
         headerName: "Followed At",
         field: "followed_at",
         minWidth: 150,
-        cellRenderer: formatToLocaleStringCellRenderer,
+        valueFormatter: formatToLocaleStringValueFormatter,
       },
       { headerName: "Display Name", field: "user_name", minWidth: 150 },
       {
@@ -99,8 +99,8 @@ async function displayFollowerDiffList(nowAllFollowers) {
         {
           headerName: "Followed At",
           field: "followed_at",
-          maxWidth: 200,
-          cellRenderer: formatToLocaleStringCellRenderer,
+          maxWidth: 180,
+          valueFormatter: formatToLocaleStringValueFormatter,
         },
         { headerName: "Display Name", field: "user_name", maxWidth: 175 },
         {
@@ -126,7 +126,7 @@ async function displayFollowerDiffList(nowAllFollowers) {
           maxWidth: 150,
           cellRenderer: twitchLinkInCellRenderer,
         },
-        { headerName: "User ID", field: "user_id", maxWidth: 100 },
+        { headerName: "User ID", field: "user_id", minWidth: 100 },
       ],
       rowData: unfollowedUsers,
       domLayout: "autoHeight",
