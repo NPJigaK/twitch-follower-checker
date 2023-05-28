@@ -1,4 +1,5 @@
 :version: 1.0.0
+:tip-caption: :bulb:
 :toc:
 
 = Twitch Follower Checker
@@ -30,7 +31,7 @@ Search テキストボックスに文字を入力することで、ユーザー�
 
 ==== 差分の確認
 
-`Last checked` の日付の段階の Follower List からの差分が表示されます。
+`Last checked` の日付の時点の Follower List からの差分が表示されます。
 
 `Done check` ボタンを押下すると、 `Last checked` の日付が現在の時間に更新されます。 +
 TIP: `Done check` ボタンを押下する必要は必ずしもありません。差分の元となるリストを更新したい任意のタイミングで押下してください。
