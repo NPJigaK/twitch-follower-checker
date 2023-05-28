@@ -38,7 +38,7 @@ async function displayFollowerList(nowAllFollowers) {
         headerName: "Followed At",
         field: "followed_at",
         minWidth: 150,
-        cellRenderer: formatToLocaleStringValueFormatter,
+        valueFormatter: formatToLocaleStringValueFormatter,
         filterParams: {
           valueFormatter: formatToLocaleStringValueFormatter,
         },
@@ -102,7 +102,7 @@ async function displayFollowerDiffList(nowAllFollowers) {
         {
           headerName: "Followed At",
           field: "followed_at",
-          maxWidth: 180,
+          maxWidth: 170,
           cellRenderer: formatToLocaleStringValueFormatter,
         },
         { headerName: "Display Name", field: "user_name", maxWidth: 175 },
@@ -129,7 +129,7 @@ async function displayFollowerDiffList(nowAllFollowers) {
           minWidth: 150,
           cellRenderer: twitchLinkInCellRenderer,
         },
-        { headerName: "User ID", field: "user_id", maxWidth: 130 },
+        { headerName: "User ID", field: "user_id", maxWidth: 140 },
       ],
       rowData: unfollowedUsers,
       domLayout: "autoHeight",
