@@ -39,9 +39,7 @@ async function displayFollowerList(nowAllFollowers) {
         field: "followed_at",
         minWidth: 150,
         cellRenderer: formatToLocaleStringCellRenderer,
-        getQuickFilterText: (params) => {
-          return formatToLocaleString(params.value);
-        },
+        getQuickFilterText: formatToLocaleStringCellRenderer,
       },
       { headerName: "Display Name", field: "user_name", minWidth: 150 },
       {
