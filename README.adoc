@@ -34,7 +34,8 @@ A list of new followers and those who have unfollowed will be displayed.
 Differences from the Follower List as of the `Last checked` date will be displayed.
 
 When you press the `Done check` button, the `Last checked` date will be updated to the current time. +
-TIP: You do not necessarily have to press the `Done check` button. Press it at any time you want to update the list that becomes the basis for the difference.
+[TIP]
+You do not necessarily have to press the `Done check` button. Press it at any time you want to update the list that becomes the basis for the difference.
 
 == Contribute
 
