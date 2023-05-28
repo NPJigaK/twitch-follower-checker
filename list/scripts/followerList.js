@@ -126,7 +126,7 @@ async function displayFollowerDiffList(nowAllFollowers) {
           minWidth: 150,
           cellRenderer: twitchLinkInCellRenderer,
         },
-        { headerName: "User ID", field: "user_id", maxWidth: 120 },
+        { headerName: "User ID", field: "user_id", minWidth: 120 },
       ],
       rowData: unfollowedUsers,
       domLayout: "autoHeight",
