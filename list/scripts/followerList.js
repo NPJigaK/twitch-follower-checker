@@ -1,6 +1,6 @@
 const twitchLinkInCellRenderer = (params) =>
   `<a href="https://www.twitch.tv/${params.value}" target="_blank" rel="noopener">${params.value}</a>`;
-const formatToLocaleStringValueFormatter = (params) =>
+const formatToLocaleStringCellRenderer = (params) =>
   `${formatToLocaleString(new Date(params.value))}`;
 
 function formatToLocaleString(date) {
@@ -38,9 +38,10 @@ async function displayFollowerList(nowAllFollowers) {
         headerName: "Followed At",
         field: "followed_at",
         minWidth: 150,
-        valueFormatter: formatToLocaleStringValueFormatter,
-        filterParams: {
-          valueFormatter: formatToLocaleStringValueFormatter,
+        cellRenderer: formatToLocaleStringCellRenderer,
+        getQuickFilterText: (params) => {
+          console.log(params);
+          return formatToLocaleString(params.value.name);
         },
       },
       { headerName: "Display Name", field: "user_name", minWidth: 150 },
@@ -103,7 +104,7 @@ async function displayFollowerDiffList(nowAllFollowers) {
           headerName: "Followed At",
           field: "followed_at",
           maxWidth: 170,
-          cellRenderer: formatToLocaleStringValueFormatter,
+          cellRenderer: formatToLocaleStringCellRenderer,
         },
         { headerName: "Display Name", field: "user_name", maxWidth: 175 },
         {
