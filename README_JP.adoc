@@ -1,0 +1,48 @@
+:version: 1.0.0
+:toc:
+
+= Twitch Follower Checker
+
+Twitch Follower Checker は、あなたの Twitch チャンネルの新規フォロワーやアンフォローを簡単に追跡できるウェブアプリケーションです。
+
+== 使用方法
+
+このツールは https://kagijpn.github.io/twitch-follower-checker/list/[こちら] から使用できます。
+
+=== Twitch 認証
+
+初回アクセス時には、`Authenticate with Twitch` ボタンをクリックして認証を行ってください。
+表示されるリストは認証を行ったユーザーを対象とします。
+
+=== Follower List
+
+現在あなたをチャンネルをフォローしているユーザーの一覧が表示されます。
+
+==== ユーザーフィルタリング
+
+Search テキストボックスに文字を入力することで、ユーザーをフィルタリングすることができます。
+検索対象は、`Followed At`, `Display Name`, `User Name`, `User ID` です。 +
+例えば、`2023/05`と入力すると、2023 年 5 月にフォローした人に絞り込まれます。
+
+=== Follower Diff List
+
+新規フォロワーとフォロー解除をした人の一覧が表示されます。
+
+==== 差分の確認
+
+`Last checked` の日付の段階の Follower List からの差分が表示されます。
+
+`Done check` ボタンを押下すると、 `Last checked` の日付が現在の時間に更新されます。 +
+TIP: `Done check` ボタンを押下する必要は必ずしもありません。差分の元となるリストを更新したい任意のタイミングで押下してください。
+
+== 貢献
+
+バグ報告や改善提案、機能提案などは随時受け付けています。検討した上で取り入れさせていただきます。
+https://github.com/KagiJPN/twitch-follower-checker/issues/new[Issue として起票]して頂ければと思います。
+
+より良く、使いやすいツールにアップデートするためにも、ぜひともご協力のほどお願い申し上げます！
+その他、何か連絡がある場合は https://twitter.com/KagiJPN[私のツイッター]までお気軽にご連絡ください！
+
+== ライセンス
+
+このプロジェクトは https://github.com/KagiJPN/twitch-follower-checker/blob/main/LICENSE[Apache License 2.0] に準拠してライセンスされています。
