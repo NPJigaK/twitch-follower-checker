@@ -23,7 +23,7 @@ Twitch Follower Checker は、あなたの Twitch チャンネルの新規フォ
 
 Search テキストボックスに文字を入力することで、ユーザーをフィルタリングすることができます。
 検索対象は、`Followed At`, `Display Name`, `User Name`, `User ID` です。 +
-例えば、`2023/05`と入力すると、2023 年 5 月にフォローした人に絞り込まれます。
+例えば、`2023/05` と入力すると、2023 年 5 月にフォローした人に絞り込まれます。
 
 === Follower Diff List
 
