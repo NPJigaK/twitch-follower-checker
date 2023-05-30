@@ -208,7 +208,7 @@ function adtb(gridOptions, tab) {
     var activeTab = e.detail;
     console.log(e);
     // グリッドが含まれるタブがアクティブになったときだけ `sizeColumnsToFit` を呼び出します
-    if (activeTab.matches(tab)) {
+    if (activeTab.content.id == tab) {
       // ここで '#your-tab-id' をグリッドが含まれるタブのIDに置き換えてください
       setTimeout(function () {
         gridOptions.api.sizeColumnsToFit();
