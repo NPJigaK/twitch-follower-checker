@@ -133,6 +133,7 @@ async function displayFollowerDiffList(nowAllFollowers) {
       domLayout: "autoHeight",
       onGridReady: (params) => params.api.sizeColumnsToFit(),
     };
+    adtb(unfollowedUsersOptions, "followerDiff");
     const unfollowedUsersGridDiv = document.querySelector("#unfollowedUsers");
     new agGrid.Grid(unfollowedUsersGridDiv, unfollowedUsersOptions);
   } else {
@@ -199,3 +200,19 @@ const fetchFollowers = async (channelId, cursor = "") => {
 
   return followers;
 };
+
+function adtb(gridOptions, tab) {
+  // タブが切り替わった時に発生するイベントのリスナーを設定します
+  document.querySelector("[data-tabs]").addEventListener("tabby", function (e) {
+    // 'tabby' イベントは、新しくアクティブになったタブが引数 'e' の 'detail' プロパティでアクセスできます
+    var activeTab = e.detail;
+    console.log(e);
+    // グリッドが含まれるタブがアクティブになったときだけ `sizeColumnsToFit` を呼び出します
+    if (activeTab.matches(tab)) {
+      // ここで '#your-tab-id' をグリッドが含まれるタブのIDに置き換えてください
+      setTimeout(function () {
+        gridOptions.api.sizeColumnsToFit();
+      }, 0);
+    }
+  });
+}
