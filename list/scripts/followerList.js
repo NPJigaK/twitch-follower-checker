@@ -100,14 +100,14 @@ async function displayFollowerDiffList(nowAllFollowers) {
         {
           headerName: "Followed At",
           field: "followed_at",
-          maxWidth: 170,
+          minWidth: 170,
           cellRenderer: formatToLocaleStringCellRenderer,
         },
-        { headerName: "Display Name", field: "user_name", maxWidth: 175 },
+        { headerName: "Display Name", field: "user_name", minWidth: 175 },
         {
           headerName: "User Name",
           field: "user_login",
-          maxWidth: 150,
+          minWidth: 150,
           cellRenderer: twitchLinkInCellRenderer,
         },
       ],
@@ -115,6 +115,7 @@ async function displayFollowerDiffList(nowAllFollowers) {
       domLayout: "autoHeight",
       onGridReady: (params) => params.api.sizeColumnsToFit(),
     };
+    adtb(newFollowersGridOptions, "followerDiff");
     const newFollowersGridDiv = document.querySelector("#newFollowers");
     new agGrid.Grid(newFollowersGridDiv, newFollowersGridOptions);
 
@@ -124,10 +125,10 @@ async function displayFollowerDiffList(nowAllFollowers) {
         {
           headerName: "User Name",
           field: "user_login",
-          maxWidth: 150,
+          minWidth: 150,
           cellRenderer: twitchLinkInCellRenderer,
         },
-        { headerName: "User ID", field: "user_id", maxWidth: 140 },
+        { headerName: "User ID", field: "user_id", minWidth: 140 },
       ],
       rowData: unfollowedUsers,
       domLayout: "autoHeight",
