@@ -113,9 +113,8 @@ async function displayFollowerDiffList(nowAllFollowers) {
       ],
       rowData: newFollowers,
       domLayout: "autoHeight",
-      onGridReady: (params) => params.api.sizeColumnsToFit(),
     };
-    adtb(newFollowersGridOptions, "followerDiff");
+    sizeColumnsToFitOnTabSwith(newFollowersGridOptions, "followerDiff");
     const newFollowersGridDiv = document.querySelector("#newFollowers");
     new agGrid.Grid(newFollowersGridDiv, newFollowersGridOptions);
 
@@ -132,9 +131,8 @@ async function displayFollowerDiffList(nowAllFollowers) {
       ],
       rowData: unfollowedUsers,
       domLayout: "autoHeight",
-      onGridReady: (params) => params.api.sizeColumnsToFit(),
     };
-    adtb(unfollowedUsersOptions, "followerDiff");
+    sizeColumnsToFitOnTabSwith(unfollowedUsersOptions, "followerDiff");
     const unfollowedUsersGridDiv = document.querySelector("#unfollowedUsers");
     new agGrid.Grid(unfollowedUsersGridDiv, unfollowedUsersOptions);
   } else {
@@ -202,18 +200,11 @@ const fetchFollowers = async (channelId, cursor = "") => {
   return followers;
 };
 
-function adtb(gridOptions, tab) {
-  // タブが切り替わった時に発生するイベントのリスナーを設定します
+function sizeColumnsToFitOnTabSwith(gridOptions, tab) {
+  // タブが切り替わった時に発生するイベントリスナーにsizeColumnsToFitを登録する
   document.querySelector("[data-tabs]").addEventListener("tabby", function (e) {
-    // 'tabby' イベントは、新しくアクティブになったタブが引数 'e' の 'detail' プロパティでアクセスできます
-    var activeTab = e.detail;
-    console.log(e);
-    // グリッドが含まれるタブがアクティブになったときだけ `sizeColumnsToFit` を呼び出します
-    if (activeTab.content.id == tab) {
-      // ここで '#your-tab-id' をグリッドが含まれるタブのIDに置き換えてください
-      setTimeout(function () {
-        gridOptions.api.sizeColumnsToFit();
-      }, 0);
+    if (e.detail.content.id == tab) {
+      gridOptions.api.sizeColumnsToFit();
     }
   });
 }
