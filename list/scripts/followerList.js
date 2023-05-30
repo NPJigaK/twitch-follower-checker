@@ -55,7 +55,7 @@ async function displayFollowerList(nowAllFollowers) {
     pagination: true,
     paginationPageSize: 25,
     quickFilterText: "",
-    onFirstDataRendered: () => gridOptions.api.sizeColumnsToFit(),
+    onFirstDataRendered: (params) => params.api.sizeColumnsToFit(),
   };
   const gridDiv = document.querySelector("#followerList");
   new agGrid.Grid(gridDiv, gridOptions);
@@ -113,7 +113,7 @@ async function displayFollowerDiffList(nowAllFollowers) {
       ],
       rowData: newFollowers,
       domLayout: "autoHeight",
-      onFirstDataRendered: () => newFollowersGridOptions.api.sizeColumnsToFit(),
+      onFirstDataRendered: (params) => params.api.sizeColumnsToFit(),
     };
     const newFollowersGridDiv = document.querySelector("#newFollowers");
     new agGrid.Grid(newFollowersGridDiv, newFollowersGridOptions);
@@ -131,7 +131,7 @@ async function displayFollowerDiffList(nowAllFollowers) {
       ],
       rowData: unfollowedUsers,
       domLayout: "autoHeight",
-      onFirstDataRendered: () => unfollowedUsersOptions.api.sizeColumnsToFit(),
+      onFirstDataRendered: (params) => params.api.sizeColumnsToFit(),
     };
     const unfollowedUsersGridDiv = document.querySelector("#unfollowedUsers");
     new agGrid.Grid(unfollowedUsersGridDiv, unfollowedUsersOptions);
