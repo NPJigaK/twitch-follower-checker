@@ -57,7 +57,6 @@ async function displayFollowerList(nowAllFollowers) {
     quickFilterText: "",
     onGridReady: (params) => params.api.sizeColumnsToFit(),
   };
-  sizeColumnsToFitOnWindowResize(gridOptions)
   const gridDiv = document.querySelector("#followerList");
   new agGrid.Grid(gridDiv, gridOptions);
 
@@ -115,7 +114,6 @@ async function displayFollowerDiffList(nowAllFollowers) {
       rowData: newFollowers,
       domLayout: "autoHeight",
     };
-    sizeColumnsToFitOnWindowResize(newFollowersGridOptions)
     sizeColumnsToFitOnTabSwith(newFollowersGridOptions, "followerDiff");
     const newFollowersGridDiv = document.querySelector("#newFollowers");
     new agGrid.Grid(newFollowersGridDiv, newFollowersGridOptions);
@@ -134,7 +132,6 @@ async function displayFollowerDiffList(nowAllFollowers) {
       rowData: unfollowedUsers,
       domLayout: "autoHeight",
     };
-    sizeColumnsToFitOnWindowResize(unfollowedUsersOptions)
     sizeColumnsToFitOnTabSwith(unfollowedUsersOptions, "followerDiff");
     const unfollowedUsersGridDiv = document.querySelector("#unfollowedUsers");
     new agGrid.Grid(unfollowedUsersGridDiv, unfollowedUsersOptions);
@@ -209,12 +206,5 @@ function sizeColumnsToFitOnTabSwith(gridOptions, tab) {
     if (e.detail && e.detail.content.id == tab) {
       gridOptions.api.sizeColumnsToFit();
     }
-  });
-}
-
-function sizeColumnsToFitOnWindowResize(gridOptions) {
-  console.log(gridOptions)
-  window.addEventListener("resize", function () {
-    gridOptions.api.sizeColumnsToFit();
   });
 }
