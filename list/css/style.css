@@ -1,5 +1,6 @@
 #title-container {
   display: flex;
+  align-items: flex-end;
 }
 
 #title-container a {
