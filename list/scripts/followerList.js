@@ -114,7 +114,7 @@ async function displayFollowerDiffList(nowAllFollowers) {
       rowData: newFollowers,
       domLayout: "autoHeight",
     };
-    sizeColumnsToFitOnTabSwith(newFollowersGridOptions, "followerDiff");
+    sizeColumnsToFitOnTabSwitch(newFollowersGridOptions, "followerDiff");
     const newFollowersGridDiv = document.querySelector("#newFollowers");
     new agGrid.Grid(newFollowersGridDiv, newFollowersGridOptions);
 
@@ -132,7 +132,7 @@ async function displayFollowerDiffList(nowAllFollowers) {
       rowData: unfollowedUsers,
       domLayout: "autoHeight",
     };
-    sizeColumnsToFitOnTabSwith(unfollowedUsersOptions, "followerDiff");
+    sizeColumnsToFitOnTabSwitch(unfollowedUsersOptions, "followerDiff");
     const unfollowedUsersGridDiv = document.querySelector("#unfollowedUsers");
     new agGrid.Grid(unfollowedUsersGridDiv, unfollowedUsersOptions);
   } else {
@@ -200,7 +200,7 @@ const fetchFollowers = async (channelId, cursor = "") => {
   return followers;
 };
 
-function sizeColumnsToFitOnTabSwith(gridOptions, tab) {
+function sizeColumnsToFitOnTabSwitch(gridOptions, tab) {
   // タブが切り替わった時に発生するイベントリスナーにsizeColumnsToFitを登録する
   document.querySelector("[data-tabs]").addEventListener("tabby", function (e) {
     if (e.detail && e.detail.content.id == tab) {
