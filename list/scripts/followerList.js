@@ -39,6 +39,7 @@ async function displayFollowerList(nowAllFollowers) {
         field: "followed_at",
         minWidth: 150,
         cellRenderer: formatToLocaleStringCellRenderer,
+        getQuickFilterText: formatToLocaleStringCellRenderer,
       },
       { headerName: "Display Name", field: "user_name", minWidth: 150 },
       {
@@ -54,7 +55,7 @@ async function displayFollowerList(nowAllFollowers) {
     pagination: true,
     paginationPageSize: 25,
     quickFilterText: "",
-    onFirstDataRendered: () => gridOptions.api.sizeColumnsToFit(),
+    onGridReady: (params) => params.api.sizeColumnsToFit(),
   };
   const gridDiv = document.querySelector("#followerList");
   new agGrid.Grid(gridDiv, gridOptions);
@@ -99,21 +100,21 @@ async function displayFollowerDiffList(nowAllFollowers) {
         {
           headerName: "Followed At",
           field: "followed_at",
-          maxWidth: 200,
+          minWidth: 170,
           cellRenderer: formatToLocaleStringCellRenderer,
         },
-        { headerName: "Display Name", field: "user_name", maxWidth: 175 },
+        { headerName: "Display Name", field: "user_name", minWidth: 175 },
         {
           headerName: "User Name",
           field: "user_login",
-          maxWidth: 150,
+          minWidth: 150,
           cellRenderer: twitchLinkInCellRenderer,
         },
       ],
       rowData: newFollowers,
       domLayout: "autoHeight",
-      onFirstDataRendered: () => newFollowersGridOptions.api.sizeColumnsToFit(),
     };
+    sizeColumnsToFitOnTabSwitch(newFollowersGridOptions, "followerDiff");
     const newFollowersGridDiv = document.querySelector("#newFollowers");
     new agGrid.Grid(newFollowersGridDiv, newFollowersGridOptions);
 
@@ -123,15 +124,15 @@ async function displayFollowerDiffList(nowAllFollowers) {
         {
           headerName: "User Name",
           field: "user_login",
-          maxWidth: 150,
+          minWidth: 150,
           cellRenderer: twitchLinkInCellRenderer,
         },
-        { headerName: "User ID", field: "user_id", maxWidth: 100 },
+        { headerName: "User ID", field: "user_id", minWidth: 100 },
       ],
       rowData: unfollowedUsers,
       domLayout: "autoHeight",
-      onFirstDataRendered: () => unfollowedUsersOptions.api.sizeColumnsToFit(),
     };
+    sizeColumnsToFitOnTabSwitch(unfollowedUsersOptions, "followerDiff");
     const unfollowedUsersGridDiv = document.querySelector("#unfollowedUsers");
     new agGrid.Grid(unfollowedUsersGridDiv, unfollowedUsersOptions);
   } else {
@@ -198,3 +199,12 @@ const fetchFollowers = async (channelId, cursor = "") => {
 
   return followers;
 };
+
+function sizeColumnsToFitOnTabSwitch(gridOptions, tab) {
+  // タブが切り替わった時に発生するイベントリスナーにsizeColumnsToFitを登録する
+  document.querySelector("[data-tabs]").addEventListener("tabby", function (e) {
+    if (e.detail && e.detail.content.id == tab) {
+      gridOptions.api.sizeColumnsToFit();
+    }
+  });
+}

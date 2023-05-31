@@ -1,14 +1,28 @@
+#title-container {
+  display: flex;
+  align-items: baseline;
+  margin: 22px 0;
+}
+
+#title-container h1 {
+  margin: 0;
+}
+
+#title-container a {
+  margin-left: 20px;
+}
+
 #followerList {
   width: 800px;
 }
 
 #newFollowers {
-  width: 540px;
+  width: 510px;
   display: inline-block;
 }
 
 #unfollowedUsers {
-  width: 260px;
+  width: 290px;
   display: inline-block;
 }
 

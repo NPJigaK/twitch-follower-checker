@@ -7,7 +7,7 @@
     <meta name="description"
         content="The Twitch Follower Checker is a web application that easily allows you to track new followers and unfollows on your Twitch channel.">
     <meta name="keywords"
-        content="Twitch, Follower Checker, unfollows, unfollows Checker, Twitch Follower Tracker, Unfollow Tracker, Twitch Analytics">
+        content="Twitch, Follower Checker, unfollows, unfollows Checker, Twitch Follower Tracker, Unfollow Tracker, Twitch Analytics, アンフォロー, フォロー解除">
     <meta name="author" content="KagiJPN">
     <meta name="robots" content="index, follow">
     <meta name="googlebot" content="index, follow">
@@ -26,14 +26,12 @@
     <meta name="twitter:site" content="@KagiJPN" />
     <meta name="twitter:creator" content="@KagiJPN" />
 
-    <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico">
+    <!-- ag-Grid 29.x.x ライブラリの読み込み -->
+    <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@29/dist/ag-grid-community.min.noStyle.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@29/styles/ag-grid.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@29/styles/ag-theme-alpine.css" />
 
-    <!-- ag-Grid ライブラリの読み込み -->
-    <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-grid.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-theme-alpine.css" />
-
-    <!-- tabby ライブラリの読み込み -->
+    <!-- tabby 12.x.x ライブラリの読み込み -->
     <script src="https://cdn.jsdelivr.net/gh/cferdinandi/tabby@12/dist/js/tabby.polyfills.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/cferdinandi/tabby@12/dist/css/tabby-ui.min.css">
 
@@ -41,10 +39,15 @@
     <script src="./scripts/constants.js"></script>
     <script src="./scripts/auth.js"></script>
     <script src="./scripts/followerList.js"></script>
+
+    <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico">
 </head>
 
 <body>
-    <h1>Twitch Follower Checker</h1>
+    <div id="title-container">
+        <h1>Twitch Follower Checker</h1>
+        <a href="https://kagijpn.github.io/twitch-follower-checker/" target="_blank" rel="noopener">usage</a>
+    </div>
 
     <button onclick="authenticate()" id="authenticateButton">Authenticate with Twitch</button>
 
