@@ -203,7 +203,7 @@ const fetchFollowers = async (channelId, cursor = "") => {
 function sizeColumnsToFitOnTabSwith(gridOptions, tab) {
   // タブが切り替わった時に発生するイベントリスナーにsizeColumnsToFitを登録する
   document.querySelector("[data-tabs]").addEventListener("tabby", function (e) {
-    if (e.detail.content.id == tab) {
+    if (e.detail && e.detail.content.id == tab) {
       gridOptions.api.sizeColumnsToFit();
     }
   });
