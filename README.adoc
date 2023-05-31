@@ -6,7 +6,7 @@
 
 The Twitch Follower Checker is a web application that allows you to easily track new followers and unfollows on your Twitch channel.
 
-※ 日本の方向けのドキュメントは link:README_JP.adoc[こちら]！
+※ 日本の方向けのドキュメントは https://kagijpn.github.io/twitch-follower-checker/jp/[こちら]！
 
 == Usage
 
