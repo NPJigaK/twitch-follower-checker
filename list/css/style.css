@@ -1,6 +1,6 @@
 #title-container {
   display: flex;
-  align-items: flex-end;
+  align-items: baseline;
   margin: 22px 0;
 }
 
