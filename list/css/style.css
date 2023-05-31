@@ -1,6 +1,11 @@
 #title-container {
   display: flex;
   align-items: flex-end;
+  margin: 22px 0;
+}
+
+#title-container h1 {
+  margin: 0;
 }
 
 #title-container a {
