@@ -1,3 +1,12 @@
+#title-container {
+  display: flex;
+  align-items: center;
+}
+
+#title-container a {
+  margin-left: 20px;
+}
+
 #followerList {
   width: 800px;
 }
