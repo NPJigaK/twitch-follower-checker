@@ -33,11 +33,17 @@ A list of new followers and those who have unfollowed will be displayed.
 
 ==== Confirming Differences
 
-Differences from the Follower List as of the `Last checked` date will be displayed.
+Differences from the `Follower List` as of the `Last checked` date will be displayed.
 
 When you press the `Done check` button, the `Last checked` date will be updated to the current time. +
 [TIP]
-You do not necessarily have to press the `Done check` button. Press it at any time you want to update the list that becomes the basis for the difference.
+You do not necessarily have to press the `Done check` button. Press it at any time you want to update the list that becomes the basis for the difference. +
+After updating `Last checked`, we recommend you to proceed to <<refreshing-lists,refresh the lists>>.
+
+[[refreshing-lists]]
+=== Refreshing the Lists
+By pressing the `Refresh Follower Lists` button, you can refresh the `Follower List` and `Follower Diff List` to their latest states. +
+The time until the `Refresh Follower Lists` button can be pressed again is shown in `Refresh available in`. This is to regulate the frequency of API calls in a short period due to the link:https://dev.twitch.tv/docs/api/guide/#twitch-rate-limits[Rate Limits] set by Twitch API.
 
 == Contribute
 

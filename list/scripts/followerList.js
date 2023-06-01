@@ -14,6 +14,69 @@ function formatToLocaleString(date) {
   });
 }
 
+let gridOptions = {
+  columnDefs: [
+    {
+      headerName: "Followed At",
+      field: "followed_at",
+      minWidth: 150,
+      cellRenderer: formatToLocaleStringCellRenderer,
+      getQuickFilterText: formatToLocaleStringCellRenderer,
+    },
+    { headerName: "Display Name", field: "user_name", minWidth: 150 },
+    {
+      headerName: "User Name",
+      field: "user_login",
+      minWidth: 150,
+      cellRenderer: twitchLinkInCellRenderer,
+    },
+    { headerName: "User ID", field: "user_id", minWidth: 75 },
+  ],
+  rowData: null,
+  domLayout: "autoHeight",
+  pagination: true,
+  paginationPageSize: 25,
+  quickFilterText: "",
+  animateRows: true,
+  onGridReady: (params) => params.api.sizeColumnsToFit(),
+};
+
+let newFollowersGridOptions = {
+  columnDefs: [
+    {
+      headerName: "Followed At",
+      field: "followed_at",
+      minWidth: 170,
+      cellRenderer: formatToLocaleStringCellRenderer,
+    },
+    { headerName: "Display Name", field: "user_name", minWidth: 175 },
+    {
+      headerName: "User Name",
+      field: "user_login",
+      minWidth: 150,
+      cellRenderer: twitchLinkInCellRenderer,
+    },
+  ],
+  rowData: null,
+  domLayout: "autoHeight",
+  animateRows: true,
+};
+
+let unfollowedUsersOptions = {
+  columnDefs: [
+    {
+      headerName: "User Name",
+      field: "user_login",
+      minWidth: 150,
+      cellRenderer: twitchLinkInCellRenderer,
+    },
+    { headerName: "User ID", field: "user_id", minWidth: 100 },
+  ],
+  rowData: null,
+  domLayout: "autoHeight",
+  animateRows: true,
+};
+
 async function getNowAllFollowers() {
   // Twitch API で認証ユーザー情報を取得
   const res = await fetch("https://api.twitch.tv/helix/users", {
@@ -31,34 +94,15 @@ async function getNowAllFollowers() {
 }
 
 async function displayFollowerList(nowAllFollowers) {
-  // 一覧表示
-  const gridOptions = {
-    columnDefs: [
-      {
-        headerName: "Followed At",
-        field: "followed_at",
-        minWidth: 150,
-        cellRenderer: formatToLocaleStringCellRenderer,
-        getQuickFilterText: formatToLocaleStringCellRenderer,
-      },
-      { headerName: "Display Name", field: "user_name", minWidth: 150 },
-      {
-        headerName: "User Name",
-        field: "user_login",
-        minWidth: 150,
-        cellRenderer: twitchLinkInCellRenderer,
-      },
-      { headerName: "User ID", field: "user_id", minWidth: 75 },
-    ],
-    rowData: nowAllFollowers,
-    domLayout: "autoHeight",
-    pagination: true,
-    paginationPageSize: 25,
-    quickFilterText: "",
-    onGridReady: (params) => params.api.sizeColumnsToFit(),
-  };
-  const gridDiv = document.querySelector("#followerList");
-  new agGrid.Grid(gridDiv, gridOptions);
+  if (gridOptions.rowData === null) {
+    // 一覧表示 初期化
+    gridOptions.rowData = nowAllFollowers;
+    const gridDiv = document.querySelector("#followerList");
+    new agGrid.Grid(gridDiv, gridOptions);
+  } else {
+    // 一覧表示 更新
+    gridOptions.api.setRowData(nowAllFollowers);
+  }
 
   // 検索窓作成
   const filterInput = document.getElementById("quickFilterInput");
@@ -93,48 +137,27 @@ async function displayFollowerDiffList(nowAllFollowers) {
 
     // console.log(newFollowers);
     // console.log(unfollowedUsers);
+    if (newFollowersGridOptions.rowData === null) {
+      // 新しいフォロワー一覧表示 初期化
+      newFollowersGridOptions.rowData = newFollowers;
+      sizeColumnsToFitOnTabSwitch(newFollowersGridOptions, "followerDiff");
+      const newFollowersGridDiv = document.querySelector("#newFollowers");
+      new agGrid.Grid(newFollowersGridDiv, newFollowersGridOptions);
+    } else {
+      // 新しいフォロワー一覧表示 更新
+      newFollowersGridOptions.api.setRowData(newFollowers);
+    }
 
-    // 新しいフォロワー一覧作成
-    const newFollowersGridOptions = {
-      columnDefs: [
-        {
-          headerName: "Followed At",
-          field: "followed_at",
-          minWidth: 170,
-          cellRenderer: formatToLocaleStringCellRenderer,
-        },
-        { headerName: "Display Name", field: "user_name", minWidth: 175 },
-        {
-          headerName: "User Name",
-          field: "user_login",
-          minWidth: 150,
-          cellRenderer: twitchLinkInCellRenderer,
-        },
-      ],
-      rowData: newFollowers,
-      domLayout: "autoHeight",
-    };
-    sizeColumnsToFitOnTabSwitch(newFollowersGridOptions, "followerDiff");
-    const newFollowersGridDiv = document.querySelector("#newFollowers");
-    new agGrid.Grid(newFollowersGridDiv, newFollowersGridOptions);
-
-    // フォロー解除した人一覧作成
-    const unfollowedUsersOptions = {
-      columnDefs: [
-        {
-          headerName: "User Name",
-          field: "user_login",
-          minWidth: 150,
-          cellRenderer: twitchLinkInCellRenderer,
-        },
-        { headerName: "User ID", field: "user_id", minWidth: 100 },
-      ],
-      rowData: unfollowedUsers,
-      domLayout: "autoHeight",
-    };
-    sizeColumnsToFitOnTabSwitch(unfollowedUsersOptions, "followerDiff");
-    const unfollowedUsersGridDiv = document.querySelector("#unfollowedUsers");
-    new agGrid.Grid(unfollowedUsersGridDiv, unfollowedUsersOptions);
+    if (unfollowedUsersOptions.rowData === null) {
+      // フォロー解除した人一覧表示 初期化
+      unfollowedUsersOptions.rowData = unfollowedUsers;
+      sizeColumnsToFitOnTabSwitch(unfollowedUsersOptions, "followerDiff");
+      const unfollowedUsersGridDiv = document.querySelector("#unfollowedUsers");
+      new agGrid.Grid(unfollowedUsersGridDiv, unfollowedUsersOptions);
+    } else {
+      // フォロー解除した人一覧表示 更新
+      unfollowedUsersOptions.api.setRowData(unfollowedUsers);
+    }
   } else {
     // 初回はフォロワーリストをローカルストレージに保存
     await updateFollowerListInLocalStorage();
