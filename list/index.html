@@ -87,7 +87,7 @@
         <div id="followerDiff">
             <h2>Follower Diff List</h2>
             <div id="lastCheckedContainer">
-                <button onclick="updateFollowerListInLocalStorage()">Done check</button>
+                <button id="doneCheckButton">Done check</button>
                 <span id="lastCheckedDate"></span>
             </div>
             <!-- フォロワー差分一覧 -->
@@ -132,6 +132,7 @@
             document.getElementById("refreshButton").style.display = 'block';
             document.getElementById("authenticateButton").disabled = true;
             display();
+            // document.getElementById('refreshButton').click();
         }
 
         async function display() {
@@ -141,11 +142,13 @@
             displayLastCheckedDate();
         }
 
+        document.getElementById("doneCheckButton").addEventListener("click", async function () {
+            await updateFollowerListInLocalStorage();
+            // document.getElementById('refreshButton').click();
+        });
+
         // リフレッシュボタンのlistener
         document.getElementById("refreshButton").addEventListener("click", function () {
-            // Refresh lists
-            // display()
-
             // Disable the button
             this.disabled = true;
 
@@ -170,6 +173,9 @@
                     this.disabled = false;
                 }
             }, 1000);
+
+            // Refresh lists
+            display()
         });
     </script>
 </body>

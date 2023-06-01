@@ -14,6 +14,10 @@ function formatToLocaleString(date) {
   });
 }
 
+let gridInstance;
+let newFollowersGridInstance;
+let unfollowedUsersGridInstance;
+
 async function getNowAllFollowers() {
   // Twitch API で認証ユーザー情報を取得
   const res = await fetch("https://api.twitch.tv/helix/users", {
@@ -31,34 +35,41 @@ async function getNowAllFollowers() {
 }
 
 async function displayFollowerList(nowAllFollowers) {
-  // 一覧表示
-  const gridOptions = {
-    columnDefs: [
-      {
-        headerName: "Followed At",
-        field: "followed_at",
-        minWidth: 150,
-        cellRenderer: formatToLocaleStringCellRenderer,
-        getQuickFilterText: formatToLocaleStringCellRenderer,
-      },
-      { headerName: "Display Name", field: "user_name", minWidth: 150 },
-      {
-        headerName: "User Name",
-        field: "user_login",
-        minWidth: 150,
-        cellRenderer: twitchLinkInCellRenderer,
-      },
-      { headerName: "User ID", field: "user_id", minWidth: 75 },
-    ],
-    rowData: nowAllFollowers,
-    domLayout: "autoHeight",
-    pagination: true,
-    paginationPageSize: 25,
-    quickFilterText: "",
-    onGridReady: (params) => params.api.sizeColumnsToFit(),
-  };
-  const gridDiv = document.querySelector("#followerList");
-  new agGrid.Grid(gridDiv, gridOptions);
+  if (!gridInstance) {
+    // 一覧表示
+    const gridOptions = {
+      columnDefs: [
+        {
+          headerName: "Followed At",
+          field: "followed_at",
+          minWidth: 150,
+          cellRenderer: formatToLocaleStringCellRenderer,
+          getQuickFilterText: formatToLocaleStringCellRenderer,
+        },
+        { headerName: "Display Name", field: "user_name", minWidth: 150 },
+        {
+          headerName: "User Name",
+          field: "user_login",
+          minWidth: 150,
+          cellRenderer: twitchLinkInCellRenderer,
+        },
+        { headerName: "User ID", field: "user_id", minWidth: 75 },
+      ],
+      rowData: nowAllFollowers,
+      domLayout: "autoHeight",
+      pagination: true,
+      paginationPageSize: 25,
+      quickFilterText: "",
+      onGridReady: (params) => params.api.sizeColumnsToFit(),
+    };
+    const gridDiv = document.querySelector("#followerList");
+    console.log(gridDiv);
+    gridInstance = new agGrid.Grid(gridDiv, gridOptions);
+  } else {
+    gridInstance.api.setRowData(newData);
+    const gridDiv = document.querySelector("#followerList");
+    console.log(gridDiv);
+  }
 
   // 検索窓作成
   const filterInput = document.getElementById("quickFilterInput");
@@ -116,7 +127,10 @@ async function displayFollowerDiffList(nowAllFollowers) {
     };
     sizeColumnsToFitOnTabSwitch(newFollowersGridOptions, "followerDiff");
     const newFollowersGridDiv = document.querySelector("#newFollowers");
-    new agGrid.Grid(newFollowersGridDiv, newFollowersGridOptions);
+    newFollowersGridInstance = new agGrid.Grid(
+      newFollowersGridDiv,
+      newFollowersGridOptions
+    );
 
     // フォロー解除した人一覧作成
     const unfollowedUsersOptions = {
@@ -134,7 +148,10 @@ async function displayFollowerDiffList(nowAllFollowers) {
     };
     sizeColumnsToFitOnTabSwitch(unfollowedUsersOptions, "followerDiff");
     const unfollowedUsersGridDiv = document.querySelector("#unfollowedUsers");
-    new agGrid.Grid(unfollowedUsersGridDiv, unfollowedUsersOptions);
+    unfollowedUsersGridInstance = new agGrid.Grid(
+      unfollowedUsersGridDiv,
+      unfollowedUsersOptions
+    );
   } else {
     // 初回はフォロワーリストをローカルストレージに保存
     await updateFollowerListInLocalStorage();
@@ -155,8 +172,6 @@ async function updateFollowerListInLocalStorage() {
   localStorage.setItem(previousFollowersKey, previousFollowers);
   localStorage.setItem(lastCheckedDate, formatToLocaleString(new Date()));
   displayLastCheckedDate();
-  // FollowerList を更新したら refreshButton を押下する
-  document.getElementById('refreshButton').click();
 }
 
 function setFollowerListInSessionStorage(nowAllFollowers) {
