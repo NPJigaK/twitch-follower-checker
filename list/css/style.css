@@ -34,3 +34,8 @@
   display: flex;
   gap: 20px;
 }
+
+#refreshButtonContainer {
+  display: flex;
+  gap: 10px;
+}
