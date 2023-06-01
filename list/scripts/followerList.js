@@ -66,7 +66,7 @@ async function displayFollowerList(nowAllFollowers) {
     console.log(gridDiv);
     gridInstance = new agGrid.Grid(gridDiv, gridOptions);
   } else {
-    gridInstance.api.setRowData(newData);
+    gridInstance.api.setRowData(nowAllFollowers);
     const gridDiv = document.querySelector("#followerList");
     console.log(gridDiv);
   }
