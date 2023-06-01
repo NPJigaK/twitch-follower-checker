@@ -35,7 +35,7 @@ let gridOptions = {
   rowData: null,
   domLayout: "autoHeight",
   pagination: true,
-  paginationPageSize: 25,
+  paginationPageSize: 15,
   quickFilterText: "",
   animateRows: true,
   onGridReady: (params) => params.api.sizeColumnsToFit(),
