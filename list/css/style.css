@@ -1,7 +1,7 @@
 #title-container {
   display: flex;
   align-items: baseline;
-  margin: 22px 0;
+  margin: 0 0 22px 0;
 }
 
 #title-container h1 {
