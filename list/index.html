@@ -64,7 +64,7 @@
             <button onclick="authenticate()" id="authenticateButton">Authenticate with Twitch</button>
         </div>
         <div>
-            <button id="refreshButton">Refresh Followers List</button>
+            <button id="refreshButton" style="display: none;">Refresh Followers List</button>
             <span id="refreshTimer"></span>
         </div>
     </div>
@@ -129,6 +129,7 @@
         // accessToken が存在＆失効していなかったらリスト表示処理へ
         if (localStorage.getItem(accessTokenKey) && checkTokenExpired()) {
             document.getElementById("mainContainer").style.display = 'block';
+            document.getElementById("refreshButton").style.display = 'block';
             document.getElementById("authenticateButton").disabled = true;
             display();
         }
