@@ -29,3 +29,8 @@
 #lastCheckedContainer {
   margin-bottom: 20px;
 }
+
+#buttonContainer {
+  display: flex;
+  gap: 20px;
+}

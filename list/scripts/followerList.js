@@ -155,6 +155,8 @@ async function updateFollowerListInLocalStorage() {
   localStorage.setItem(previousFollowersKey, previousFollowers);
   localStorage.setItem(lastCheckedDate, formatToLocaleString(new Date()));
   displayLastCheckedDate();
+  // FollowerList を更新したら refreshButton を押下する
+  document.getElementById('refreshButton').click();
 }
 
 function setFollowerListInSessionStorage(nowAllFollowers) {

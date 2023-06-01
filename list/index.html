@@ -59,8 +59,15 @@
         <h1>Twitch Follower Checker</h1>
         <a href="https://kagijpn.github.io/twitch-follower-checker/" target="_blank" rel="noopener">usage</a>
     </div>
-
-    <button onclick="authenticate()" id="authenticateButton">Authenticate with Twitch</button>
+    <div id="buttonContainer">
+        <div>
+            <button onclick="authenticate()" id="authenticateButton">Authenticate with Twitch</button>
+        </div>
+        <div>
+            <button id="refreshButton">Refresh Followers List</button>
+            <span id="refreshTimer"></span>
+        </div>
+    </div>
 
     <div id="mainContainer" style="display: none;">
         <ul data-tabs>
@@ -132,6 +139,34 @@
             displayFollowerDiffList(nowAllFollowers);
             displayLastCheckedDate();
         }
+
+        // リフレッシュボタンのlistener
+        document.getElementById("refreshButton").addEventListener("click", function () {
+            // Disable the button
+            this.disabled = true;
+
+            let countdown = 3 * 60; // 3 minutes in seconds
+            const timerDisplay = document.getElementById("refreshTimer");
+
+            // Set an interval
+            const intervalId = setInterval(() => {
+                countdown--; // decrement the countdown
+
+                // Calculate minutes and seconds
+                const minutes = Math.floor(countdown / 60);
+                const seconds = countdown % 60;
+
+                // Display the countdown
+                timerDisplay.textContent = `Refresh available in: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+                // When countdown is finished, clear the interval and enable the button
+                if (countdown <= 0) {
+                    clearInterval(intervalId);
+                    timerDisplay.textContent = "";
+                    this.disabled = false;
+                }
+            }, 1000);
+        });
     </script>
 </body>
 
