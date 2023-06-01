@@ -481,6 +481,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_twitch_認証">Twitch 認証</a></li>
 <li><a href="#_follower_list">Follower List</a></li>
 <li><a href="#_follower_diff_list">Follower Diff List</a></li>
+<li><a href="#update-lists">リストの更新</a></li>
 </ul>
 </li>
 <li><a href="#_貢献">貢献</a></li>
@@ -531,10 +532,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect3 data-line-32">
 <h4 id="_差分の確認">差分の確認</h4>
 <div class="paragraph data-line-34">
-<p><code>Last checked</code> の日付の時点の Follower List からの差分が表示されます。</p>
+<p><code>Last checked</code> の日付の時点の <code>Follower List</code> からの差分が表示されます。</p>
 </div>
 <div class="paragraph data-line-36">
-<p><code>Done check</code> ボタンを押下すると、 <code>Last checked</code> の日付が現在の時間に更新されます。<br></p>
+<p><code>Done check</code> ボタンを押下すると、<code>Last checked</code> の日付が現在の時刻に更新されます。<br></p>
 </div>
 <div class="admonitionblock tip data-line-38">
 <table>
@@ -543,32 +544,40 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="title">💡</div>
 </td>
 <td class="content">
-必ずしも <code>Done check</code> ボタンを押下する必要はありません。差分の元となるリストを更新したい任意のタイミングで押下してください。
+必ずしも <code>Done check</code> ボタンを押下する必要はありません。差分の元となるリストを更新したい任意のタイミングで押下してください。<br>
+<code>Last checked</code> を更新した後は、<a href="#update-lists">リストの更新</a> を推奨します。
 </td>
 </tr>
 </table>
 </div>
 </div>
 </div>
+<div class="sect2 data-line-42">
+<h3 id="update-lists">リストの更新</h3>
+<div class="paragraph data-line-43">
+<p><code>Refresh Follower Lists</code> ボタンを押下することで、<code>Follower List</code> と <code>Follower Diff List</code> を最新の状態に更新できます。<br>
+<code>Refresh available in</code> には、次に <code>Refresh Follower Lists</code> ボタンが押下可能になるまでの時間が表示されます。これは、Twitch API が <a href="https://dev.twitch.tv/docs/api/guide/#twitch-rate-limits" data-href="https://dev.twitch.tv/docs/api/guide/#twitch-rate-limits">Rate Limits</a> を設けているため、短時間で連続してAPIを呼び出すことを抑制するためです。</p>
 </div>
 </div>
-<div class="sect1 data-line-40">
+</div>
+</div>
+<div class="sect1 data-line-46">
 <h2 id="_貢献">貢献</h2>
 <div class="sectionbody">
-<div class="paragraph data-line-42">
+<div class="paragraph data-line-48">
 <p>バグ報告や改善提案、機能提案などは随時受け付けています。検討した上で取り入れさせていただきます。
 <a href="https://github.com/KagiJPN/twitch-follower-checker/issues/new" data-href="https://github.com/KagiJPN/twitch-follower-checker/issues/new">Issue として起票</a>して頂ければと思います。</p>
 </div>
-<div class="paragraph data-line-45">
+<div class="paragraph data-line-51">
 <p>より良く、使いやすいツールにアップデートするためにも、ぜひともご協力のほどお願い申し上げます！
 その他、何か連絡がある場合は <a href="https://twitter.com/KagiJPN" data-href="https://twitter.com/KagiJPN">私のツイッター</a>までお気軽にご連絡ください！</p>
 </div>
 </div>
 </div>
-<div class="sect1 data-line-48">
+<div class="sect1 data-line-54">
 <h2 id="_ライセンス">ライセンス</h2>
 <div class="sectionbody">
-<div class="paragraph data-line-50">
+<div class="paragraph data-line-56">
 <p>このプロジェクトは <a href="https://github.com/KagiJPN/twitch-follower-checker/blob/main/LICENSE" data-href="https://github.com/KagiJPN/twitch-follower-checker/blob/main/LICENSE">Apache License 2.0</a> に準拠してライセンスされています。</p>
 </div>
 </div>
@@ -576,7 +585,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-05-29 12:41:28 +0900
+Last updated 2023-06-01 19:07:40 +0900
 </div>
 </div>
 </body>

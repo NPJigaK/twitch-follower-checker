@@ -31,11 +31,17 @@ Search テキストボックスに文字を入力することで、ユーザー�
 
 ==== 差分の確認
 
-`Last checked` の日付の時点の Follower List からの差分が表示されます。
+`Last checked` の日付の時点の `Follower List` からの差分が表示されます。
 
-`Done check` ボタンを押下すると、 `Last checked` の日付が現在の時間に更新されます。 +
+`Done check` ボタンを押下すると、`Last checked` の日付が現在の時刻に更新されます。 +
 [TIP]
-必ずしも `Done check` ボタンを押下する必要はありません。差分の元となるリストを更新したい任意のタイミングで押下してください。
+必ずしも `Done check` ボタンを押下する必要はありません。差分の元となるリストを更新したい任意のタイミングで押下してください。 +
+`Last checked` を更新した後は、<<update-lists,リストの更新>> を推奨します。
+
+[[update-lists]]
+=== リストの更新
+`Refresh Follower Lists` ボタンを押下することで、`Follower List` と `Follower Diff List` を最新の状態に更新できます。 +
+`Refresh available in` には、次に `Refresh Follower Lists` ボタンが押下可能になるまでの時間が表示されます。これは、Twitch API が link:https://dev.twitch.tv/docs/api/guide/#twitch-rate-limits[Rate Limits] を設けているため、短時間で連続してAPIを呼び出すことを抑制するためです。
 
 == 貢献
 
