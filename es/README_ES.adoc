@@ -15,7 +15,7 @@ Esta herramienta se puede acceder desde https://kagijpn.github.io/twitch-followe
 
 En tu primera visita, haz clic en el botón `Authenticate with Twitch` para autenticarte. La lista que se muestra corresponderá a los usuarios autenticados.
 
-=== `Follower List`
+=== Follower List
 
 Esta característica muestra una lista de usuarios que actualmente te siguen en tu canal.
 
@@ -25,7 +25,7 @@ Puedes filtrar usuarios escribiendo en el cuadro de texto de búsqueda. +
 Los parámetros de búsqueda incluyen `Followed At`, `Display Name`, `User Name` y `User ID`. +
 Por ejemplo, al escribir `2023/05`, se filtrará para mostrar solo a aquellos que comenzaron a seguirte en mayo de 2023.
 
-=== `Follower Diff List`
+=== Follower Diff List
 
 Esta lista muestra a los nuevos seguidores y a los usuarios que dejaron de seguir.
 

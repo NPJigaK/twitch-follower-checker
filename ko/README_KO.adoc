@@ -15,7 +15,7 @@ Twitch Follower Checker는 사용자가 편리하게 Twitch 채널의 새로운 
 
 처음 방문 시, `Authenticate with Twitch` 버튼을 클릭하여 인증합니다. 표시되는 목록은 인증된 사용자에 해당합니다.
 
-=== `Follower List`
+=== Follower List
 
 이 기능은 현재 채널을 팔로우하는 사용자 목록을 표시합니다.
 
@@ -25,7 +25,7 @@ Twitch Follower Checker는 사용자가 편리하게 Twitch 채널의 새로운 
 검색 매개변수에는 `Followed At`, `Display Name`, `User Name`, 그리고 `User ID`가 포함됩니다. +
 예를 들어, `2023/05`를 입력하면 2023년 5월에 팔로우를 시작한 사람만 표시하도록 필터링됩니다.
 
-=== `Follower Diff List`
+=== Follower Diff List
 
 이 목록은 새 팔로워와 언팔로우한 사용자를 보여줍니다.
 

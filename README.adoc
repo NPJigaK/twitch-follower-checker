@@ -7,6 +7,18 @@
 
 The Twitch Follower Checker is a browser-based tool that effortlessly enables you to track new followers and unfollowers on your Twitch channel.
 
+[%collapsible]
+.Other Language Documentation
+====
+※ 日本の方向けのドキュメントは https://kagijpn.github.io/twitch-follower-checker/jp/[こちら]！ +
+※ Dokumente für Menschen in Deutschland sind https://kagijpn.github.io/twitch-follower-checker/de/[hier]! +
+※ El documento para hispanohablantes está https://kagijpn.github.io/twitch-follower-checker/es/[aquí]! +
+※ Les documents pour les personnes en France sont https://kagijpn.github.io/twitch-follower-checker/fr/[ici]! +
+※ 한국 분들을 위한 문서는 https://kagijpn.github.io/twitch-follower-checker/ko/[여기]서 확인할 수 있습니다! +
+※ O documento para os brasileiros está https://kagijpn.github.io/twitch-follower-checker/pt/[aqui]! +
+※ Документ для русскоговорящих находится https://kagijpn.github.io/twitch-follower-checker/ru/[здесь]!
+====
+
 == How to Use
 
 This tool can be accessed from https://kagijpn.github.io/twitch-follower-checker/list/[here].
@@ -15,7 +27,7 @@ This tool can be accessed from https://kagijpn.github.io/twitch-follower-checker
 
 On your initial visit, click the `Authenticate with Twitch` button to authenticate. The displayed list will correspond to the authenticated users.
 
-=== `Follower List`
+=== Follower List
 
 This feature displays a list of users currently following your channel.
 
@@ -25,7 +37,7 @@ You can filter users by typing into the Search textbox. +
 The search parameters include `Followed At`, `Display Name`, `User Name`, and `User ID`. +
 For instance, typing `2023/05` will filter to show only those who started following you in May 2023.
 
-=== `Follower Diff List`
+=== Follower Diff List
 
 This list shows new followers and users who have unfollowed.
 

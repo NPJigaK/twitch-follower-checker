@@ -15,7 +15,7 @@ Cet outil peut être accessible à partir de https://kagijpn.github.io/twitch-fo
 
 Lors de votre première visite, cliquez sur le bouton `Authenticate with Twitch` pour vous authentifier. La liste affichée correspondra aux utilisateurs authentifiés.
 
-=== `Follower List`
+=== Follower List
 
 Cette fonctionnalité affiche une liste des utilisateurs qui suivent actuellement votre chaîne.
 
@@ -25,7 +25,7 @@ Vous pouvez filtrer les utilisateurs en tapant dans la boîte de texte Recherche
 Les paramètres de recherche incluent `Followed At`, `Display Name`, `User Name`, et `User ID`. +
 Par exemple, taper `2023/05` filtrera pour n'afficher que ceux qui ont commencé à vous suivre en mai 2023.
 
-=== `Follower Diff List`
+=== Follower Diff List
 
 Cette liste montre les nouveaux followers et les utilisateurs qui ont unfollowed.
 

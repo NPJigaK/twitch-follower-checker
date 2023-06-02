@@ -15,7 +15,7 @@ Dieses Tool ist zugänglich unter https://kagijpn.github.io/twitch-follower-chec
 
 Bei Ihrem ersten Besuch klicken Sie auf die Schaltfläche `Authenticate with Twitch`, um sich zu authentifizieren. Die angezeigte Liste entspricht den authentifizierten Benutzern.
 
-=== `Follower List`
+=== Follower List
 
 Diese Funktion zeigt eine Liste der Benutzer an, die derzeit Ihren Kanal verfolgen.
 
@@ -25,7 +25,7 @@ Sie können Benutzer filtern, indem Sie in das Suchtextfeld tippen. +
 Die Suchparameter beinhalten `Followed At`, `Display Name`, `User Name` und `User ID`. +
 Wenn Sie zum Beispiel `2023/05` eingeben, wird der Filter nur diejenigen anzeigen, die Ihnen seit Mai 2023 folgen.
 
-=== `Follower Diff List`
+=== Follower Diff List
 
 Diese Liste zeigt neue Follower und Benutzer an, die nicht mehr folgen.
 
