@@ -1,0 +1,54 @@
+:version: 1.1.0
+:tip-caption: :bulb:
+:toc:
+:toclevels: 3
+
+= Guía de Usuario de Twitch Follower Checker
+
+Twitch Follower Checker es una herramienta basada en navegador que te permite seguir de manera sencilla a los nuevos seguidores y a los que dejaron de seguirte en tu canal de Twitch.
+
+== Cómo usar
+
+Esta herramienta se puede acceder desde https://kagijpn.github.io/twitch-follower-checker/list/[aquí].
+
+=== Autenticación con Twitch
+
+En tu primera visita, haz clic en el botón `Authenticate with Twitch` para autenticarte. La lista que se muestra corresponderá a los usuarios autenticados.
+
+=== `Follower List`
+
+Esta característica muestra una lista de usuarios que actualmente te siguen en tu canal.
+
+==== Filtrado de Usuarios
+
+Puedes filtrar usuarios escribiendo en el cuadro de texto de búsqueda. +
+Los parámetros de búsqueda incluyen `Followed At`, `Display Name`, `User Name` y `User ID`. +
+Por ejemplo, al escribir `2023/05`, se filtrará para mostrar solo a aquellos que comenzaron a seguirte en mayo de 2023.
+
+=== `Follower Diff List`
+
+Esta lista muestra a los nuevos seguidores y a los usuarios que dejaron de seguir.
+
+==== Confirmando Diferencias
+
+Se mostrarán las diferencias en comparación con la `Follower List` a partir de la fecha `Last checked`.
+
+Al presionar el botón `Done check`, se actualizará la fecha `Last checked` al tiempo actual.
+[TIP]
+El botón `Done check` no necesita ser presionado cada vez. Presiónalo cuando desees actualizar la lista base utilizada para el cálculo de la diferencia. +
+Después de actualizar la fecha `Last checked`, es recomendable proceder a <<refreshing-lists,actualizar las listas>>.
+
+[[refreshing-lists]]
+=== Actualizando las Listas
+Al presionar el botón `Refresh Follower Lists` puedes actualizar la `Follower List` y la `Follower Diff List` a su estado más reciente. +
+El tiempo restante hasta que el botón `Refresh Follower Lists` pueda ser presionado nuevamente se indica debajo de `Refresh available in`. Esta es una medida para controlar la frecuencia de las llamadas a la API en un corto período debido a los link:https://dev.twitch.tv/docs/api/guide/#twitch-rate-limits[Límites de Tasa] establecidos por la API de Twitch.
+
+== Contribuir
+
+Agradecemos los informes de errores, sugerencias de mejoras y propuestas de nuevas funciones. Estas serán consideradas para su inclusión. Si puedes, por favor https://github.com/KagiJPN/twitch-follower-checker/issues/new[reporta un problema].
+
+¡Tu cooperación es muy valorada mientras nos esforzamos por mejorar esta herramienta y hacerla más fácil de usar! Si hay algo más que te gustaría comunicarnos, no dudes en ponerte en contacto conmigo en https://twitter.com/KagiJPN[mi Twitter]!
+
+== Licencia
+
+Este proyecto está licenciado bajo la https://github.com/KagiJPN/twitch-follower-checker/blob/main/LICENSE[Licencia Apache 2.0].

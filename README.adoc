@@ -1,57 +1,53 @@
-:version: 1.0.0
+:version: 1.1.0
 :tip-caption: :bulb:
 :toc:
+:toclevels: 3
 
 = Twitch Follower Checker User Guide
 
-The Twitch Follower Checker is a web application that allows you to easily track new followers and unfollows on your Twitch channel.
+The Twitch Follower Checker is a browser-based tool that effortlessly enables you to track new followers and unfollowers on your Twitch channel.
 
-※ 日本の方向けのドキュメントは https://kagijpn.github.io/twitch-follower-checker/jp/[こちら]！
+== How to Use
 
-== Usage
+This tool can be accessed from https://kagijpn.github.io/twitch-follower-checker/list/[here].
 
-You can use this tool from https://kagijpn.github.io/twitch-follower-checker/list/[here].
+=== Authenticating with Twitch
 
-=== Authentication with Twitch
+On your initial visit, click the `Authenticate with Twitch` button to authenticate. The displayed list will correspond to the authenticated users.
 
-Upon first access, click the `Authenticate with Twitch` button to authenticate.
-The list that is displayed will target the users who have been authenticated.
+=== `Follower List`
 
-=== Follower List
-
-A list of users currently following your channel will be displayed.
+This feature displays a list of users currently following your channel.
 
 ==== User Filtering
 
-By entering text into the Search text box, you can filter users.
-The search targets are `Followed At`, `Display Name`, `User Name`, and `User ID`. +
-For example, if you input `2023/05`, it will narrow down to people who followed in May 2023.
+You can filter users by typing into the Search textbox. +
+The search parameters include `Followed At`, `Display Name`, `User Name`, and `User ID`. +
+For instance, typing `2023/05` will filter to show only those who started following you in May 2023.
 
-=== Follower Diff List
+=== `Follower Diff List`
 
-A list of new followers and those who have unfollowed will be displayed.
+This list shows new followers and users who have unfollowed.
 
 ==== Confirming Differences
 
-Differences from the `Follower List` as of the `Last checked` date will be displayed.
+The differences compared to the `Follower List` as of the `Last checked` date will be displayed.
 
-When you press the `Done check` button, the `Last checked` date will be updated to the current time. +
+Hitting the `Done check` button will update the `Last checked` date to the current time.
 [TIP]
-You do not necessarily have to press the `Done check` button. Press it at any time you want to update the list that becomes the basis for the difference. +
-After updating `Last checked`, we recommend you to proceed to <<refreshing-lists,refresh the lists>>.
+The `Done check` button doesn't need to be pressed every time. Push it whenever you wish to refresh the base list used for the difference calculation. +
+After updating the `Last checked` date, it's advisable to proceed to <<refreshing-lists,refresh the lists>>.
 
 [[refreshing-lists]]
 === Refreshing the Lists
-By pressing the `Refresh Follower Lists` button, you can refresh the `Follower List` and `Follower Diff List` to their latest states. +
-The time until the `Refresh Follower Lists` button can be pressed again is shown in `Refresh available in`. This is to regulate the frequency of API calls in a short period due to the link:https://dev.twitch.tv/docs/api/guide/#twitch-rate-limits[Rate Limits] set by Twitch API.
+Pressing the `Refresh Follower Lists` button allows you to refresh the `Follower List` and `Follower Diff List` to their latest status. +
+The time remaining until the `Refresh Follower Lists` button can be pressed again is indicated under `Refresh available in`. This is a measure to control the frequency of API calls in a short period due to the link:https://dev.twitch.tv/docs/api/guide/#twitch-rate-limits[Rate Limits] set by Twitch API.
 
 == Contribute
 
-We are always accepting bug reports, improvement proposals, and feature proposals. After consideration, we will incorporate them.
-Please https://github.com/KagiJPN/twitch-follower-checker/issues/new[raise an issue] if you can.
+We welcome bug reports, suggestions for improvements, and proposals for new features. These will be considered for inclusion. If you can, please https://github.com/KagiJPN/twitch-follower-checker/issues/new[raise an issue].
 
-In order to update to a better, easier-to-use tool, we sincerely appreciate your cooperation!
-If there is anything else you need to contact us about, please feel free to contact me on https://twitter.com/KagiJPN[my Twitter]!
+Your cooperation is highly valued as we strive to enhance this tool and make it easier to use! If there's anything else you'd like to reach out to us about, feel free to get in touch with me on https://twitter.com/KagiJPN[my Twitter]!
 
 == License
 
