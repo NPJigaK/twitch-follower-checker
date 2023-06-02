@@ -45,9 +45,7 @@ Twitch Follower Checker는 사용자가 편리하게 Twitch 채널의 새로운 
 
 == 기여
 
-버그 보고, 개선 제안, 새 기능 제안을 환영합니다. 이들은 포함을 고려할 것입니다
-
-. 가능하다면, https://github.com/KagiJPN/twitch-follower-checker/issues/new[문제를 제기해] 주세요.
+버그 보고, 개선 제안, 새 기능 제안을 환영합니다. 이들은 포함을 고려할 것입니다. 가능하다면, https://github.com/KagiJPN/twitch-follower-checker/issues/new[문제를 제기해] 주세요.
 
 이 도구를 향상시키고 사용하기 쉽게 만드는 데 협력을 높이 평가합니다! 다른 것에 대해 문의하고 싶다면, https://twitter.com/KagiJPN[내 트위터]로 연락해 주십시오!
 
