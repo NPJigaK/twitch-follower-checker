@@ -2,7 +2,7 @@
 :tip-caption: :bulb:
 :toc:
 
-= Twitch Follower Checker
+= Twitch Follower Checker User Guide
 
 The Twitch Follower Checker is a web application that allows you to easily track new followers and unfollows on your Twitch channel.
 
