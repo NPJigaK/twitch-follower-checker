@@ -63,51 +63,50 @@
         </div>
     </div>
 
-    <div class="body">
-        <div id="buttonContainer">
-            <div>
-                <button onclick="authenticate()" id="authenticateButton">Authenticate with Twitch</button>
-            </div>
-            <div id="refreshButtonContainer">
-                <button id="refreshButton" style="display: none;">Refresh Follower Lists</button>
-                <span id="refreshTimer"></span>
-            </div>
+    <div id="buttonContainer">
+        <div>
+            <button onclick="authenticate()" id="authenticateButton">Authenticate with Twitch</button>
         </div>
-
-        <div id="mainContainer" style="display: none;">
-            <ul data-tabs>
-                <li><a data-tabby-default href="#follower">Follower List</a></li>
-                <li><a href="#followerDiff">Follower Diff List</a></li>
-            </ul>
-
-            <div id="follower">
-                <h2>Follower List</h2>
-                <!-- 検索機能 -->
-                <div id="search">
-                    <input type="text" id="quickFilterInput" placeholder="Search...">
-                </div>
-                <!-- フォロワー一覧 -->
-                <div id="followerList" class="ag-theme-alpine"></div>
-            </div>
-            <div id="followerDiff">
-                <h2>Follower Diff List</h2>
-                <div id="lastCheckedContainer">
-                    <button onclick="updateFollowerListInLocalStorage()">Done check</button>
-                    <span id="lastCheckedDate"></span>
-                </div>
-                <!-- フォロワー差分一覧 -->
-                <div id="followerDiffLists">
-                    <div id="newFollowers" class="ag-theme-alpine">
-                        <span style="font-size: large;">New Followers</span>
-                    </div>
-                    <div id="unfollowedUsers" class="ag-theme-alpine">
-                        <span style="font-size: large;">Unfollowed Users</span>
-                    </div>
-                </div>
-
-            </div>
+        <div id="refreshButtonContainer">
+            <button id="refreshButton" style="display: none;">Refresh Follower Lists</button>
+            <span id="refreshTimer"></span>
         </div>
     </div>
+
+    <div id="mainContainer" style="display: none;">
+        <ul data-tabs>
+            <li><a data-tabby-default href="#follower">Follower List</a></li>
+            <li><a href="#followerDiff">Follower Diff List</a></li>
+        </ul>
+
+        <div id="follower">
+            <h2>Follower List</h2>
+            <!-- 検索機能 -->
+            <div id="search">
+                <input type="text" id="quickFilterInput" placeholder="Search...">
+            </div>
+            <!-- フォロワー一覧 -->
+            <div id="followerList" class="ag-theme-alpine"></div>
+        </div>
+        <div id="followerDiff">
+            <h2>Follower Diff List</h2>
+            <div id="lastCheckedContainer">
+                <button onclick="updateFollowerListInLocalStorage()">Done check</button>
+                <span id="lastCheckedDate"></span>
+            </div>
+            <!-- フォロワー差分一覧 -->
+            <div id="followerDiffLists">
+                <div id="newFollowers" class="ag-theme-alpine">
+                    <span style="font-size: large;">New Followers</span>
+                </div>
+                <div id="unfollowedUsers" class="ag-theme-alpine">
+                    <span style="font-size: large;">Unfollowed Users</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
     <script>
         // ====== メインロジック ======
         // リダイレクト処理
