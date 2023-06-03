@@ -1,0 +1,54 @@
+:version: 1.1.0
+:tip-caption: :bulb:
+:toc:
+:toclevels: 3
+
+= Twitch Follower Checker 사용자 가이드
+
+Twitch Follower Checker는 사용자가 편리하게 Twitch 채널의 새로운 팔로워와 언팔로워를 추적할 수 있게 해주는 브라우저 기반 도구입니다.
+
+== 사용 방법
+
+이 도구는 https://kagijpn.github.io/twitch-follower-checker/list/[여기]에서 접근할 수 있습니다.
+
+=== Twitch 인증
+
+처음 방문 시, `Authenticate with Twitch` 버튼을 클릭하여 인증합니다. 표시되는 목록은 인증된 사용자에 해당합니다.
+
+=== Follower List
+
+이 기능은 현재 채널을 팔로우하는 사용자 목록을 표시합니다.
+
+==== 사용자 필터링
+
+검색 텍스트 상자에 입력하여 사용자를 필터링할 수 있습니다. +
+검색 매개변수에는 `Followed At`, `Display Name`, `User Name`, 그리고 `User ID`가 포함됩니다. +
+예를 들어, `2023/05`를 입력하면 2023년 5월에 팔로우를 시작한 사람만 표시하도록 필터링됩니다.
+
+=== Follower Diff List
+
+이 목록은 새 팔로워와 언팔로우한 사용자를 보여줍니다.
+
+==== 차이 확인하기
+
+`Last checked` 날짜에 따른 `Follower List`와의 차이가 표시됩니다.
+
+`Done check` 버튼을 누르면 `Last checked` 날짜를 현재 시간으로 업데이트합니다.
+[TIP]
+`Done check` 버튼을 매번 누를 필요는 없습니다. 차이 계산에 사용되는 기본 목록을 새로 고치고 싶을 때마다 누르십시오. +
+`Last checked` 날짜를 업데이트 한 후에는 <<refreshing-lists,목록을 새로 고치는 것>>이 바람직합니다.
+
+[[refreshing-lists]]
+=== 목록 새로 고치기
+`Refresh Follower Lists` 버튼을 누르면 `Follower List` 와  `Follower Diff List` 를 최신 상태로 새로 고칠 수 있습니다. +
+`Refresh Follower Lists` 버튼을 다시 누를 수 있는 남은 시간은 `Refresh available in` 아래에 표시됩니다. 이는 link:https://dev.twitch.tv/docs/api/guide/#twitch-rate-limits[Twitch API의 요율 제한] 때문에 짧은 기간 동안 API 호출 빈도를 제어하기 위한 조치입니다.
+
+== 기여
+
+버그 보고, 개선 제안, 새 기능 제안을 환영합니다. 이들은 포함을 고려할 것입니다. 가능하다면, https://github.com/KagiJPN/twitch-follower-checker/issues/new[문제를 제기해] 주세요.
+
+이 도구를 향상시키고 사용하기 쉽게 만드는 데 협력을 높이 평가합니다! 다른 것에 대해 문의하고 싶다면, https://twitter.com/KagiJPN[내 트위터]로 연락해 주십시오!
+
+== 라이선스
+
+이 프로젝트는 https://github.com/KagiJPN/twitch-follower-checker/blob/main/LICENSE[Apache License 2.0]에 따라 라이선스가 부여됩니다.

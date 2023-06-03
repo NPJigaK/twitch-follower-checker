@@ -1,0 +1,54 @@
+:version: 1.1.0
+:tip-caption: :bulb:
+:toc:
+:toclevels: 3
+
+= Guide d'utilisation de Twitch Follower Checker
+
+Twitch Follower Checker est un outil basé sur le navigateur qui vous permet de suivre facilement les nouveaux followers et les unfollowers sur votre chaîne Twitch.
+
+== Comment utiliser
+
+Cet outil peut être accessible à partir de https://kagijpn.github.io/twitch-follower-checker/list/[ici].
+
+=== Authentification avec Twitch
+
+Lors de votre première visite, cliquez sur le bouton `Authenticate with Twitch` pour vous authentifier. La liste affichée correspondra aux utilisateurs authentifiés.
+
+=== Follower List
+
+Cette fonctionnalité affiche une liste des utilisateurs qui suivent actuellement votre chaîne.
+
+==== Filtrage des utilisateurs
+
+Vous pouvez filtrer les utilisateurs en tapant dans la boîte de texte Recherche. +
+Les paramètres de recherche incluent `Followed At`, `Display Name`, `User Name`, et `User ID`. +
+Par exemple, taper `2023/05` filtrera pour n'afficher que ceux qui ont commencé à vous suivre en mai 2023.
+
+=== Follower Diff List
+
+Cette liste montre les nouveaux followers et les utilisateurs qui ont unfollowed.
+
+==== Confirmer les différences
+
+Les différences par rapport à la `Follower List` à la date de `Last checked` seront affichées.
+
+En appuyant sur le bouton `Done check`, vous mettrez à jour la date de `Last checked` à l'heure actuelle.
+[TIP]
+Le bouton `Done check` n'a pas besoin d'être pressé à chaque fois. Appuyez dessus chaque fois que vous souhaitez rafraîchir la liste de base utilisée pour le calcul des différences. +
+Après la mise à jour de la date de `Last checked`, il est conseillé de procéder à <<refreshing-lists, rafraîchir les listes>>.
+
+[[refreshing-lists]]
+=== Rafraîchissement des listes
+En appuyant sur le bouton `Refresh Follower Lists`, vous pouvez rafraîchir la `Follower List` et la `Follower Diff List` à leur dernier état. +
+Le temps restant avant que le bouton `Refresh Follower Lists` puisse être à nouveau pressé est indiqué sous `Refresh available in`. Il s'agit d'une mesure pour contrôler la fréquence des appels d'API sur une courte période en raison des link:https://dev.twitch.tv/docs/api/guide/#twitch-rate-limits[limites de taux] fixées par l'API Twitch.
+
+== Contribuer
+
+Nous accueillons les rapports de bugs, les suggestions d'améliorations et les propositions de nouvelles fonctionnalités. Celles-ci seront prises en considération pour inclusion. Si vous le pouvez, veuillez https://github.com/KagiJPN/twitch-follower-checker/issues/new[signaler un problème].
+
+Votre coopération est très appréciée car nous nous efforçons d'améliorer cet outil et de le rendre plus facile à utiliser ! Si vous avez d'autres questions, n'hésitez pas à me contacter sur mon https://twitter.com/KagiJPN[Twitter] !
+
+== Licence
+
+Ce projet est licencié sous la https://github.com/KagiJPN/twitch-follower-checker/blob/main/LICENSE[Licence Apache 2.0].

@@ -5,12 +5,12 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.17">
-<title>Twitch Follower Checker User Guide - Track Follows/Unfollows</title>
+<title>Twitch Follower Checker - Prüfen Sie, wer Ihnen nicht mehr folgt</title>
 <meta name="google-site-verification" content="Z-E4OJcdTyw0o-aeIA0afrP55pyAdwEtkDeS28PePbk" />
 <meta name="description"
-    content="The Twitch Follower Checker, a user-friendly and free web application, lets you effortlessly track new followers and unfollows on your Twitch channel.">
+    content="Der Twitch Follower Checker, eine kostenlose Webanwendung zum Verfolgen von neuen Followern und Unfollows auf Twitch. Ideal zum Überprüfen von Unfollows.">
 <meta name="keywords"
-    content="Twitch, Follower Checker, unfollows, unfollows Checker, Twitch Follower Tracker, Unfollow Tracker, Twitch Analytics">
+    content="Twitch, Follower Checker, kostenlos, Webanwendung, Follower, Unfollows, Verfolgung, Twitch-Kanal, Überprüfung von Unfollows">
 <meta name="author" content="KagiJPN">
 <meta name="robots" content="index, follow">
 <meta name="googlebot" content="index, follow">
@@ -28,10 +28,10 @@
 <!-- Open Graph Meta Tags -->
 <meta property="og:title" content="Twitch Follower Checker">
 <meta property="og:description"
-    content="The Twitch Follower Checker is a web application that easily allows you to track new followers and unfollows on your Twitch channel.">
+    content="Der Twitch Follower Checker, eine kostenlose Webanwendung zum Verfolgen von neuen Followern und Unfollows auf Twitch. Ideal zum Überprüfen von Unfollows.">
 <meta property="og:image"
     content="https://raw.githubusercontent.com/KagiJPN/twitch-follower-checker/master/images/og-image.jpg">
-<meta property="og:url" content="https://kagijpn.github.io/twitch-follower-checker/">
+<meta property="og:url" content="https://kagijpn.github.io/twitch-follower-checker/de/">
 <meta property="og:type" content="website">
 
 <!-- Twitter Meta Tags -->
@@ -39,7 +39,7 @@
 <meta name="twitter:site" content="@KagiJPN" />
 <meta name="twitter:creator" content="@KagiJPN" />
 
-<link rel="shortcut icon" type="image/x-icon" href="./favicon.ico">
+<link rel="shortcut icon" type="image/x-icon" href="../favicon.ico">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -472,28 +472,28 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article data-line-1">
 <div id="header">
-<h1>Twitch Follower Checker User Guide</h1>
+<h1>Twitch Follower Checker Benutzerhandbuch</h1>
 <div id="toc" class="toc">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
-<li><a href="#_how_to_use">How to Use</a>
+<li><a href="#_wie_zu_verwenden">Wie zu verwenden</a>
 <ul class="sectlevel2">
-<li><a href="#_authenticating_with_twitch">Authenticating with Twitch</a></li>
+<li><a href="#_authentifizierung_mit_twitch">Authentifizierung mit Twitch</a></li>
 <li><a href="#_follower_list">Follower List</a>
 <ul class="sectlevel3">
-<li><a href="#_user_filtering">User Filtering</a></li>
+<li><a href="#_benutzerfilterung">Benutzerfilterung</a></li>
 </ul>
 </li>
 <li><a href="#_follower_diff_list">Follower Diff List</a>
 <ul class="sectlevel3">
-<li><a href="#_confirming_differences">Confirming Differences</a></li>
+<li><a href="#_unterschiede_bestätigen">Unterschiede bestätigen</a></li>
 </ul>
 </li>
-<li><a href="#refreshing-lists">Refreshing the Lists</a></li>
+<li><a href="#refreshing-lists">Listen aktualisieren</a></li>
 </ul>
 </li>
-<li><a href="#_contribute">Contribute</a></li>
-<li><a href="#_license">License</a></li>
+<li><a href="#_mitmachen">Mitmachen</a></li>
+<li><a href="#_lizenz">Lizenz</a></li>
 </ul>
 </div>
 </div>
@@ -501,110 +501,96 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph data-line-8">
-<p>The Twitch Follower Checker is a browser-based tool that effortlessly enables you to track new followers and unfollowers on your Twitch channel.</p>
-</div>
-<details class="data-line-12">
-<summary class="title">Other Language Documentation</summary>
-<div class="content">
-<div class="paragraph data-line-13">
-<p>※ 日本の方向けのドキュメントは <a href="https://kagijpn.github.io/twitch-follower-checker/jp/" data-href="https://kagijpn.github.io/twitch-follower-checker/jp/">こちら</a>！<br>
-※ Dokumente für Menschen in Deutschland sind <a href="https://kagijpn.github.io/twitch-follower-checker/de/" data-href="https://kagijpn.github.io/twitch-follower-checker/de/">hier</a>!<br>
-※ El documento para hispanohablantes está <a href="https://kagijpn.github.io/twitch-follower-checker/es/" data-href="https://kagijpn.github.io/twitch-follower-checker/es/">aquí</a>!<br>
-※ Les documents pour les personnes en France sont <a href="https://kagijpn.github.io/twitch-follower-checker/fr/" data-href="https://kagijpn.github.io/twitch-follower-checker/fr/">ici</a>!<br>
-※ 한국 분들을 위한 문서는 <a href="https://kagijpn.github.io/twitch-follower-checker/ko/" data-href="https://kagijpn.github.io/twitch-follower-checker/ko/">여기</a>서 확인할 수 있습니다!<br>
-※ O documento para os brasileiros está <a href="https://kagijpn.github.io/twitch-follower-checker/pt/" data-href="https://kagijpn.github.io/twitch-follower-checker/pt/">aqui</a>!<br>
-※ Документ для русскоговорящих находится <a href="https://kagijpn.github.io/twitch-follower-checker/ru/" data-href="https://kagijpn.github.io/twitch-follower-checker/ru/">здесь</a>!</p>
+<p>Der Twitch Follower Checker ist ein browserbasiertes Tool, das Ihnen mühelos ermöglicht, neue Follower und Unfollower auf Ihrem Twitch-Kanal zu verfolgen.</p>
 </div>
 </div>
-</details>
 </div>
-</div>
-<div class="sect1 data-line-22">
-<h2 id="_how_to_use">How to Use</h2>
+<div class="sect1 data-line-10">
+<h2 id="_wie_zu_verwenden">Wie zu verwenden</h2>
 <div class="sectionbody">
-<div class="paragraph data-line-24">
-<p>This tool can be accessed from <a href="https://kagijpn.github.io/twitch-follower-checker/list/" data-href="https://kagijpn.github.io/twitch-follower-checker/list/" target="_blank" rel="noopener">here</a>.</p>
+<div class="paragraph data-line-12">
+<p>Dieses Tool ist zugänglich unter <a href="https://kagijpn.github.io/twitch-follower-checker/list/" data-href="https://kagijpn.github.io/twitch-follower-checker/list/" target="_blank" rel="noopener">hier</a>.</p>
 </div>
-<div class="sect2 data-line-26">
-<h3 id="_authenticating_with_twitch">Authenticating with Twitch</h3>
-<div class="paragraph data-line-28">
-<p>On your initial visit, click the <code>Authenticate with Twitch</code> button to authenticate. The displayed list will correspond to the authenticated users.</p>
+<div class="sect2 data-line-14">
+<h3 id="_authentifizierung_mit_twitch">Authentifizierung mit Twitch</h3>
+<div class="paragraph data-line-16">
+<p>Bei Ihrem ersten Besuch klicken Sie auf die Schaltfläche <code>Authenticate with Twitch</code>, um sich zu authentifizieren. Die angezeigte Liste entspricht den authentifizierten Benutzern.</p>
 </div>
 </div>
-<div class="sect2 data-line-30">
+<div class="sect2 data-line-18">
 <h3 id="_follower_list">Follower List</h3>
-<div class="paragraph data-line-32">
-<p>This feature displays a list of users currently following your channel.</p>
+<div class="paragraph data-line-20">
+<p>Diese Funktion zeigt eine Liste der Benutzer an, die derzeit Ihren Kanal verfolgen.</p>
 </div>
-<div class="sect3 data-line-34">
-<h4 id="_user_filtering">User Filtering</h4>
-<div class="paragraph data-line-36">
-<p>You can filter users by typing into the Search textbox.<br>
-The search parameters include <code>Followed At</code>, <code>Display Name</code>, <code>User Name</code>, and <code>User ID</code>.<br>
-For instance, typing <code>2023/05</code> will filter to show only those who started following you in May 2023.</p>
+<div class="sect3 data-line-22">
+<h4 id="_benutzerfilterung">Benutzerfilterung</h4>
+<div class="paragraph data-line-24">
+<p>Sie können Benutzer filtern, indem Sie in das Suchtextfeld tippen.<br>
+Die Suchparameter beinhalten <code>Followed At</code>, <code>Display Name</code>, <code>User Name</code> und <code>User ID</code>.<br>
+Wenn Sie zum Beispiel <code>2023/05</code> eingeben, wird der Filter nur diejenigen anzeigen, die Ihnen seit Mai 2023 folgen.</p>
 </div>
 </div>
 </div>
-<div class="sect2 data-line-40">
+<div class="sect2 data-line-28">
 <h3 id="_follower_diff_list">Follower Diff List</h3>
-<div class="paragraph data-line-42">
-<p>This list shows new followers and users who have unfollowed.</p>
+<div class="paragraph data-line-30">
+<p>Diese Liste zeigt neue Follower und Benutzer an, die nicht mehr folgen.</p>
 </div>
-<div class="sect3 data-line-44">
-<h4 id="_confirming_differences">Confirming Differences</h4>
-<div class="paragraph data-line-46">
-<p>The differences compared to the <code>Follower List</code> as of the <code>Last checked</code> date will be displayed.</p>
+<div class="sect3 data-line-32">
+<h4 id="_unterschiede_bestätigen">Unterschiede bestätigen</h4>
+<div class="paragraph data-line-34">
+<p>Die Unterschiede im Vergleich zur <code>Follower List</code> zum Zeitpunkt des <code>Last checked</code> Datums werden angezeigt.</p>
 </div>
-<div class="paragraph data-line-48">
-<p>Hitting the <code>Done check</code> button will update the <code>Last checked</code> date to the current time.</p>
+<div class="paragraph data-line-36">
+<p>Wenn Sie die Schaltfläche <code>Done check</code> drücken, wird das Datum von <code>Last checked</code> auf die aktuelle Zeit aktualisiert.</p>
 </div>
-<div class="admonitionblock tip data-line-50">
+<div class="admonitionblock tip data-line-38">
 <table>
 <tr>
 <td class="icon">
 <div class="title">💡</div>
 </td>
 <td class="content">
-The <code>Done check</code> button doesn&#8217;t need to be pressed every time. Push it whenever you wish to refresh the base list used for the difference calculation.<br>
-After updating the <code>Last checked</code> date, it&#8217;s advisable to proceed to <a href="#refreshing-lists">refresh the lists</a>.
+Die Schaltfläche <code>Done check</code> muss nicht jedes Mal gedrückt werden. Drücken Sie sie, wann immer Sie die Grundliste für die Differenzberechnung aktualisieren möchten.<br>
+Nach der Aktualisierung des <code>Last checked</code> Datums ist es ratsam, mit der <a href="#refreshing-lists">Aktualisierung der Listen</a> fortzufahren.
 </td>
 </tr>
 </table>
 </div>
 </div>
 </div>
-<div class="sect2 data-line-54">
-<h3 id="refreshing-lists">Refreshing the Lists</h3>
-<div class="paragraph data-line-55">
-<p>Pressing the <code>Refresh Follower Lists</code> button allows you to refresh the <code>Follower List</code> and <code>Follower Diff List</code> to their latest status.<br>
-The time remaining until the <code>Refresh Follower Lists</code> button can be pressed again is indicated under <code>Refresh available in</code>. This is a measure to control the frequency of API calls in a short period due to the <a href="https://dev.twitch.tv/docs/api/guide/#twitch-rate-limits" data-href="https://dev.twitch.tv/docs/api/guide/#twitch-rate-limits" target="_blank" rel="noopener">Rate Limits</a> set by Twitch API.</p>
+<div class="sect2 data-line-42">
+<h3 id="refreshing-lists">Listen aktualisieren</h3>
+<div class="paragraph data-line-43">
+<p>Das Drücken der <code>Refresh Follower Lists</code> Schaltfläche ermöglicht es Ihnen, die <code>Follower List</code> und die <code>Follower Diff List</code> auf ihren neuesten Stand zu aktualisieren.<br>
+Die verbleibende Zeit, bis die Schaltfläche <code>Refresh Follower Lists</code> erneut gedrückt werden kann, wird unter <code>Refresh available in</code> angezeigt. Dies ist eine Maßnahme zur Kontrolle der Häufigkeit von API-Aufrufen in kurzer Zeit aufgrund der <a href="https://dev.twitch.tv/docs/api/guide/#twitch-rate-limits" data-href="https://dev.twitch.tv/docs/api/guide/#twitch-rate-limits" target="_blank" rel="noopener">Rate Limits</a>, die von der Twitch API festgelegt wurden.</p>
 </div>
 </div>
 </div>
 </div>
-<div class="sect1 data-line-58">
-<h2 id="_contribute">Contribute</h2>
+<div class="sect1 data-line-46">
+<h2 id="_mitmachen">Mitmachen</h2>
 <div class="sectionbody">
-<div class="paragraph data-line-60">
-<p>We welcome bug reports, suggestions for improvements, and proposals for new features. These will be considered for inclusion. If you can, please <a href="https://github.com/KagiJPN/twitch-follower-checker/issues/new" data-href="https://github.com/KagiJPN/twitch-follower-checker/issues/new" target="_blank" rel="noopener">raise an issue</a>.</p>
+<div class="paragraph data-line-48">
+<p>Wir freuen uns über Fehlermeldungen, Verbesserungsvorschläge und Vorschläge für neue Funktionen. Diese werden zur Aufnahme in Betracht gezogen. Wenn Sie können, stellen Sie bitte ein <a href="https://github.com/KagiJPN/twitch-follower-checker/issues/new" data-href="https://github.com/KagiJPN/twitch-follower-checker/issues/new" target="_blank" rel="noopener">Issue ein</a>.</p>
 </div>
-<div class="paragraph data-line-62">
-<p>Your cooperation is highly valued as we strive to enhance this tool and make it easier to use! If there&#8217;s anything else you&#8217;d like to reach out to us about, feel free to get in touch with me on <a href="https://twitter.com/KagiJPN" data-href="https://twitter.com/KagiJPN" target="_blank" rel="noopener">my Twitter</a>!</p>
+<div class="paragraph data-line-50">
+<p>Ihre Zusammenarbeit ist sehr wertvoll, da wir bestrebt sind, dieses Tool zu verbessern und einfacher zu bedienen! Wenn es etwas gibt, über das Sie uns erreichen möchten, zögern Sie nicht, mich auf meinem <a href="https://twitter.com/KagiJPN" data-href="https://twitter.com/KagiJPN" target="_blank" rel="noopener">Twitter</a> zu kontaktieren!</p>
 </div>
 </div>
 </div>
-<div class="sect1 data-line-64">
-<h2 id="_license">License</h2>
+<div class="sect1 data-line-52">
+<h2 id="_lizenz">Lizenz</h2>
 <div class="sectionbody">
-<div class="paragraph data-line-66">
-<p>This project is licensed under the <a href="https://github.com/KagiJPN/twitch-follower-checker/blob/main/LICENSE" data-href="https://github.com/KagiJPN/twitch-follower-checker/blob/main/LICENSE" target="_blank" rel="noopener">Apache License 2.0</a>.</p>
+<div class="paragraph data-line-54">
+<p>Dieses Projekt steht unter der <a href="https://github.com/KagiJPN/twitch-follower-checker/blob/main/LICENSE" data-href="https://github.com/KagiJPN/twitch-follower-checker/blob/main/LICENSE" target="_blank" rel="noopener">Apache License 2.0</a>.</p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-06-03 05:00:16 +0900
+Last updated 2023-06-03 04:45:09 +0900
 </div>
 </div>
 </body>
