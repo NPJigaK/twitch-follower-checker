@@ -2,6 +2,10 @@
   margin-bottom: 20px;
 }
 
+.body {
+  background-color: #f7f7f7;
+}
+
 #title-container {
   display: flex;
   align-items: baseline;
