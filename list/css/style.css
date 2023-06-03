@@ -7,7 +7,7 @@ body {
 
 .header {
   background-color: #6441a4;
-  padding: 20px;
+  /* padding: 20px; */
   color: #fff;
 }
 
@@ -16,7 +16,7 @@ body {
   text-decoration: none;
 }
 
-.header h1:hover a:hover {
+.header a:hover {
   color: #a970ff;
 }
 /* =========== */
