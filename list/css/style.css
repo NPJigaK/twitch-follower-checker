@@ -6,25 +6,21 @@ body {
 }
 
 .header {
-  background-color: #6441a4;
+  background-color: #18181b;
   /* padding: 20px; */
   color: #fff;
 }
-
-.header h1 a {
-  color: #fff;
-  text-decoration: none;
-}
-
-.header a:hover {
-  color: #a970ff;
-}
-/* =========== */
 
 #title-container {
   display: flex;
   align-items: baseline;
   margin: 0 0 22px 0;
+}
+
+#title-container img {
+  margin-right: 10px; /* タイトルとアイコンの間に少しスペースを開ける */
+  width: 24px; /* アイコンのサイズを調整する */
+  height: 24px; /* アイコンのサイズを調整する */
 }
 
 #title-container h1 {
@@ -33,6 +29,20 @@ body {
 
 #title-container a {
   margin-left: 20px;
+  color: #fff;
+  text-decoration: none;
+}
+
+#title-container a:hover {
+  color: #a970ff;
+}
+
+/* =========== */
+
+#buttonContainer {
+  padding-top: 20px;
+  display: flex;
+  gap: 20px;
 }
 
 #followerList {
@@ -51,12 +61,6 @@ body {
 
 #lastCheckedContainer {
   margin-bottom: 20px;
-}
-
-#buttonContainer {
-  padding-top: 20px; 
-  display: flex;
-  gap: 20px;
 }
 
 #refreshButtonContainer {
