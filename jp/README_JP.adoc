@@ -5,7 +5,7 @@
 
 = Twitch Follower Checker ユーザーガイド
 
-Twitch Follower Checker は、あなたの Twitch チャンネルの新規フォロワーやアンフォローをブラウザ上で簡単に追跡できるウェブアプリケーションです。
+Twitch Follower Checker は、あなたの Twitch チャンネルの新規フォロワーやアンフォローをブラウザ上で簡単に確認できるウェブアプリケーションです。
 
 == 使用方法
 
