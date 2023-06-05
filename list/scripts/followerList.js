@@ -234,9 +234,3 @@ function sizeColumnsToFitOnTabSwitch(gridOptions, tab) {
     }
   });
 }
-
-function sizeColumnsToFitOnWindowResize(grid) {
-  window.addEventListener("resize", () => {
-    grid.sizeColumnsToFit();
-  });
-}

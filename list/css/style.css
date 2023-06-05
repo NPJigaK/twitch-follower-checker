@@ -2,6 +2,8 @@ header {
   margin-bottom: 5px;
   background-color: #fff;
   display: block;
+  flex-direction: row;
+  align-items: stretch;
 }
 
 body {
