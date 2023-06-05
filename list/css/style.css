@@ -39,17 +39,6 @@ body {
   width: 1000px;
 }
 
-@media (max-width: 992px) {
-  #newFollowers,
-  #unfollowedUsers {
-    width: 100%;
-    display: block;
-  }
-  #main-container {
-    width: 100%;
-  }
-}
-
 #buttonContainer {
   margin-top: 10px;
   margin-bottom: 5px;
@@ -81,4 +70,15 @@ body {
 #refreshButtonContainer {
   display: flex;
   gap: 10px;
+}
+
+@media (max-width: 992px) {
+  #newFollowers,
+  #unfollowedUsers {
+    width: 100%;
+    display: block;
+  }
+  #main-container {
+    width: 100%;
+  }
 }
