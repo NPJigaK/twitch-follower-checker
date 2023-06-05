@@ -138,7 +138,9 @@
         if (localStorage.getItem(accessTokenKey) && checkTokenExpired()) {
             document.getElementById("lists-container").style.display = 'block';
             document.getElementById("refreshButton").style.display = 'block';
-            document.getElementById("authenticateButton").disabled = true;
+            
+            document.getElementById("authenticateButton").disabled = true; // 念のため押せないように
+            document.getElementById("authenticateButton").style.display = 'none';
             display();
             // document.getElementById('refreshButton').click();
         }
