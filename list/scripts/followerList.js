@@ -39,10 +39,7 @@ let gridOptions = {
   quickFilterText: "",
   animateRows: true,
   onGridReady: (params) => params.api.sizeColumnsToFit(),
-  onGridSizeChanged: (params) => {
-    console.log("change");
-    params.api.sizeColumnsToFit();
-  },
+  onGridSizeChanged: (params) => params.api.sizeColumnsToFit(),
 };
 
 let newFollowersGridOptions = {
