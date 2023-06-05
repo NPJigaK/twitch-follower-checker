@@ -60,11 +60,13 @@ body {
 
 #newFollowers {
   /*width: 510px;*/
+  width: 70%;
   display: inline-block;
 }
 
 #unfollowedUsers {
   /*width: 290px;*/
+  width: 30%;
   display: inline-block;
 }
 
