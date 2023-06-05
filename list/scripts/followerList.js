@@ -39,6 +39,7 @@ let gridOptions = {
   quickFilterText: "",
   animateRows: true,
   onGridReady: (params) => params.api.sizeColumnsToFit(),
+  gridSizeChanged: (params) => params.api.sizeColumnsToFit(),
 };
 
 let newFollowersGridOptions = {
@@ -60,6 +61,7 @@ let newFollowersGridOptions = {
   rowData: null,
   domLayout: "autoHeight",
   animateRows: true,
+  gridSizeChanged: (params) => params.api.sizeColumnsToFit(),
 };
 
 let unfollowedUsersOptions = {
@@ -75,6 +77,7 @@ let unfollowedUsersOptions = {
   rowData: null,
   domLayout: "autoHeight",
   animateRows: true,
+  gridSizeChanged: (params) => params.api.sizeColumnsToFit(),
 };
 
 async function getNowAllFollowers() {
@@ -229,5 +232,11 @@ function sizeColumnsToFitOnTabSwitch(gridOptions, tab) {
     if (e.detail && e.detail.content.id == tab) {
       gridOptions.api.sizeColumnsToFit();
     }
+  });
+}
+
+function sizeColumnsToFitOnWindowResize(grid) {
+  window.addEventListener("resize", () => {
+    grid.sizeColumnsToFit();
   });
 }

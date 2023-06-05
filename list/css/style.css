@@ -47,19 +47,16 @@ body {
 }
 
 #followerList {
-  /*width: 800px;*/
   width: 100%;
 }
 
 #newFollowers {
-  /*width: 510px;*/
-  width: 65%;
+  width: 60%;
   display: inline-block;
 }
 
 #unfollowedUsers {
-  /*width: 290px;*/
-  width: 30%;
+  width: 35%;
   display: inline-block;
 }
 
