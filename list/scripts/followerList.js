@@ -39,8 +39,10 @@ let gridOptions = {
   quickFilterText: "",
   animateRows: true,
   onGridReady: (params) => params.api.sizeColumnsToFit(),
-  gridSizeChanged: (params) => {console.log("change")
-    params.api.sizeColumnsToFit()},
+  onGridSizeChanged: (params) => {
+    console.log("change");
+    params.api.sizeColumnsToFit();
+  },
 };
 
 let newFollowersGridOptions = {
@@ -62,7 +64,7 @@ let newFollowersGridOptions = {
   rowData: null,
   domLayout: "autoHeight",
   animateRows: true,
-  gridSizeChanged: (params) => params.api.sizeColumnsToFit(),
+  onGridSizeChanged: (params) => params.api.sizeColumnsToFit(),
 };
 
 let unfollowedUsersOptions = {
@@ -78,7 +80,7 @@ let unfollowedUsersOptions = {
   rowData: null,
   domLayout: "autoHeight",
   animateRows: true,
-  gridSizeChanged: (params) => params.api.sizeColumnsToFit(),
+  onGridSizeChanged: (params) => params.api.sizeColumnsToFit(),
 };
 
 async function getNowAllFollowers() {
