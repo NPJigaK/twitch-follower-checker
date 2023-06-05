@@ -34,8 +34,8 @@ body {
 
 #main-container {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  width: 992px;
 }
 
 @media (max-width: 992px) {
@@ -43,6 +43,9 @@ body {
   #unfollowedUsers {
     width: 100%;
     display: block;
+  }
+  #main-container {
+    width: 992px;
   }
 }
 
