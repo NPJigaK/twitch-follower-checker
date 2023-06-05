@@ -55,10 +55,14 @@
 </head>
 
 <body>
-    <div id="title-container">
-        <h1>Twitch Follower Checker</h1>
-        <a href="https://kagijpn.github.io/twitch-follower-checker/" target="_blank" rel="noopener">usage</a>
-    </div>
+    <header>
+        <div id="title-container">
+            <img src="../favicon.ico" alt="Twitch Follower Checker Icon">
+            <h1>Twitch Follower Checker</h1>
+            <a href="https://kagijpn.github.io/twitch-follower-checker/" target="_blank" rel="noopener">usage</a>
+        </div>
+    </header>
+
     <div id="buttonContainer">
         <div>
             <button onclick="authenticate()" id="authenticateButton">Authenticate with Twitch</button>
@@ -102,6 +106,7 @@
 
         </div>
     </div>
+
     <script>
         // ====== メインロジック ======
         // リダイレクト処理
@@ -147,7 +152,7 @@
             // Disable the button
             this.disabled = true;
 
-            let countdown = 4 * 60; // 4 minutes in seconds
+            let countdown = 2 * 60 + 20; // 2 minutes 20 seconds
             const timerDisplay = document.getElementById("refreshTimer");
 
             // Set an interval

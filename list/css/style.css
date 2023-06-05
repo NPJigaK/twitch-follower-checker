@@ -1,7 +1,22 @@
+header {
+  margin-bottom: 5px;
+  background-color: #fff;
+}
+
+body {
+  background-color: #f7f7f7;
+}
+
 #title-container {
   display: flex;
   align-items: baseline;
   margin: 0 0 22px 0;
+}
+
+#title-container img {
+  margin-right: 10px;
+  width: 24px;
+  height: 24px;
 }
 
 #title-container h1 {
@@ -10,6 +25,18 @@
 
 #title-container a {
   margin-left: 20px;
+  text-decoration: none;
+}
+
+#title-container a:hover {
+  color: #a970ff;
+}
+
+#buttonContainer {
+  margin-top: 10px;
+  margin-bottom: 5px;
+  display: flex;
+  gap: 20px;
 }
 
 #followerList {
@@ -28,11 +55,6 @@
 
 #lastCheckedContainer {
   margin-bottom: 20px;
-}
-
-#buttonContainer {
-  display: flex;
-  gap: 20px;
 }
 
 #refreshButtonContainer {
