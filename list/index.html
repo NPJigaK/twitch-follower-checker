@@ -138,7 +138,7 @@
         if (localStorage.getItem(accessTokenKey) && checkTokenExpired()) {
             document.getElementById("lists-container").style.display = 'block';
             document.getElementById("refreshButton").style.display = 'block';
-            
+
             document.getElementById("authenticateButton").disabled = true; // 念のため押せないように
             document.getElementById("authenticateButton").style.display = 'none';
             display();
@@ -154,34 +154,65 @@
 
         // リフレッシュボタンのlistener
         document.getElementById("refreshButton").addEventListener("click", function () {
+            const refreshButton = this;
+
             // Disable the button
             this.disabled = true;
 
             let countdown = 2 * 60 + 20; // 2 minutes 20 seconds
             const timerDisplay = document.getElementById("refreshTimer");
 
-            // Set an interval
-            const intervalId = setInterval(() => {
-                countdown--; // decrement the countdown
+            // Check if Web Workers are supported
+            if (typeof (Worker) !== "undefined") {
+                // Web Workers are supported
 
-                // Calculate minutes and seconds
-                const minutes = Math.floor(countdown / 60);
-                const seconds = countdown % 60;
+                // Create a new worker
+                const worker = new Worker("./scripts/countdownWorker.js");
+                // Start the worker with the initial countdown value
+                worker.postMessage(countdown);
 
-                // Display the countdown
-                timerDisplay.textContent = `Refresh available in: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                // Listen for messages from the worker
+                worker.onmessage = function (event) {
+                    if (event.data === "finished") {
+                        // If the countdown is finished, enable the button and terminate the worker
+                        timerDisplay.textContent = "";
+                        refreshButton.disabled = false;
+                        worker.terminate();
+                    } else {
+                        // Otherwise, update the countdown display
+                        countdown = event.data;
+                        const minutes = Math.floor(countdown / 60);
+                        const seconds = countdown % 60;
+                        timerDisplay.textContent = `Refresh available in: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                    }
+                };
+            } else {
+                // Web Workers are not supported
 
-                // When countdown is finished, clear the interval and enable the button
-                if (countdown <= 0) {
-                    clearInterval(intervalId);
-                    timerDisplay.textContent = "";
-                    this.disabled = false;
-                }
-            }, 1000);
+                // Set an interval
+                const intervalId = setInterval(() => {
+                    countdown--; // decrement the countdown
+
+                    // Calculate minutes and seconds
+                    const minutes = Math.floor(countdown / 60);
+                    const seconds = countdown % 60;
+
+                    // Display the countdown
+                    timerDisplay.textContent = `Refresh available in: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+                    // When countdown is finished, clear the interval and enable the button
+                    if (countdown <= 0) {
+                        clearInterval(intervalId);
+                        timerDisplay.textContent = "";
+                        refreshButton.disabled = false;
+                    }
+                }, 1000);
+            }
 
             // Refresh lists
             display()
         });
+
     </script>
 </body>
 
