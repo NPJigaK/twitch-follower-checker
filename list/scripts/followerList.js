@@ -30,7 +30,7 @@ let gridOptions = {
       minWidth: 150,
       cellRenderer: twitchLinkInCellRenderer,
     },
-    { headerName: "User ID", field: "user_id", minWidth: 100 },
+    { headerName: "User ID", field: "user_id", minWidth: 110 },
   ],
   rowData: null,
   domLayout: "autoHeight",
