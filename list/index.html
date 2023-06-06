@@ -154,10 +154,12 @@
 
         // リフレッシュボタンのlistener
         document.getElementById("refreshButton").addEventListener("click", function () {
+            const refreshButton = this;
+
             // Disable the button
             this.disabled = true;
 
-            let countdown = 2 * 60 + 20; // 2 minutes 20 seconds
+            const countdown = 2 * 60 + 20; // 2 minutes 20 seconds
             const timerDisplay = document.getElementById("refreshTimer");
 
             // Check if Web Workers are supported
@@ -165,7 +167,7 @@
                 // Web Workers are supported
 
                 // Create a new worker
-                let worker = new Worker("./scripts/countdownWorker.js");
+                const worker = new Worker("./scripts/countdownWorker.js");
                 // Start the worker with the initial countdown value
                 worker.postMessage(countdown);
 
@@ -174,7 +176,7 @@
                     if (event.data === "finished") {
                         // If the countdown is finished, enable the button and terminate the worker
                         timerDisplay.textContent = "";
-                        this.disabled = false;
+                        refreshButton.disabled = false;
                         worker.terminate();
                     } else {
                         // Otherwise, update the countdown display
@@ -202,7 +204,7 @@
                     if (countdown <= 0) {
                         clearInterval(intervalId);
                         timerDisplay.textContent = "";
-                        this.disabled = false;
+                        refreshButton.disabled = false;
                     }
                 }, 1000);
             }
