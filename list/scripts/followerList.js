@@ -19,7 +19,7 @@ let gridOptions = {
     {
       headerName: "Followed At",
       field: "followed_at",
-      minWidth: 150,
+      minWidth: 170,
       cellRenderer: formatToLocaleStringCellRenderer,
       getQuickFilterText: formatToLocaleStringCellRenderer,
     },
@@ -30,7 +30,7 @@ let gridOptions = {
       minWidth: 150,
       cellRenderer: twitchLinkInCellRenderer,
     },
-    { headerName: "User ID", field: "user_id", minWidth: 75 },
+    { headerName: "User ID", field: "user_id", minWidth: 100 },
   ],
   rowData: null,
   domLayout: "autoHeight",
