@@ -8,9 +8,7 @@ body {
 header {
   margin-bottom: 5px;
   background-color: #fff;
-  align-self: auto;
-  width: auto;
-  display: block;
+  align-items: flex-start;
 }
 
 #title-container {
