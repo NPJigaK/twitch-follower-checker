@@ -39,13 +39,12 @@ For instance, typing `2023/05` will filter to show only those who started follow
 
 === Follower Diff List
 
-This list shows new followers and users who have unfollowed.
+This list allows you to investigate new followers and users who have unfollowed. +
+The list displays the difference in followers from the date of the `Last checked` to the present.
 
 ==== Confirming Differences
 
-The differences compared to the `Follower List` as of the `Last checked` date will be displayed.
-
-Hitting the `Done check` button will update the `Last checked` date to the current time.
+When the `Done check` button is pressed, the date of `Last checked` is updated to the current time.
 [TIP]
 The `Done check` button doesn't need to be pressed every time. Push it whenever you wish to refresh the base list used for the difference calculation. +
 After updating the `Last checked` date, it's advisable to proceed to <<refreshing-lists,refresh the lists>>.
