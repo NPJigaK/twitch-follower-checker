@@ -10,8 +10,8 @@ async function checkTokenExpired() {
   // console.log(resJson);
   if (res.status === 401 || resJson.expires_in < 3600) {
     // access token が失効している、もしくは1時間以内に失効する場合は再認証させる。
-    document.getElementById("authenticateButton").disabled = false;
     alert("Access token is invalid. Please reauthenticate.");
+    document.getElementById("authenticateButton").disabled = false; // たぶんこれ要らないけど念のため
     return false;
   }
 

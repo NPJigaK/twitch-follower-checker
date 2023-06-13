@@ -9,7 +9,7 @@ Twitch Follower Checker は、あなたの Twitch チャンネルの新規フォ
 
 == 使用方法
 
-このツールは https://kagijpn.github.io/twitch-follower-checker/list/[こちら] から使用できます。
+このツールは https://twitch-follower-checker.devkey.jp/list/[こちら] から使用できます。
 
 === Twitch 認証
 

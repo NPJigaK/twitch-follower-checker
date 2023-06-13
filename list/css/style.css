@@ -1,3 +1,4 @@
+/* Base styles */
 body {
   background-color: #f7f7f7;
   display: flex;
@@ -5,16 +6,23 @@ body {
   align-items: center;
 }
 
+header,
+#title-container,
+#button-container,
+#refresh-button-container {
+  display: flex;
+}
+
+/* Header styles */
 header {
   margin-bottom: 5px;
   background-color: #fff;
-  display: flex;
   align-items: flex-start;
   width: 100%;
 }
 
+/* Title container styles */
 #title-container {
-  display: flex;
   align-items: baseline;
   margin: 0 0 22px 0;
 }
@@ -38,49 +46,57 @@ header {
   color: #a970ff;
 }
 
+/* Main container styles */
 #main-container {
   width: 1000px;
 }
 
-#buttonContainer {
+/* Button container styles */
+#button-container {
   margin-top: 10px;
   margin-bottom: 5px;
-  display: flex;
   /* gap: 20px; ボタンを複数個表示するならgapする*/
 }
 
-#followerList {
+/* Follower list styles */
+#follower-list {
   width: 100%;
 }
 
-#newFollowers {
+#new-followers {
   width: 60%;
-  display: inline-block;
 }
 
-#unfollowedUsers {
+#unfollowed-users {
   width: 35%;
+}
+
+.inline-block-container {
   display: inline-block;
 }
 
-#lastCheckedContainer {
+/* Last checked container styles */
+#last-checked-container {
   margin-bottom: 20px;
 }
 
-#refreshButtonContainer {
-  display: flex;
+/* Refresh button container styles */
+#refresh-button-container {
   gap: 10px;
 }
 
+/* Responsive styles */
 @media (max-width: 992px) {
-  #newFollowers,
-  #unfollowedUsers {
+  #new-followers,
+  #unfollowed-users {
     width: 100%;
     display: block;
   }
+
   #main-container {
     width: 100%;
   }
+
   #title-container h1 {
     font-size: 1.3em;
   }

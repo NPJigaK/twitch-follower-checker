@@ -1,8 +1,10 @@
+// Cell Renderer Functions
 const twitchLinkInCellRenderer = (params) =>
   `<a href="https://www.twitch.tv/${params.value}" target="_blank" rel="noopener">${params.value}</a>`;
 const formatToLocaleStringCellRenderer = (params) =>
   `${formatToLocaleString(new Date(params.value))}`;
 
+// format date to locale string
 function formatToLocaleString(date) {
   return date.toLocaleString(undefined, {
     year: "numeric",
@@ -14,7 +16,15 @@ function formatToLocaleString(date) {
   });
 }
 
+// grid options
+const gridOptionsBase = {
+  domLayout: "autoHeight",
+  animateRows: true,
+  onGridSizeChanged: (params) => params.api.sizeColumnsToFit(),
+};
+
 let gridOptions = {
+  ...gridOptionsBase,
   columnDefs: [
     {
       headerName: "Followed At",
@@ -33,16 +43,14 @@ let gridOptions = {
     { headerName: "User ID", field: "user_id", minWidth: 110 },
   ],
   rowData: null,
-  domLayout: "autoHeight",
   pagination: true,
   paginationPageSize: 15,
   quickFilterText: "",
-  animateRows: true,
   onGridReady: (params) => params.api.sizeColumnsToFit(),
-  onGridSizeChanged: (params) => params.api.sizeColumnsToFit(),
 };
 
 let newFollowersGridOptions = {
+  ...gridOptionsBase,
   columnDefs: [
     {
       headerName: "Followed At",
@@ -59,12 +67,10 @@ let newFollowersGridOptions = {
     },
   ],
   rowData: null,
-  domLayout: "autoHeight",
-  animateRows: true,
-  onGridSizeChanged: (params) => params.api.sizeColumnsToFit(),
 };
 
 let unfollowedUsersOptions = {
+  ...gridOptionsBase,
   columnDefs: [
     {
       headerName: "User Name",
@@ -75,9 +81,6 @@ let unfollowedUsersOptions = {
     { headerName: "User ID", field: "user_id", minWidth: 100 },
   ],
   rowData: null,
-  domLayout: "autoHeight",
-  animateRows: true,
-  onGridSizeChanged: (params) => params.api.sizeColumnsToFit(),
 };
 
 async function getNowAllFollowers() {
@@ -92,90 +95,81 @@ async function getNowAllFollowers() {
 
   // Twitch API でフォロワーリストを取得
   const nowAllFollowers = await fetchFollowers(resJson.data[0].id);
-
   return nowAllFollowers;
 }
 
 async function displayFollowerList(nowAllFollowers) {
   if (gridOptions.rowData === null) {
-    // 一覧表示 初期化
-    gridOptions.rowData = nowAllFollowers;
-    const gridDiv = document.querySelector("#followerList");
-    new agGrid.Grid(gridDiv, gridOptions);
+    // フォロワー一覧表示: 初期化
+    createListView(gridOptions, nowAllFollowers, "follower", "#follower-list");
+
+    // 検索窓作成
+    const filterInput = document.getElementById("quickFilterInput");
+    filterInput.addEventListener("input", function () {
+      const filterValue = filterInput.value;
+      gridOptions.api.setQuickFilter(filterValue);
+    });
   } else {
-    // 一覧表示 更新
+    // フォロワー一覧表示: 更新
     gridOptions.api.setRowData(nowAllFollowers);
   }
-
-  // 検索窓作成
-  const filterInput = document.getElementById("quickFilterInput");
-  filterInput.addEventListener("input", function () {
-    const filterValue = filterInput.value;
-    gridOptions.api.setQuickFilter(filterValue);
-  });
 }
 
+// display follower diff list
 async function displayFollowerDiffList(nowAllFollowers) {
   // 更新用のフォロワーリストを作成して SessionStorage に保存しておく
   setFollowerListInSessionStorage(nowAllFollowers);
-
-  // 差分一覧表示
   const previousFollowers = JSON.parse(
     localStorage.getItem(previousFollowersKey)
   );
 
-  // console.log(nowAllFollowers);
-  // console.log(previousFollowers);
   if (previousFollowers !== null) {
-    const newFollowers = nowAllFollowers.filter(
-      (newItem) =>
-        !previousFollowers.some(
-          (oldItem) => oldItem.user_id === newItem.user_id
-        )
-    );
-    const unfollowedUsers = previousFollowers.filter(
-      (oldItem) =>
-        !nowAllFollowers.some((newItem) => newItem.user_id === oldItem.user_id)
-    );
+    const newFollowers = getDifference(nowAllFollowers, previousFollowers);
+    const unfollowedUsers = getDifference(previousFollowers, nowAllFollowers);
 
-    // console.log(newFollowers);
-    // console.log(unfollowedUsers);
     if (newFollowersGridOptions.rowData === null) {
-      // 新しいフォロワー一覧表示 初期化
-      newFollowersGridOptions.rowData = newFollowers;
-      sizeColumnsToFitOnTabSwitch(newFollowersGridOptions, "followerDiff");
-      const newFollowersGridDiv = document.querySelector("#newFollowers");
-      new agGrid.Grid(newFollowersGridDiv, newFollowersGridOptions);
+      // 新しいフォロワー一覧表示: 初期化
+      createListView(
+        newFollowersGridOptions,
+        newFollowers,
+        "followerDiff",
+        "#new-followers"
+      );
+      // フォロー解除した人一覧表示: 初期化
+      createListView(
+        unfollowedUsersOptions,
+        unfollowedUsers,
+        "followerDiff",
+        "#unfollowed-users"
+      );
     } else {
-      // 新しいフォロワー一覧表示 更新
+      // 新しいフォロワー一覧表示: 更新
       newFollowersGridOptions.api.setRowData(newFollowers);
-    }
-
-    if (unfollowedUsersOptions.rowData === null) {
-      // フォロー解除した人一覧表示 初期化
-      unfollowedUsersOptions.rowData = unfollowedUsers;
-      sizeColumnsToFitOnTabSwitch(unfollowedUsersOptions, "followerDiff");
-      const unfollowedUsersGridDiv = document.querySelector("#unfollowedUsers");
-      new agGrid.Grid(unfollowedUsersGridDiv, unfollowedUsersOptions);
-    } else {
-      // フォロー解除した人一覧表示 更新
+      // フォロー解除した人一覧表示: 更新
       unfollowedUsersOptions.api.setRowData(unfollowedUsers);
     }
   } else {
-    // 初回はフォロワーリストをローカルストレージに保存
     await updateFollowerListInLocalStorage();
-    // grid を再描画
     displayFollowerDiffList(nowAllFollowers);
   }
 }
 
-function displayLastCheckedDate() {
-  // Last checked を表示
-  document.getElementById("lastCheckedDate").innerText = `Last checked: ${
-    localStorage.getItem(lastCheckedDate) || "none"
-  }`;
+async function createListView(gridOptions, data, tab, selector) {
+  gridOptions.rowData = data;
+  sizeColumnsToFitOnTabSwitch(gridOptions, tab);
+  const gridDiv = document.querySelector(selector);
+  new agGrid.Grid(gridDiv, gridOptions);
 }
 
+// get the difference between two arrays of objects
+function getDifference(followers1, followers2) {
+  return followers1.filter(
+    (newItem) =>
+      !followers2.some((oldItem) => oldItem.user_id === newItem.user_id)
+  );
+}
+
+// update follower list in local storage
 async function updateFollowerListInLocalStorage() {
   const previousFollowers = sessionStorage.getItem(previousFollowersKey);
   localStorage.setItem(previousFollowersKey, previousFollowers);
@@ -183,6 +177,14 @@ async function updateFollowerListInLocalStorage() {
   displayLastCheckedDate();
 }
 
+// display last checked date
+function displayLastCheckedDate() {
+  document.getElementById("lastCheckedDate").innerText = `Last checked: ${
+    localStorage.getItem(lastCheckedDate) || "none"
+  }`;
+}
+
+// set follower list in session storage
 function setFollowerListInSessionStorage(nowAllFollowers) {
   const comparedNowAllFollowers = nowAllFollowers.map((item) => {
     return {
@@ -196,6 +198,7 @@ function setFollowerListInSessionStorage(nowAllFollowers) {
   );
 }
 
+// fetch All followers
 const fetchFollowers = async (channelId, cursor = "") => {
   const url = `https://api.twitch.tv/helix/channels/followers?broadcaster_id=${channelId}&first=100&after=${cursor}`;
 
@@ -206,14 +209,13 @@ const fetchFollowers = async (channelId, cursor = "") => {
     },
   });
 
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch followers: ${response.status} ${response.statusText}`
-    );
-  }
+  // if (!response.ok) {
+  //   throw new Error(
+  //     `Failed to fetch followers: ${response.status} ${response.statusText}`
+  //   );
+  // }
 
   const data = await response.json();
-
   const followers = data.data; // 取得したフォロワーの配列
 
   if (data.pagination && data.pagination.cursor) {

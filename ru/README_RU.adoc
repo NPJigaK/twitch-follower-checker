@@ -9,7 +9,7 @@ Twitch Follower Checker - это инструмент на основе брау
 
 == Как использовать
 
-Этот инструмент доступен по адресу https://kagijpn.github.io/twitch-follower-checker/list/[здесь].
+Этот инструмент доступен по адресу https://twitch-follower-checker.devkey.jp/list/[здесь].
 
 === Аутентификация с Twitch
 
