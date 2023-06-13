@@ -9,7 +9,7 @@ Twitch Follower Checker est un outil basé sur le navigateur qui vous permet de 
 
 == Comment utiliser
 
-Cet outil peut être accessible à partir de https://kagijpn.github.io/twitch-follower-checker/list/[ici].
+Cet outil peut être accessible à partir de https://twitch-follower-checker.devkey.jp/list/[ici].
 
 === Authentification avec Twitch
 

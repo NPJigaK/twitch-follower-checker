@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="utf-8">
@@ -30,7 +30,7 @@
         content="The Twitch Follower Checker is a web application that easily allows you to track new followers and unfollows on your Twitch channel.">
     <meta property="og:image"
         content="https://raw.githubusercontent.com/KagiJPN/twitch-follower-checker/master/images/og-image.jpg">
-    <meta property="og:url" content="https://kagijpn.github.io/twitch-follower-checker/list/">
+    <meta property="og:url" content="https://twitch-follower-checker.devkey.jp/list/">
     <meta property="og:type" content="website">
 
     <!-- Twitter Meta Tags -->
@@ -60,16 +60,16 @@
         <div id="title-container">
             <img src="../favicon.ico" alt="Twitch Follower Checker Icon">
             <h1>Twitch Follower Checker</h1>
-            <a href="https://kagijpn.github.io/twitch-follower-checker/" target="_blank" rel="noopener">usage</a>
+            <a href="https://twitch-follower-checker.devkey.jp/" target="_blank" rel="noopener">usage</a>
         </div>
     </header>
 
     <div id="main-container">
-        <div id="buttonContainer">
+        <div id="button-container">
             <div>
                 <button onclick="authenticate()" id="authenticateButton">Authenticate with Twitch</button>
             </div>
-            <div id="refreshButtonContainer">
+            <div id="refresh-button-container">
                 <button id="refreshButton" style="display: none;">Refresh Follower Lists</button>
                 <span id="refreshTimer"></span>
             </div>
@@ -88,20 +88,20 @@
                     <input type="text" id="quickFilterInput" placeholder="Search...">
                 </div>
                 <!-- フォロワー一覧 -->
-                <div id="followerList" class="ag-theme-alpine"></div>
+                <div id="follower-list" class="ag-theme-alpine"></div>
             </div>
             <div id="followerDiff">
                 <h2>Follower Diff List</h2>
-                <div id="lastCheckedContainer">
+                <div id="last-checked-container">
                     <button onclick="updateFollowerListInLocalStorage()">Done check</button>
                     <span id="lastCheckedDate"></span>
                 </div>
                 <!-- フォロワー差分一覧 -->
                 <div id="followerDiffLists">
-                    <div id="newFollowers" class="ag-theme-alpine">
+                    <div id="new-followers" class="ag-theme-alpine inline-block-container">
                         <span style="font-size: large;">New Followers</span>
                     </div>
-                    <div id="unfollowedUsers" class="ag-theme-alpine">
+                    <div id="unfollowed-users" class="ag-theme-alpine inline-block-container">
                         <span style="font-size: large;">Unfollowed Users</span>
                     </div>
                 </div>
@@ -111,108 +111,105 @@
     </div>
 
     <script>
-        // ====== メインロジック ======
-        // リダイレクト処理
-        const hash = window.location.hash.substr(1); // 先頭の#を削除する
-        if (hash) {
-            // URLデコードしてパラメータを取得
-            const params = new URLSearchParams(hash);
-
-            // パラメータをオブジェクトに変換
-            const hashValues = {};
-            for (const [key, value] of params.entries()) {
-                hashValues[key] = value;
+        // Extract URL parameters and save access token
+        function extractAndSaveToken() {
+            const hash = window.location.hash.substr(1);
+            if (!hash) {
+                return;
             }
 
-            // console.log(hashValues);
-            // access_token が存在したら localStorage に保存
+            const params = new URLSearchParams(hash);
+            const hashValues = Object.fromEntries(params.entries());
+
             if (hashValues.access_token) {
                 localStorage.setItem(accessTokenKey, hashValues.access_token);
             }
         }
 
-        // Tab の作成
-        const tabs = new Tabby('[data-tabs]');
+        // Show lists if access token is valid
+        function showListsIfTokenValid() {
+            if (!localStorage.getItem(accessTokenKey) || !checkTokenExpired()) {
+                return;
+            }
 
-        // accessToken が存在＆失効していなかったらリスト表示処理へ
-        if (localStorage.getItem(accessTokenKey) && checkTokenExpired()) {
             document.getElementById("lists-container").style.display = 'block';
             document.getElementById("refreshButton").style.display = 'block';
-
             document.getElementById("authenticateButton").disabled = true; // 念のため押せないように
             document.getElementById("authenticateButton").style.display = 'none';
-            display();
-            // document.getElementById('refreshButton').click();
+            displayFollowers();
         }
 
-        async function display() {
+        // Display the follower lists
+        async function displayFollowers() {
             const nowAllFollowers = await getNowAllFollowers();
             displayFollowerList(nowAllFollowers);
             displayFollowerDiffList(nowAllFollowers);
             displayLastCheckedDate();
         }
 
-        // リフレッシュボタンのlistener
-        document.getElementById("refreshButton").addEventListener("click", function () {
-            const refreshButton = this;
+        // Refresh button listener
+        function setupRefreshButton() {
+            const refreshButton = document.getElementById("refreshButton");
+            refreshButton.addEventListener("click", function () {
+                this.disabled = true;
+                const countdown = 2 * 60;
+                const timerDisplay = document.getElementById("refreshTimer");
 
-            // Disable the button
-            this.disabled = true;
+                if (typeof (Worker) !== "undefined") {
+                    handleWorkerCountdown(this, countdown, timerDisplay);
+                } else {
+                    handleIntervalCountdown(this, countdown, timerDisplay);
+                }
 
-            let countdown = 2 * 60 + 20; // 2 minutes 20 seconds
-            const timerDisplay = document.getElementById("refreshTimer");
+                displayFollowers();
+            });
+        }
 
-            // Check if Web Workers are supported
-            if (typeof (Worker) !== "undefined") {
-                // Web Workers are supported
+        // Handle countdown using Web Workers
+        function handleWorkerCountdown(refreshButton, countdown, timerDisplay) {
+            const worker = new Worker("./scripts/countdownWorker.js");
+            worker.postMessage(countdown);
 
-                // Create a new worker
-                const worker = new Worker("./scripts/countdownWorker.js");
-                // Start the worker with the initial countdown value
-                worker.postMessage(countdown);
+            worker.onmessage = function (event) {
+                if (event.data === "finished") {
+                    timerDisplay.textContent = "";
+                    refreshButton.disabled = false;
+                    worker.terminate();
+                } else {
+                    displayCountdown(event.data, timerDisplay);
+                }
+            };
+        }
 
-                // Listen for messages from the worker
-                worker.onmessage = function (event) {
-                    if (event.data === "finished") {
-                        // If the countdown is finished, enable the button and terminate the worker
-                        timerDisplay.textContent = "";
-                        refreshButton.disabled = false;
-                        worker.terminate();
-                    } else {
-                        // Otherwise, update the countdown display
-                        countdown = event.data;
-                        const minutes = Math.floor(countdown / 60);
-                        const seconds = countdown % 60;
-                        timerDisplay.textContent = `Refresh available in: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-                    }
-                };
-            } else {
-                // Web Workers are not supported
+        // Handle countdown using setInterval
+        function handleIntervalCountdown(refreshButton, countdown, timerDisplay) {
+            const intervalId = setInterval(() => {
+                countdown--;
+                displayCountdown(countdown, timerDisplay);
 
-                // Set an interval
-                const intervalId = setInterval(() => {
-                    countdown--; // decrement the countdown
+                if (countdown <= 0) {
+                    clearInterval(intervalId);
+                    timerDisplay.textContent = "";
+                    refreshButton.disabled = false;
+                }
+            }, 1000);
+        }
 
-                    // Calculate minutes and seconds
-                    const minutes = Math.floor(countdown / 60);
-                    const seconds = countdown % 60;
+        // Display countdown
+        function displayCountdown(countdown, timerDisplay) {
+            const minutes = Math.floor(countdown / 60);
+            const seconds = countdown % 60;
+            timerDisplay.textContent = `Refresh available in: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
 
-                    // Display the countdown
-                    timerDisplay.textContent = `Refresh available in: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        // Main logic
+        // Tab の作成
+        const tabs = new Tabby('[data-tabs]');
+        extractAndSaveToken();
 
-                    // When countdown is finished, clear the interval and enable the button
-                    if (countdown <= 0) {
-                        clearInterval(intervalId);
-                        timerDisplay.textContent = "";
-                        refreshButton.disabled = false;
-                    }
-                }, 1000);
-            }
+        showListsIfTokenValid();
 
-            // Refresh lists
-            display()
-        });
-
+        setupRefreshButton();
     </script>
 </body>
 
