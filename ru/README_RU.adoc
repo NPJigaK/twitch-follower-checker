@@ -1,4 +1,4 @@
-:version: 1.2.0
+:version: 1.3.0
 :tip-caption: :bulb:
 :toc:
 :toclevels: 3
@@ -45,10 +45,10 @@ Twitch Follower Checker - это инструмент на основе брау
 
 == Содействие
 
-Мы приветствуем отчеты об ошибках, предложения по улучшению и предложения новых функций. Они будут рассмотрены для включения. Если вы можете, пожалуйста, https://github.com/KagiJPN/twitch-follower-checker/issues/new[поднимите вопрос].
+Мы приветствуем отчеты об ошибках, предложения по улучшению и предложения новых функций. Они будут рассмотрены для включения. Если вы можете, пожалуйста, https://github.com/NPJigaK/twitch-follower-checker/issues/new[поднимите вопрос].
 
 Мы высоко ценим ваше сотрудничество, стремясь улучшить этот инструмент и сделать его более удобным в использовании! Если есть что-то еще, что вы хотели бы обсудить с нами, не стесняйтесь связаться со мной на https://twitter.com/KagiJPN[моем Twitter]!
 
 == Лицензия
 
-Этот проект лицензирован под https://github.com/KagiJPN/twitch-follower-checker/blob/main/LICENSE[Apache License 2.0].
+Этот проект лицензирован под https://github.com/NPJigaK/twitch-follower-checker/blob/main/LICENSE[Apache License 2.0].

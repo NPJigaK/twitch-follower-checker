@@ -1,4 +1,4 @@
-:version: 1.2.0
+:version: 1.3.0
 :tip-caption: :bulb:
 :toc:
 :toclevels: 3
@@ -46,11 +46,11 @@ Search テキストボックスに文字を入力することで、ユーザー�
 == 貢献
 
 バグ報告や改善提案、機能提案などは随時受け付けています。検討した上で取り入れさせていただきます。
-https://github.com/KagiJPN/twitch-follower-checker/issues/new[Issue として起票]して頂ければと思います。
+https://github.com/NPJigaK/twitch-follower-checker/issues/new[Issue として起票]して頂ければと思います。
 
 より良く、使いやすいツールにアップデートするためにも、ぜひともご協力のほどお願い申し上げます！
 その他、何か連絡がある場合は https://twitter.com/KagiJPN[私のツイッター]までお気軽にご連絡ください！
 
 == ライセンス
 
-このプロジェクトは https://github.com/KagiJPN/twitch-follower-checker/blob/main/LICENSE[Apache License 2.0] に準拠してライセンスされています。
+このプロジェクトは https://github.com/NPJigaK/twitch-follower-checker/blob/main/LICENSE[Apache License 2.0] に準拠してライセンスされています。

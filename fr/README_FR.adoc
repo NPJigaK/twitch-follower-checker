@@ -1,4 +1,4 @@
-:version: 1.2.0
+:version: 1.3.0
 :tip-caption: :bulb:
 :toc:
 :toclevels: 3
@@ -45,10 +45,10 @@ Le temps restant avant que le bouton `Refresh Follower Lists` puisse être à no
 
 == Contribuer
 
-Nous accueillons les rapports de bugs, les suggestions d'améliorations et les propositions de nouvelles fonctionnalités. Celles-ci seront prises en considération pour inclusion. Si vous le pouvez, veuillez https://github.com/KagiJPN/twitch-follower-checker/issues/new[signaler un problème].
+Nous accueillons les rapports de bugs, les suggestions d'améliorations et les propositions de nouvelles fonctionnalités. Celles-ci seront prises en considération pour inclusion. Si vous le pouvez, veuillez https://github.com/NPJigaK/twitch-follower-checker/issues/new[signaler un problème].
 
 Votre coopération est très appréciée car nous nous efforçons d'améliorer cet outil et de le rendre plus facile à utiliser ! Si vous avez d'autres questions, n'hésitez pas à me contacter sur mon https://twitter.com/KagiJPN[Twitter] !
 
 == Licence
 
-Ce projet est licencié sous la https://github.com/KagiJPN/twitch-follower-checker/blob/main/LICENSE[Licence Apache 2.0].
+Ce projet est licencié sous la https://github.com/NPJigaK/twitch-follower-checker/blob/main/LICENSE[Licence Apache 2.0].
