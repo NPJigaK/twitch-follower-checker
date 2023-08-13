@@ -127,8 +127,8 @@
         }
 
         // Show lists if access token is valid
-        function showListsIfTokenValid() {
-            if (!localStorage.getItem(accessTokenKey) || !checkTokenExpired()) {
+        async function showListsIfTokenValid() {
+            if (!localStorage.getItem(accessTokenKey) || !await checkTokenExpired()) {
                 return;
             }
 
