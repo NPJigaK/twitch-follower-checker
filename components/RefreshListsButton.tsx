@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@material-tailwind/react";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import classNames from "classnames";
+import { debugLogger } from "@/lib/debugLogger";
 
 const RefreshListsButton: React.FC<{ onRefresh: () => void }> = ({
   onRefresh,
@@ -9,7 +10,7 @@ const RefreshListsButton: React.FC<{ onRefresh: () => void }> = ({
   const [isDisabled, setIsDisabled] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
   const [worker, setWorker] = useState<Worker | null>(null);
-
+  debugLogger("RefreshListsButton");
   useEffect(() => {
     return () => {
       if (worker) {

@@ -18,7 +18,7 @@
     "ag-grid-community": "30.2.0",
     "ag-grid-react": "30.2.0",
     "classnames": "^2.3.2",
-    "next": "13.5.4",
+    "next": "13.5.3",
     "nextra": "3.0.0-alpha.8",
     "nextra-theme-docs": "3.0.0-alpha.8",
     "react": "^18",

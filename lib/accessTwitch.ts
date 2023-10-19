@@ -7,10 +7,11 @@ export function useIsTwitchTokenAvailable() {
     null | boolean
   >(null);
 
+  debugLogger("useIsTwitchTokenAvailable");
   useEffect(() => {
     const checkAndStoreAccessToken = async () => {
       let accessTokenFromHash = null;
-
+      debugLogger("checkAndStoreAccessToken");
       if (typeof window !== "undefined") {
         const hashParams = new URLSearchParams(
           window.location.hash.substring(1)
@@ -55,7 +56,7 @@ export const useNowAllFollowers = () => {
   const [nowAllFollowers, setNowAllFollowers] = useState<any[] | null>(null);
   const [newAllFollowers, setNewAllFollowers] = useState<any[] | null>(null);
   const [oldAllFollowers, setOldAllFollowers] = useState<any[] | null>(null);
-
+  debugLogger("useNowAllFollowers");
   const fetchFollowers = useCallback(
     async (channelId: string, cursor = ""): Promise<any[]> => {
       const url = `https://api.twitch.tv/helix/channels/followers?broadcaster_id=${channelId}&first=100&after=${cursor}`;
@@ -83,22 +84,19 @@ export const useNowAllFollowers = () => {
   );
 
   type User = { user_id: string; [key: string]: any };
-  const findDifference = useCallback(
-    async (oldArray: User[], newArray: User[]) => {
-      const oldUserIds = oldArray.map((user) => user.user_id);
-      const newUserIds = newArray.map((user) => user.user_id);
+  const findDifference = useCallback((oldArray: User[], newArray: User[]) => {
+    const oldUserIds = oldArray.map((user) => user.user_id);
+    const newUserIds = newArray.map((user) => user.user_id);
 
-      const removedUsers = oldArray.filter(
-        (user) => !newUserIds.includes(user.user_id)
-      );
-      const addedUsers = newArray.filter(
-        (user) => !oldUserIds.includes(user.user_id)
-      );
+    const removedUsers = oldArray.filter(
+      (user) => !newUserIds.includes(user.user_id)
+    );
+    const addedUsers = newArray.filter(
+      (user) => !oldUserIds.includes(user.user_id)
+    );
 
-      return { removedUsers, addedUsers };
-    },
-    []
-  );
+    return { removedUsers, addedUsers };
+  }, []);
 
   const refresh = useCallback(async () => {
     debugLogger("refresh");
@@ -124,6 +122,7 @@ export const useNowAllFollowers = () => {
   }, [fetchFollowers, findDifference]); // fetchFollowers は依存配列に含まれています
 
   useEffect(() => {
+    debugLogger("refresh");
     refresh(); // コンポーネントがマウントされた時に refresh 関数を呼び出します
   }, [refresh]); // refresh は依存配列に含まれています
 

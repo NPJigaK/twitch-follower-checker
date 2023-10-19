@@ -2,8 +2,10 @@ import classNames from "classnames";
 import AuthenticateWithTwitch from "./AuthenticateWithTwitch";
 import AppContainer from "./AppContainer";
 import { useIsTwitchTokenAvailable } from "@/lib/accessTwitch";
+import { debugLogger } from "@/lib/debugLogger";
 
 function MainContainer() {
+  debugLogger("MainContainer")
   const isTwitchTokenAvailable = useIsTwitchTokenAvailable();
   let container;
 

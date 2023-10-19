@@ -1,3 +1,4 @@
+import { debugLogger } from "@/lib/debugLogger";
 import { Button } from "@material-tailwind/react";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import classNames from "classnames";
@@ -10,6 +11,7 @@ const CheckDoneButton: React.FC<{
     onChecked();
   };
 
+  debugLogger("CheckDoneButton")
   return (
     <Button
       className={classNames("flex", "items-center", "gap-1", "dark:text-white")}

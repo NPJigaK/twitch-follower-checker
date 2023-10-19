@@ -20,6 +20,7 @@ import { useNowAllFollowers } from "@/lib/accessTwitch";
 import { debugLogger } from "@/lib/debugLogger";
 
 export default function AppContainer() {
+  debugLogger("AppContainer");
   const [activeTab, setActiveTab] = useState("Follower List");
   const [lastCheckedDate, setLastCheckedDate] = useState<string | null>(
     localStorage.getItem("ftls")
@@ -33,6 +34,7 @@ export default function AppContainer() {
     storeNowFollowes,
   } = useNowAllFollowers();
 
+  debugLogger("AppContainer2");
   const gridRef1 = useRef<AgGridReact<any>>(null);
   const gridRef2 = useRef<AgGridReact<any>>(null);
   const gridRef3 = useRef<AgGridReact<any>>(null);
@@ -68,10 +70,12 @@ export default function AppContainer() {
   }, []);
 
   const onFirstDataRendered = useCallback((params: any) => {
+    debugLogger("onFirstDataRendered");
     params.api.sizeColumnsToFit();
   }, []);
 
   const onGridSizeChanged = useCallback((params: any) => {
+    debugLogger("onGridSizeChanged");
     params.api.sizeColumnsToFit();
   }, []);
 
@@ -91,6 +95,7 @@ export default function AppContainer() {
   }, [refresh, data]);
 
   const onChecked = useCallback(() => {
+    debugLogger("onChecked");
     storeNowFollowes();
     const ftls = formatToLocaleString(new Date());
     localStorage.setItem("ftls", ftls);
@@ -98,6 +103,7 @@ export default function AppContainer() {
   }, [storeNowFollowes]);
 
   useEffect(() => {
+    debugLogger("onChecked();");
     if (!localStorage.getItem("ftls")) {
       onChecked();
     }
