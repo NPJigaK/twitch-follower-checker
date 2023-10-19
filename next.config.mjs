@@ -10,9 +10,6 @@ const nextConfig = {
   reactStrictMode: true,
   // Configuration for enabling static export
   output: "export",
-  images: {
-    unoptimized: true,
-  },
 };
 
 export default withNextra(nextConfig);
