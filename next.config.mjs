@@ -13,6 +13,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  basePath: "",
 };
 
 export default withNextra(nextConfig);
