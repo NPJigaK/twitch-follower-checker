@@ -1,0 +1,39 @@
+---
+title: Twitch フォロワーチェッカーの使い方 - 新規フォロー・フォロー解除の確認
+description: Twitch フォロワーチェッカーの使い方を説明するページです。
+---
+
+import Link from "next/link";
+
+Twitch フォロワーチェッカーは<Link class={"\_text-primary-600 \_underline \_decoration-from-font [text-underline-position:from-font]"}href="/" target="\_blank" rel="noopener noreferrer">こちら</Link>から利用できます！
+
+## Twitch 認証
+
+初回アクセス時には、`Authenticate with Twitch` ボタンをクリックして Twitch 認証を行ってください。  
+表示されるリストは認証を行ったユーザーを対象とします。
+
+## Follower List
+
+現在あなたのチャンネルをフォローしているユーザーの一覧が表示されます。
+
+## New Follower List
+
+`Last checked` の日付の時点のフォロワーから新しくあなたのチャンネルをフォローしたユーザーの一覧が表示されます。
+
+## Unfolloewd List
+
+`Last checked` の日付の時点のフォロワーからあなたのチャンネルをフォロー解除したユーザーの一覧が表示されます。
+
+## 差分更新
+`Last checked` の日付を更新します。`New Follower List` と `Unfolloewd List` が対象です。
+
+## リストを更新する
+
+`REFRESH LISTS` ボタンを押下するとフォローしているユーザーを再度取得してリストを更新します。  
+配信中などリアルタイムでフォロワーの推移を確認したい時に使います。  
+API 制限があるため再度ボタンを押せるようになるまで数分設けています。
+
+## ユーザーフィルタリング
+
+`Search...` と書かれた検索窓からユーザーのフィルタリング・検索を行えます。  
+チャンネルをフォローした日付や表示名など全て列の文字が対象になります。
