@@ -100,6 +100,8 @@ const config: DocsThemeConfig = {
           type="image/vnd.microsoft.icon"
           media="(prefers-color-scheme: dark)"
         />
+
+        <meta name="msvalidate.01" content="7B9D9DB35830909D0ABC0C6F18DD3B49" />
       </>
     );
   },
