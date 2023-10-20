@@ -1,9 +1,9 @@
 const isDebugMode = (): boolean => {
-  return true;
-  // if (typeof window !== "undefined") {
-  //   return window.location.hash.includes("debug");
-  // }
-  // return false;
+  if (typeof window !== "undefined") {
+    // Make it server-side compatible.
+    return window.location.hash.includes("debug");
+  }
+  return false;
 };
 export const debugLogger = (...messages: any[]): void => {
   if (isDebugMode()) {

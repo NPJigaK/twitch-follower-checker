@@ -3,5 +3,5 @@ export const clientId = "h0pe6dkb6r51jzkk27ujasldoqgio9";
 export const redirectUri = "http://localhost:3000/";
 export const scope = "moderator:read:followers";
 export const accessTokenKey = "twitchAccessToken";
-export const lastCheckedDateKey = "lastCheckedDateKey";
-export const storedAllFollowersKey = "storedAllFollowersKey";
+export const lastCheckedDateKey = "lastCheckedDate";
+export const storedAllFollowersKey = "previousFollowersKey";

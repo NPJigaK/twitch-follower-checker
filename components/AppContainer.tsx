@@ -18,12 +18,13 @@ import RefreshListsButton from "./RefreshListsButton";
 import CheckDoneButton from "./CheckDoneButton";
 import { useNowAllFollowers } from "@/lib/accessTwitch";
 import { debugLogger } from "@/lib/debugLogger";
+import { lastCheckedDateKey } from "@/lib/constants";
 
 export default function AppContainer() {
   debugLogger("AppContainer");
   const [activeTab, setActiveTab] = useState("Follower List");
   const [lastCheckedDate, setLastCheckedDate] = useState<string | null>(
-    localStorage.getItem("ftls")
+    localStorage.getItem(lastCheckedDateKey)
   );
 
   const {
@@ -98,13 +99,13 @@ export default function AppContainer() {
     debugLogger("onChecked");
     storeNowFollowes();
     const ftls = formatToLocaleString(new Date());
-    localStorage.setItem("ftls", ftls);
+    localStorage.setItem(lastCheckedDateKey, ftls);
     setLastCheckedDate(ftls);
   }, [storeNowFollowes]);
 
   useEffect(() => {
     debugLogger("onChecked();");
-    if (!localStorage.getItem("ftls")) {
+    if (!localStorage.getItem(lastCheckedDateKey)) {
       onChecked();
     }
   }, [onChecked]);
