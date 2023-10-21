@@ -18,7 +18,7 @@ import RefreshListsButton from "./RefreshListsButton";
 import CheckDoneButton from "./CheckDoneButton";
 import { useNowAllFollowers } from "@/lib/accessTwitch";
 import { debugLogger } from "@/lib/debugLogger";
-import { lastCheckedDateKey } from "@/lib/constants";
+import { lastCheckedDateKey, storedAllFollowersKey } from "@/lib/constants";
 
 export default function AppContainer() {
   debugLogger("AppContainer");
@@ -105,7 +105,10 @@ export default function AppContainer() {
 
   useEffect(() => {
     debugLogger("onChecked();");
-    if (!localStorage.getItem(lastCheckedDateKey)) {
+    if (
+      !localStorage.getItem(lastCheckedDateKey) &&
+      localStorage.getItem(storedAllFollowersKey)
+    ) {
       onChecked();
     }
   }, [onChecked]);

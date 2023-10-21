@@ -110,10 +110,16 @@ export const useNowAllFollowers = () => {
     const resJson = await res.json();
     const followers = await fetchFollowers(resJson.data[0].id);
 
+    if (!localStorage.getItem(storedAllFollowersKey)) {
+      // addedUsers の差分が全てのユーザーにならないように、初期値はfollowers
+      localStorage.setItem(storedAllFollowersKey, JSON.stringify(followers));
+    }
+
     const result = await findDifference(
       followers,
-      JSON.parse(localStorage.getItem(storedAllFollowersKey) ?? "[]")
+      JSON.parse(localStorage.getItem(storedAllFollowersKey) as string)
     );
+
     debugLogger(result.removedUsers);
     debugLogger(result.addedUsers);
     setNowAllFollowers(followers);

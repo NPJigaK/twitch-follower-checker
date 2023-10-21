@@ -1,7 +1,10 @@
 const isDebugMode = (): boolean => {
   if (typeof window !== "undefined") {
     // Make it server-side compatible.
-    return window.location.hash.includes("debug");
+    return (
+      window.location.hash.includes("debug") ||
+      window.location.hostname === "localhost"
+    );
   }
   return false;
 };
