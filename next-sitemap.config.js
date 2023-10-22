@@ -4,7 +4,7 @@ module.exports = {
   generateRobotsTxt: true,
   outDir: "./out",
   additionalPaths: async (config) => [
-    await config.transform(config, "/na"),
+    await config.transform(config, "/en"),
     await config.transform(config, "/ja"),
     await config.transform(config, "/de"),
     await config.transform(config, "/es"),
