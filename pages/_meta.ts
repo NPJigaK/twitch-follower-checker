@@ -11,12 +11,12 @@ const hideDocs = {
   },
   de: {
     type: "page",
-    title: "Documentation",
+    title: "Dokumentation",
     display: "hidden",
   },
   es: {
     type: "page",
-    title: "Documentation",
+    title: "Documentación",
     display: "hidden",
   },
   fr: {
@@ -26,12 +26,12 @@ const hideDocs = {
   },
   pt: {
     type: "page",
-    title: "Documentation",
+    title: "Documentação",
     display: "hidden",
   },
   ru: {
     type: "page",
-    title: "Documentation",
+    title: "Документация",
     display: "hidden",
   },
 };
