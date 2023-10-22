@@ -21,6 +21,10 @@ export default function App({ Component, pageProps }: AppProps): ReactElement {
   const router = useRouter();
 
   useEffect(() => {
+    if (window.location.hostname === "localhost") {
+      debugLogger("Running on localhost. Skip initGA.");
+      return;
+    }
     initGA();
     // `routeChangeComplete` won't run for the first page load unless the query string is
     // hydrated later on, so here we log a page view if this is the first render and
