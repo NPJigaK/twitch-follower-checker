@@ -1,0 +1,40 @@
+---
+title: Anleitung zum Twitch Follower Prüfer - Überprüfung neuer Follower und Entfolgungen
+description: Auf dieser Seite wird erklärt, wie der Twitch Follower Prüfer verwendet wird.
+---
+
+import Link from "next/link";
+
+Der Twitch Follower Prüfer kann <Link class={"\_text-primary-600 \_underline \_decoration-from-font [text-underline-position:from-font]"}href="/" target="\_blank" rel="noopener noreferrer">hier</Link> genutzt werden!
+
+## Twitch-Authentifizierung
+
+Beim ersten Zugriff klicken Sie bitte auf die Schaltfläche `Authenticate with Twitch`, um die Twitch-Authentifizierung durchzuführen.  
+Die angezeigte Liste bezieht sich auf den authentifizierten Benutzer.
+
+## Follower List
+
+Es wird eine Liste der Benutzer angezeigt, die derzeit Ihren Kanal abonniert haben.
+
+## New followed List
+
+Es wird eine Liste der Benutzer angezeigt, die Ihren Kanal seit dem Datum des letzten Checks `Last checked` neu abonniert haben.
+
+## Unfollowed List
+
+Es wird eine Liste der Benutzer angezeigt, die Ihren Kanal seit dem Datum des letzten Checks `Last checked` nicht mehr abonniert haben.
+
+## Differenzaktualisierung
+
+Das Datum des `Last checked` wird aktualisiert. Dies betrifft die `New Follower List` und die `Unfollowed List`.
+
+## Listen aktualisieren
+
+Wenn Sie auf die Schaltfläche `REFRESH LISTS` klicken, werden die abonnierenden Benutzer erneut abgerufen und die Listen aktualisiert.  
+Dies ist nützlich, wenn Sie die Entwicklung der Follower in Echtzeit während einer Live-Übertragung verfolgen möchten.  
+Aufgrund der API-Beschränkungen dauert es einige Minuten, bis die Schaltfläche erneut gedrückt werden kann.
+
+## Benutzerfilterung
+
+Sie können Benutzer durch die mit `Search...` beschriftete Suchbox filtern und suchen.  
+Das Datum des Kanalabonnements und der Anzeigename sind unter anderem alle Spaltenzeichen, die berücksichtigt werden.
