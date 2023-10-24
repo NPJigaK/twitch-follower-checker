@@ -1,0 +1,18 @@
+name: "IndexNow"
+on:
+  workflow_run:
+    workflows: ["Deploy Next.js site to Pages"]
+    types:
+      - completed
+
+jobs:
+  check-and-submit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: indexnow-action
+        uses: bojieyang/indexnow-action@v1
+        with:
+          sitemap-location: "https://twitch-follower-checker.devkey.jp/sitemap.xml"
+          since: 1
+          since-unit: "day"
+          key: ${{ secrets.INDEXNOW_KEY }}
