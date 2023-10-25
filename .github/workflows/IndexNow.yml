@@ -12,6 +12,7 @@ jobs:
       - name: indexnow-action
         uses: bojieyang/indexnow-action@v1
         with:
+          endpoint: "api.indexnow.org"
           sitemap-location: "https://twitch-follower-checker.devkey.jp/sitemap.xml"
           since: 1
           since-unit: "day"
