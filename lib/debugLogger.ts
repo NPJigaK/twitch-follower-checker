@@ -3,7 +3,8 @@ const isDebugMode = (): boolean => {
     // Make it server-side compatible.
     return (
       window.location.hash.includes("debug") ||
-      window.location.hostname === "localhost"
+      window.location.hostname === "localhost" ||
+      localStorage.getItem("isDebug") != undefined
     );
   }
   return false;
