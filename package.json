@@ -25,7 +25,6 @@
     "nextra-theme-docs": "3.0.0-alpha.8",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-ga4": "^2.1.0",
     "react-social-login-buttons": "3.9.1"
   },
   "devDependencies": {
