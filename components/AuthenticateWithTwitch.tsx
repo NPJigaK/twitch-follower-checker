@@ -2,6 +2,9 @@ import { useRouter } from "next/router";
 import { createButton, createSvgIcon } from "react-social-login-buttons";
 import T from "prop-types";
 import { clientId, redirectUri, scope } from "@/lib/constants";
+import { Card, CardFooter, Typography } from "@material-tailwind/react";
+import { navigateToUserLocalePage } from "@/lib/navigateToUserLocalePage";
+import { Link } from "nextra-theme-docs";
 
 function TwitchIcon() {
   return (
@@ -28,7 +31,11 @@ TwitchIcon.propTypes = {
 const config = {
   text: "Authenticate with Twitch",
   icon: createSvgIcon(TwitchIcon),
-  style: { background: "#a970ff" },
+  style: {
+    background: "#a970ff",
+    margin: "50px auto",
+    padding: "10px",
+  },
   activeStyle: { background: "#8644e9" },
 };
 
@@ -40,5 +47,18 @@ export default function AuthenticateWithTwitch() {
     const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=${scope}`;
     router.push(authUrl);
   };
-  return <MyTwitchAuthenticateButton onClick={() => redirectToTwitch()} />;
+  return (
+    <div className="flex items-center justify-center mb-4 mt-4">
+      <Card className="w-96">
+        <CardFooter className="pt-0">
+          <MyTwitchAuthenticateButton onClick={redirectToTwitch} />
+          <Typography variant="small" className="mt-6 flex justify-center">
+            <Link href="javascript:void(0)" onClick={navigateToUserLocalePage}>
+              What is Authenticate with Twitch?
+            </Link>
+          </Typography>
+        </CardFooter>
+      </Card>
+    </div>
+  );
 }

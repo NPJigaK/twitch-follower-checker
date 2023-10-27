@@ -5,3 +5,14 @@ export const scope = "moderator:read:followers";
 export const accessTokenKey = "twitchAccessToken";
 export const lastCheckedDateKey = "lastCheckedDate";
 export const storedAllFollowersKey = "previousFollowersKey";
+
+export const supportedLocales = {
+  en: "en-US",
+  es: "es-ES",
+  pt: "pt-BR",
+  ru: "ru-RU",
+  de: "de-DE",
+  fr: "fr-FR",
+  ja: "ja-JP",
+  ko: "ko-KR",
+};

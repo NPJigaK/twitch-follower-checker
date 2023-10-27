@@ -1,3 +1,4 @@
+import { supportedLocales } from "@/lib/constants";
 import { GTM_ID } from "@/lib/gtm";
 import Document, { Html, Head, Main, NextScript } from "next/document";
 
@@ -22,16 +23,6 @@ const LangSettingDocument = ({ lang, localEntry }: any) => {
 };
 
 LangSettingDocument.getInitialProps = async (ctx: any) => {
-  const supportedLocales = {
-    en: "en-US",
-    es: "es-ES",
-    pt: "pt-BR",
-    ru: "ru-RU",
-    de: "de-DE",
-    fr: "fr-FR",
-    ja: "ja-JP",
-    ko: "ko-KR",
-  };
   const initialProps = await Document.getInitialProps(ctx);
   const { pathname } = ctx;
   const localEntry = Object.entries(supportedLocales).find((entry) =>
