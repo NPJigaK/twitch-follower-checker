@@ -238,6 +238,7 @@ export default function AppContainer() {
                   onFirstDataRendered={onFirstDataRendered}
                   onGridSizeChanged={onGridSizeChanged}
                   loadingOverlayComponent={loadingCellRenderer}
+                  suppressDragLeaveHidesColumns={true}
                 ></AgGridReact>
               </div>
             </TabPanel>
