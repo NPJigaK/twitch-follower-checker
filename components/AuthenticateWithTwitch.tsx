@@ -49,7 +49,7 @@ export default function AuthenticateWithTwitch() {
   };
   return (
     <div className="flex items-center justify-center mb-4 mt-4">
-      <Card className="w-96">
+      <Card className="w-96 dark:bg-gray-900">
         <CardFooter className="pt-0">
           <MyTwitchAuthenticateButton onClick={redirectToTwitch} />
           <Typography variant="small" className="mt-6 flex justify-center">
