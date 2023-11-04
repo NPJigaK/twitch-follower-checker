@@ -152,9 +152,11 @@ export default function AppContainer() {
               key={label}
               value={label}
               onClick={() => setActiveTab(label)}
-              className={
-                activeTab === label ? "dark:text-white" : "text-gray-500"
-              }
+              className={classNames(
+                activeTab === label ? "dark:text-white" : "text-gray-500",
+                "text-xs",
+                "sm:text-base"
+              )}
             >
               {label}
             </Tab>
@@ -163,7 +165,19 @@ export default function AppContainer() {
         <TabsBody>
           {data.map(({ label, value, gridRef }) => (
             <TabPanel key={label} value={label}>
-              <div className="flex flex-col-reverse space-y-reverse space-y-3 md:space-y-0 md:flex-row mb-1">
+              <div
+                className={classNames(
+                  "flex",
+                  "flex-col-reverse",
+                  "space-y-reverse",
+                  "space-y-3",
+                  "md:space-y-0",
+                  "md:flex-row",
+                  "mb-1",
+                  "mt-5",
+                  "sm:mt-0" // header と body の間
+                )}
+              >
                 <div className="w-56 mr-3">
                   <Input
                     label="Search..."

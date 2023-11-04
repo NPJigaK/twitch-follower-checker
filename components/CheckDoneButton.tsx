@@ -11,7 +11,7 @@ const CheckDoneButton: React.FC<{
     onChecked();
   };
 
-  debugLogger("CheckDoneButton")
+  debugLogger("CheckDoneButton");
   return (
     <Button
       className={classNames("flex", "items-center", "gap-1", "dark:text-white")}

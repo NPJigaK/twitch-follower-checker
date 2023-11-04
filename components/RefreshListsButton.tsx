@@ -80,7 +80,8 @@ const RefreshListsButton: React.FC<{ onRefresh: () => void }> = ({
           "items-center",
           "gap-1",
           "dark:text-white",
-          "mb-4"
+          "mb-8",
+          "sm:mb-4"
         )}
         size="sm"
         onClick={handleClick}
