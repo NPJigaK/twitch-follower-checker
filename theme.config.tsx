@@ -47,7 +47,7 @@ const config: DocsThemeConfig = {
     //     : `${title} - Twitch Follower Checker`
     // ) as string;
 
-    const socialCard = "/og-image.jpg";
+    const socialCard = "https://twitch-follower-checker.devkey.jp/og-image.jpg";
     const metaTitle =
       title || "Twitch Follower Checker - Follows & Unfollows Tracking Free";
     const description =
