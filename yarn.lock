@@ -913,10 +913,10 @@ ag-grid-community@30.2.1:
   resolved "https://registry.yarnpkg.com/ag-grid-community/-/ag-grid-community-30.2.1.tgz#a83d153ad1dbec46402ebe89f74ebb4b0710b3c7"
   integrity sha512-1slonXskJbbI9ybhTx//4YKfJpZVAEnHL8dui1rQJRSXKByUi+/f7XtvkLsbgBkawoWbqvRAySjYtvz80+kBfA==
 
-ag-grid-react@30.2.0:
-  version "30.2.0"
-  resolved "https://registry.yarnpkg.com/ag-grid-react/-/ag-grid-react-30.2.0.tgz#3130baaf7a7e6c743bb06d9c7ce4f06ad48a10c1"
-  integrity sha512-y4esND0ADJMw/aCyfiT1GA885sy2XvlnXUNQdiXijoxcGY6OSk3jE2DPtZfE+RsdmNdXimMpoRZHwJW/aPCegA==
+ag-grid-react@30.2.1:
+  version "30.2.1"
+  resolved "https://registry.yarnpkg.com/ag-grid-react/-/ag-grid-react-30.2.1.tgz#2005f93569d4101bc3751b20491f3560db7c8c54"
+  integrity sha512-WYt5ZstSoPEGAcTqXBdaonihXtapZdjTHZ3dc3xTK1xIdbF0/Vw4zDWCQSsG5H4M5CeUKjvbeHx7kKM1Yiah3g==
   dependencies:
     prop-types "^15.8.1"
 
