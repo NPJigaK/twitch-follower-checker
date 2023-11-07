@@ -14,7 +14,7 @@
     "@emotion/styled": "11.11.0",
     "@material-tailwind/react": "2.1.4",
     "@mui/icons-material": "5.14.16",
-    "@mui/material": "5.14.16",
+    "@mui/material": "5.14.17",
     "ag-grid-community": "30.2.1",
     "ag-grid-react": "30.2.0",
     "classnames": "^2.3.2",
