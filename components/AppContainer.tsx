@@ -197,7 +197,7 @@ export default function AppContainer() {
                     isDisabled={activeTab === "Follower List"}
                   />
                   {lastCheckedDate !== null && (
-                    <span className="ml-4 dark:text-white">
+                    <span className="ml-4 dark:text-white !text-sm sm:!text-base">
                       Last checked: {lastCheckedDate}
                     </span>
                   )}

@@ -87,11 +87,11 @@ const RefreshListsButton: React.FC<{ onRefresh: () => void }> = ({
         onClick={handleClick}
         disabled={isDisabled}
       >
-        <AutorenewIcon />
+        <AutorenewIcon className="!text-sm sm:!text-2xl" />
         Refresh Lists
       </Button>
       {timeRemaining > 0 && (
-        <span className="ml-4">{formatTime(timeRemaining)}</span>
+        <span className="ml-4 !text-sm sm:!text-base">{formatTime(timeRemaining)}</span>
       )}
     </div>
   );

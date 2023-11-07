@@ -14,12 +14,18 @@ const CheckDoneButton: React.FC<{
   debugLogger("CheckDoneButton");
   return (
     <Button
-      className={classNames("flex", "items-center", "gap-1", "dark:text-white")}
+      className={classNames(
+        "flex",
+        "items-center",
+        "gap-1",
+        "dark:text-white",
+        "min-w-fit" // min-width: fit-content;
+      )}
       size="sm"
       onClick={handleClick}
       disabled={isDisabled}
     >
-      <CheckCircleIcon />
+      <CheckCircleIcon className="!text-sm sm:!text-2xl" />
       Check done
     </Button>
   );
