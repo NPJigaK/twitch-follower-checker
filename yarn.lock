@@ -324,10 +324,10 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@material-tailwind/react@2.1.4":
-  version "2.1.4"
-  resolved "https://registry.yarnpkg.com/@material-tailwind/react/-/react-2.1.4.tgz#bc4aa182736cbdef7c5151049902569de8a6f53b"
-  integrity sha512-dRHnC+Ka0IJ8KSfToBmlJRy9gAPv6F1oVZb+ABOPcIR8LxBhAXXhMAjtQf9ilG0nq2VK9AISsYFtyWBsr8Y88A==
+"@material-tailwind/react@2.1.5":
+  version "2.1.5"
+  resolved "https://registry.yarnpkg.com/@material-tailwind/react/-/react-2.1.5.tgz#ec1ce369477543e61bd6be741bd8f6d03ef9ff97"
+  integrity sha512-Jzy+Lmunn0BhI+jQKr4K3PtsbjNrLxLIHQPXFIljjZkj4GTLiz1rbMbfratWnnEcW/F1p4HIKDtI9bMvH0oGow==
   dependencies:
     "@floating-ui/react" "0.19.0"
     classnames "2.3.2"
