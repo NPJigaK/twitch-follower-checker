@@ -13,4 +13,5 @@ module.exports = {
     await config.transform(config, "/pt"),
     await config.transform(config, "/ru"),
   ],
+  exclude: ["/jp", "/list"],
 };
