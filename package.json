@@ -16,7 +16,7 @@
     "@mui/icons-material": "5.14.18",
     "@mui/material": "5.14.18",
     "ag-grid-community": "30.2.1",
-    "ag-grid-react": "30.2.1",
+    "ag-grid-react": "31.0.2",
     "classnames": "^2.3.2",
     "next": "14.0.3",
     "next-sitemap": "^4.2.3",
