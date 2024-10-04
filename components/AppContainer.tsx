@@ -185,9 +185,12 @@ export default function AppContainer() {
                     crossOrigin=""
                     id="filter-text-box"
                     onInput={(event) =>
-                      gridRef.current?.api.setQuickFilter(
-                        (event.target as HTMLInputElement).value
-                      )
+                      gridRef.current?.api.setFilterModel({
+                        quickFilter: {
+                          filterType: "text",
+                          filter: (event.target as HTMLInputElement).value,
+                        },
+                      })
                     }
                   />
                 </div>
