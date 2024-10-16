@@ -13,7 +13,7 @@
     "@emotion/react": "11.11.1",
     "@emotion/styled": "11.11.0",
     "@headlessui/react": "^2.1.9",
-    "@material-tailwind/react": "2.1.9",
+    "@material-tailwind/react": "2.1.10",
     "@mui/icons-material": "5.15.9",
     "@mui/material": "5.15.9",
     "ag-grid-community": "32.2.1",
