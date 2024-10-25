@@ -28,7 +28,7 @@
     "react-social-login-buttons": "3.9.1"
   },
   "devDependencies": {
-    "@types/node": "20.11.17",
+    "@types/node": "22.8.0",
     "@types/react": "18.2.42",
     "@types/react-dom": "18.2.19",
     "autoprefixer": "10.4.16",
