@@ -22,6 +22,8 @@ export function useIsTwitchTokenAvailable() {
       if (accessTokenFromHash) {
         // localstorageにaccess_tokenを保存
         localStorage.setItem(accessTokenKey, accessTokenFromHash);
+        // URLからハッシュ部分（アクセストークン）を削除する
+        window.location.hash = "";
       }
 
       // localstorageからaccess_tokenを取得
