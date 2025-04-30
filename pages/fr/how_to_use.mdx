@@ -1,40 +1,48 @@
 ---
-title: Comment utiliser Twitch Vérificateur de Suiveurs - Vérification des nouveaux abonnés et désabonnements
-description: Cette page explique comment utiliser Twitch Vérificateur de Suiveurs.
+title: Comment utiliser Twitch Follower Checker - Vérification des nouveaux abonnés et désabonnés
+description: Instructions sur l'utilisation de Twitch Follower Checker.
 ---
-
-import Link from "next/link";
-
-Vous pouvez accéder à Twitch Vérificateur de Suiveurs <Link class={"\_text-primary-600 \_underline \_decoration-from-font [text-underline-position:from-font]"}href="/" target="\_blank" rel="noopener noreferrer">ici</Link> !
 
 ## Authentification Twitch
 
-Lors de votre première visite, cliquez sur le bouton `Authenticate with Twitch` pour effectuer l'authentification Twitch.
-La liste affichée sera basée sur l'utilisateur authentifié.
+- Lors de votre première visite, cliquez sur le bouton `Authenticate with Twitch` pour effectuer l'authentification Twitch.  
+- Les listes affichées concernent la chaîne de l'utilisateur authentifié.
 
-## Follower List
+## Vérifier les abonnés
+### Liste des abonnés
 
-Une liste des utilisateurs qui suivent actuellement votre chaîne est affichée.
+Affiche la liste complète des utilisateurs qui suivent actuellement votre chaîne.
 
-## New followed List
+### Nouveaux abonnés
 
-Une liste des utilisateurs qui ont commencé à suivre votre chaîne depuis la date `Last checked` (Dernière vérification) est affichée.
+Affiche les utilisateurs ayant commencé à suivre votre chaîne après la dernière date de vérification.  
+La date de la dernière vérification (date de référence) s'affiche sous `Last checked:`.
 
-## Unfollowed List
+### Désabonnements
 
-Une liste des utilisateurs qui se sont désabonnés de votre chaîne depuis la date `Last checked` (Dernière vérification) est affichée.
+Affiche les utilisateurs qui se sont désabonnés de votre chaîne depuis la dernière date de vérification.  
+La date de la dernière vérification (date de référence) s'affiche sous `Last checked:`.
 
-## Mise à jour différentielle
+## Mise à jour de la date de vérification
 
-En appuyant sur le bouton `CHECK DONE`, la date de `Last checked` sera mise à jour. Cela affecte la `New followed List` et la `Unfollowed List`.
+Cliquez sur le bouton `CHECK DONE` pour mettre à jour la date `Last checked` (date de référence).  
+**Ne cliquez sur ce bouton que si vous souhaitez mettre à jour la date de référence.**
 
-## Rafraîchissement des listes
+## Obtenir les dernières informations
 
-Appuyez sur le bouton `REFRESH LISTS` (RAFRAÎCHIR LES LISTES) pour récupérer à nouveau les abonnés et mettre à jour les listes.
-Utilisez cette fonctionnalité lors d'une diffusion en direct ou chaque fois que vous souhaitez vérifier les transitions des abonnés en temps réel.
-En raison des limitations de l'API, il y aura quelques minutes de délai avant que vous puissiez appuyer à nouveau sur le bouton.
+Cliquez sur le bouton `REFRESH LISTS` pour mettre à jour chaque liste avec les dernières informations.  
+Utilisez cette fonctionnalité lorsque vous avez besoin de mises à jour en temps réel, par exemple pendant une diffusion.
 
-## Filtrage des utilisateurs
+## Recherche d'utilisateurs
 
-Vous pouvez effectuer un filtrage et une recherche d'utilisateurs à partir de la boîte de recherche étiquetée `Search...` (Recherche...).
-Tous les textes des colonnes, comme la date à laquelle l'utilisateur a suivi la chaîne et le nom affiché, sont recherchables.
+Vous pouvez filtrer ou rechercher des utilisateurs via la barre de recherche indiquée par `Search...`.  
+Vous pouvez rechercher par date d'abonnement, nom d'utilisateur ou tout autre détail textuel.
+
+## Questions fréquentes (FAQ)
+
+### Q. Puis-je gérer plusieurs chaînes ?
+A. Une seule chaîne par navigateur est prise en charge. Pour vérifier d'autres chaînes, veuillez utiliser un autre navigateur.  
+Des fonctionnalités supplémentaires pourront être envisagées selon les demandes des utilisateurs via [Contributions](../fr/contribute/).
+
+### Q. Que faire si le chargement est lent ?
+A. La récupération des abonnés peut être longue si vous avez de nombreux abonnés. Veuillez patienter sans fermer votre navigateur.

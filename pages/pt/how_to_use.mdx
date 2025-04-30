@@ -1,40 +1,48 @@
 ---
-title: Como Usar o Twitch Verificador de Seguidores - Verificando Novos Seguidores e Desseguimentos
-description: Esta página explica como usar o Twitch Verificador de Seguidores.
+title: Como usar o Twitch Follower Checker - Verificar novos seguidores e unfollows
+description: Página explicando como usar o Twitch Follower Checker.
 ---
-
-import Link from "next/link";
-
-Você pode acessar o Twitch Verificador de Seguidores <Link class={"\_text-primary-600 \_underline \_decoration-from-font [text-underline-position:from-font]"}href="/" target="\_blank" rel="noopener noreferrer">aqui</Link>!
 
 ## Autenticação Twitch
 
-Na sua primeira visita, clique no botão `Authenticate with Twitch` para realizar a autenticação Twitch.
-A lista exibida será baseada no usuário autenticado.
+- Na primeira vez que acessar, clique no botão `Authenticate with Twitch` para realizar a autenticação no Twitch.  
+- As listas exibidas referem-se ao canal do usuário autenticado.
 
-## Follower List
+## Verificando Seguidores
+### Lista de Seguidores
 
-É exibida uma lista de usuários que atualmente estão seguindo seu canal.
+Exibe uma lista completa de todos os usuários que seguem atualmente o seu canal.
 
-## New followed List
+### Novos Seguidores
 
-É exibida uma lista de usuários que começaram a seguir seu canal desde a data do `Last checked`.
+Exibe uma lista dos usuários que começaram a seguir o seu canal após a última data de verificação.  
+A última data de verificação (data de referência) é exibida como `Last checked:` na tela.
 
-## Unfollowed List
+### Lista de Unfollows
 
-É exibida uma lista de usuários que deixaram de seguir seu canal desde a data do `Last checked`.
+Exibe uma lista dos usuários que deixaram de seguir o seu canal desde a última data de verificação.  
+A última data de verificação (data de referência) é exibida como `Last checked:` na tela.
 
-## Atualização Diferencial
+## Atualizar Data de Verificação
 
-Ao pressionar o botão `CHECK DONE`, a data de `Last checked` será atualizada. Isso afeta a `New followed List` e a `Unfollowed List`.
+Clique no botão `CHECK DONE` para atualizar a data de referência `Last checked`.  
+**Clique apenas quando quiser atualizar a data de referência.**
 
-## Atualizando as Listas
+## Obter Informações Atualizadas
 
-Pressione o botão `REFRESH LISTS` para recuperar os seguidores novamente e atualizar as listas.
-Use esse recurso durante uma transmissão ao vivo ou sempre que quiser verificar as transições de seguidores em tempo real.
-Devido às limitações da API, haverá um atraso de alguns minutos antes que você possa pressionar o botão novamente.
+Clique no botão `REFRESH LISTS` para atualizar cada lista com as informações mais recentes.  
+Use esta função durante transmissões ou quando desejar verificar novos seguidores em tempo real.
 
-## Filtragem de Usuários
+## Busca de Usuários
 
-Você pode realizar a filtragem e busca de usuários a partir da caixa de pesquisa rotulada como `Search...`.
-Todo o texto das colunas, como a data em que o usuário seguiu o canal e o nome de exibição, são pesquisáveis.
+Use a barra de busca marcada como `Search...` para filtrar ou pesquisar usuários.  
+Você pode pesquisar por datas de quando o usuário seguiu, nome de usuário ou outros detalhes.
+
+## Perguntas Frequentes (FAQ)
+
+### Q. Posso gerenciar múltiplos canais?
+A. Apenas um canal por navegador é suportado. Para verificar outros canais, utilize outro navegador.  
+Caso haja muita demanda através de [Contribuições](../pt/contribute/), poderá ser considerada a adição dessa funcionalidade.
+
+### Q. O que fazer quando o carregamento estiver lento?
+A. A obtenção de seguidores pode levar mais tempo caso você tenha muitos seguidores. Aguarde sem fechar o navegador.

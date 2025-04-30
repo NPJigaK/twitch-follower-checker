@@ -1,40 +1,48 @@
 ---
-title: How to Use Twitch Follower Checker - Checking New Follows and Unfollows
-description: This page explains how to use the Twitch Follower Checker.
+title: How to use Twitch Follower Checker - Checking New Follows and Unfollows
+description: Instructions on how to use Twitch Follower Checker.
 ---
-
-import Link from "next/link";
-
-You can access the Twitch Follower Checker <Link class={"\_text-primary-600 \_underline \_decoration-from-font [text-underline-position:from-font]"}href="/" target="\_blank" rel="noopener noreferrer">here</Link>!
 
 ## Twitch Authentication
 
-Upon your first visit, click the `Authenticate with Twitch` button to perform Twitch authentication.  
-The list displayed will be based on the authenticated user.
+- On your first visit, click the `Authenticate with Twitch` button to perform Twitch authentication.  
+- The displayed lists will reflect the followers of the authenticated user's channel.
 
-## Follower List
+## Checking Followers
+### Follower List
 
-A list of users currently following your channel is displayed.
+Displays a complete list of users currently following your channel.
 
-## New followed List
+### New Followed List
 
-A list of users who have started following your channel since the `Last checked` date is displayed.
+Displays users who started following your channel after the last check date.  
+The previous check date (reference date) is shown as `Last checked:` on the screen.
 
-## Unfollowed List
+### Unfollowed List
 
-A list of users who have unfollowed your channel since the `Last checked` date is displayed.
+Displays users who have unfollowed your channel since the last check date.  
+The previous check date (reference date) is shown as `Last checked:` on the screen.
 
-## Differential Update
+## Updating the Check Date
 
-By pressing the `CHECK DONE` button, the date of `Last checked` will be updated. This affects the `New followed List` and `Unfollowed List`.
+Clicking the `CHECK DONE` button updates the `Last checked` date (reference date).  
+**Only click this button when you want to update the reference date.**
 
-## Refreshing the Lists
+## Fetching Latest Information
 
-Press the `REFRESH LISTS` button to retrieve the followers again and update the lists.  
-Use this feature during a live stream or whenever you want to check the follower transitions in real time.  
-Due to API limitations, there will be a few minutes delay before you can press the button again.
+Click the `REFRESH LISTS` button to update each list with the latest information.  
+Use this feature when you need real-time updates, such as checking new followers during a stream.
 
-## User Filtering
+## User Search
 
-You can perform user filtering and searching from the search box labeled `Search...`.  
-All columns text such as the date when the user followed the channel and the display name are searchable.
+You can filter or search users using the search bar labeled `Search...`.  
+You can search by date followed, username, or any other textual detail.
+
+## Frequently Asked Questions (FAQ)
+
+### Q. Can I manage multiple channels?
+A. Only one channel per browser is supported. To check other channels, please use another browser.  
+Additional functionality may be considered based on user requests made via [Contributions](../en/contribute/).
+
+### Q. What should I do if loading is slow?
+A. Fetching followers may take longer if you have many followers. Please wait without closing your browser.

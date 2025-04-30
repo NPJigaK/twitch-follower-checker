@@ -1,6 +1,6 @@
 const _meta = {
   index: {
-    title: "введение",
+    title: "Введение",
   },
   how_to_use: {
     title: "Как использовать",

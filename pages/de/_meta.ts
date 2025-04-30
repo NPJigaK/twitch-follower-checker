@@ -3,10 +3,10 @@ const _meta = {
     title: "Einleitung",
   },
   how_to_use: {
-    title: "Anleitung",
+    title: "Verwendung",
   },
   contribute: {
-    title: "Mitwirken",
+    title: "Beitragen",
   },
 };
 

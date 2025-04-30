@@ -1,40 +1,48 @@
 ---
-title: Anleitung zum Twitch Follower Prüfer - Überprüfung neuer Follower und Entfolgungen
-description: Auf dieser Seite wird erklärt, wie der Twitch Follower Prüfer verwendet wird.
+title: So verwenden Sie den Twitch Follower Checker – Neue Follows und Unfollows prüfen
+description: Anleitung zur Nutzung des Twitch Follower Checkers.
 ---
-
-import Link from "next/link";
-
-Der Twitch Follower Prüfer kann <Link class={"\_text-primary-600 \_underline \_decoration-from-font [text-underline-position:from-font]"}href="/" target="\_blank" rel="noopener noreferrer">hier</Link> genutzt werden!
 
 ## Twitch-Authentifizierung
 
-Beim ersten Zugriff klicken Sie bitte auf die Schaltfläche `Authenticate with Twitch`, um die Twitch-Authentifizierung durchzuführen.  
-Die angezeigte Liste bezieht sich auf den authentifizierten Benutzer.
+- Klicken Sie bei Ihrem ersten Besuch auf die Schaltfläche `Authenticate with Twitch`, um die Twitch-Authentifizierung durchzuführen.  
+- Die angezeigten Listen beziehen sich auf den Kanal des authentifizierten Benutzers.
 
-## Follower List
+## Follower prüfen
+### Follower-Liste
 
-Es wird eine Liste der Benutzer angezeigt, die derzeit Ihren Kanal abonniert haben.
+Zeigt eine vollständige Liste der Benutzer, die Ihrem Kanal aktuell folgen.
 
-## New followed List
+### Neue Follower-Liste
 
-Es wird eine Liste der Benutzer angezeigt, die Ihren Kanal seit dem Datum des letzten Checks `Last checked` neu abonniert haben.
+Zeigt Benutzer, die Ihrem Kanal seit dem letzten Prüfdatum neu gefolgt sind.  
+Das vorherige Prüfdatum (Referenzdatum) wird auf dem Bildschirm als `Last checked:` angezeigt.
 
-## Unfollowed List
+### Unfollowed-Liste
 
-Es wird eine Liste der Benutzer angezeigt, die Ihren Kanal seit dem Datum des letzten Checks `Last checked` nicht mehr abonniert haben.
+Zeigt Benutzer, die Ihrem Kanal seit dem letzten Prüfdatum nicht mehr folgen.  
+Das vorherige Prüfdatum (Referenzdatum) wird auf dem Bildschirm als `Last checked:` angezeigt.
 
-## Differenzaktualisierung
+## Prüfdatum aktualisieren
 
-Durch Drücken der Schaltfläche `CHECK DONE` wird das Datum von `Last checked` aktualisiert. Dies betrifft die `New followed List` und die `Unfollowed List`.
+Durch Klicken auf die Schaltfläche `CHECK DONE` aktualisieren Sie das Datum von `Last checked` (Referenzdatum).  
+**Klicken Sie diese Schaltfläche nur, wenn Sie das Referenzdatum aktualisieren möchten.**
 
-## Listen aktualisieren
+## Neueste Informationen abrufen
 
-Wenn Sie auf die Schaltfläche `REFRESH LISTS` klicken, werden die abonnierenden Benutzer erneut abgerufen und die Listen aktualisiert.  
-Dies ist nützlich, wenn Sie die Entwicklung der Follower in Echtzeit während einer Live-Übertragung verfolgen möchten.  
-Aufgrund der API-Beschränkungen dauert es einige Minuten, bis die Schaltfläche erneut gedrückt werden kann.
+Klicken Sie auf die Schaltfläche `REFRESH LISTS`, um jede Liste mit den neuesten Informationen zu aktualisieren.  
+Nutzen Sie diese Funktion, wenn Sie in Echtzeit aktualisieren möchten, beispielsweise um neue Follower während eines Streams zu überprüfen.
 
-## Benutzerfilterung
+## Benutzersuche
 
-Sie können Benutzer durch die mit `Search...` beschriftete Suchbox filtern und suchen.  
-Das Datum des Kanalabonnements und der Anzeigename sind unter anderem alle Spaltenzeichen, die berücksichtigt werden.
+Benutzer können über das Suchfeld `Search...` gefiltert oder gesucht werden.  
+Es kann nach dem Datum des Follows, dem Benutzernamen oder jedem anderen Textdetail gesucht werden.
+
+## Häufig gestellte Fragen (FAQ)
+
+### F. Kann ich mehrere Kanäle verwalten?
+A. Pro Browser wird nur ein Kanal unterstützt. Bitte verwenden Sie einen anderen Browser, um andere Kanäle zu prüfen.  
+Zusätzliche Funktionen könnten basierend auf Nutzeranforderungen über [Beiträge](../de/contribute/) berücksichtigt werden.
+
+### F. Was kann ich tun, wenn das Laden langsam ist?
+A. Das Abrufen der Follower kann länger dauern, wenn Sie viele Follower haben. Bitte schließen Sie Ihren Browser nicht und warten Sie ab.
