@@ -8,8 +8,10 @@ export function navigateToUserLocalePage() {
   );
   const docLocale = localEntry ? localEntry[0] : "en";
 
-  window.open(
-    `https://twitch-follower-checker.devkey.jp/${docLocale}/how_to_use/`,
-    "_blank"
-  );
+  const docsUrl =
+    docLocale === "ja"
+      ? "https://blog.devkey.jp/posts/twitch-follower-checker/"
+      : `https://twitch-follower-checker.devkey.jp/${docLocale}/how_to_use/`;
+
+  window.open(docsUrl, "_blank", "noopener,noreferrer");
 }

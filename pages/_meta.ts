@@ -77,7 +77,8 @@ const _meta = {
       },
       ja: {
         title: "日本語",
-        href: "/ja",
+        href: "https://blog.devkey.jp/posts/twitch-follower-checker/",
+        newWindow: true,
       },
       ko: {
         title: "한국어",
