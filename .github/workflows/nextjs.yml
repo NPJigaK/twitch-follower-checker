@@ -1,71 +1,160 @@
-# Sample workflow for building and deploying a Next.js site to GitHub Pages
-#
-# To get started with Next.js see: https://nextjs.org/docs/getting-started
-#
+# Build and deploy the static Next.js site to GitHub Pages.
 name: Deploy Next.js site to Pages
 
 on:
-  # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
-
-  # Allows you to run this workflow manually from the Actions tab
+  pull_request:
+    branches: ["main"]
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+permissions: {}
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 concurrency:
-  group: "pages"
+  group: pages-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  # Build job
-  build:
+  quality:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: "20"
-          cache: yarn
-      - name: Restore cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            .next/cache
-          # Generate a new cache whenever packages or source files change.
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/yarn.lock') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
-          # If source files changed but packages didn't, rebuild from a prior cache.
-          restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('**/yarn.lock') }}-
+          node-version-file: .node-version
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Verify Yarn version
+        shell: bash
+        run: test "$(yarn --version)" = "4.12.0"
+
       - name: Install dependencies
-        run: yarn install
-      - name: Build and Static HTML export with Next.js
+        run: yarn install --immutable
+
+      - name: Verify dependency resolutions
+        run: yarn verify:dependencies
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Typecheck
+        run: yarn typecheck
+
+      - name: Test
+        run: yarn test
+
+  build:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+
+      - name: Restore Next.js cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('yarn.lock') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx', '**/*.mdx', '**/*.css', 'next.config.mjs', 'tailwind.config.ts', 'theme.config.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('yarn.lock') }}-
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Verify Yarn version
+        shell: bash
+        run: test "$(yarn --version)" = "4.12.0"
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build static site and sitemap
         run: yarn build
-      - name: Create IndexNow API key file
+
+      - name: Verify static artifact
+        run: yarn verify:artifact
+
+      - name: Preserve first build for reproducibility check
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: mv out "$RUNNER_TEMP/first-static-export"
+
+      - name: Rebuild static site and sitemap
+        if: github.event_name == 'pull_request'
+        run: yarn build
+
+      - name: Verify rebuilt static artifact
+        if: github.event_name == 'pull_request'
         run: |
-          echo "${{ secrets.INDEXNOW_KEY }}" > ./out/${{ secrets.INDEXNOW_KEY }}.txt
+          yarn verify:artifact
+          yarn compare:artifacts "$RUNNER_TEMP/first-static-export" out
+
+      - name: Create IndexNow API key file
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        shell: bash
+        env:
+          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+        run: |
+          set -euo pipefail
+          case "$INDEXNOW_KEY" in
+            ""|*[!A-Za-z0-9-]*)
+              echo "::error::INDEXNOW_KEY is missing or contains unsupported characters"
+              exit 1
+              ;;
+          esac
+          printf '%s' "$INDEXNOW_KEY" > "out/${INDEXNOW_KEY}.txt"
+
+          mapfile -d '' txt_files < <(
+            find out -maxdepth 1 -type f -name '*.txt' ! -name robots.txt -print0
+          )
+          if [ "${#txt_files[@]}" -ne 1 ] || \
+            [ "${txt_files[0]}" != "out/${INDEXNOW_KEY}.txt" ] || \
+            [ ! -s "${txt_files[0]}" ]
+          then
+            echo "::error::Unexpected IndexNow key artifact set"
+            exit 1
+          fi
+
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: ./out
 
-  # Deployment job
   deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    needs: build
+    timeout-minutes: 10
+    needs: [quality, build]
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
