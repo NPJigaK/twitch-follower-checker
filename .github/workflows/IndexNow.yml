@@ -1,19 +1,85 @@
-name: "IndexNow"
+name: IndexNow
+
 on:
   workflow_run:
     workflows: ["Deploy Next.js site to Pages"]
-    types:
-      - completed
+    types: [completed]
+    branches: [main]
+
+permissions: {}
 
 jobs:
   check-and-submit:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    permissions: {}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - name: indexnow-action
-        uses: bojieyang/indexnow-action@v1
+      - name: Wait for production smoke check
+        shell: bash
+        run: |
+          set -euo pipefail
+          site_url="https://twitch-follower-checker.devkey.jp"
+          sitemap_file="$(mktemp)"
+          trap 'rm -f "$sitemap_file"' EXIT
+
+          for attempt in $(seq 1 12); do
+            all_ok=true
+            for path in \
+              / \
+              /de/ \
+              /en/ \
+              /es/ \
+              /fr/ \
+              /ja/ \
+              /ko/ \
+              /pt/ \
+              /ru/ \
+              /sitemap.xml \
+              /robots.txt
+            do
+              if ! curl \
+                --fail \
+                --silent \
+                --show-error \
+                --location \
+                --max-time 10 \
+                --output /dev/null \
+                "${site_url}${path}"
+              then
+                all_ok=false
+                break
+              fi
+            done
+
+            if [ "$all_ok" = true ] && curl \
+              --fail \
+              --silent \
+              --show-error \
+              --location \
+              --max-time 10 \
+              --output "$sitemap_file" \
+              "${site_url}/sitemap.xml" && \
+              grep -Fq "${site_url}/sitemap-0.xml" "$sitemap_file"
+            then
+              exit 0
+            fi
+
+            sleep 10
+          done
+
+          echo "::error::Production smoke check failed"
+          exit 1
+
+      - name: Submit updated URLs to IndexNow
+        uses: bojieyang/indexnow-action@38ddfbd93579a8a44c0dee662121bf9d51098f71 # v3.0.0
         with:
-          endpoint: "api.indexnow.org"
-          sitemap-location: "https://twitch-follower-checker.devkey.jp/sitemap.xml"
+          endpoint: api.indexnow.org
+          sitemap-location: https://twitch-follower-checker.devkey.jp/sitemap.xml
           since: 1
-          since-unit: "day"
+          since-unit: day
+          failure-strategy: error
           key: ${{ secrets.INDEXNOW_KEY }}
