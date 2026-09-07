@@ -29,8 +29,10 @@ function fixture() {
       "@types/node": "24.13.3",
       "@types/react": "18.2.42",
       "@types/react-dom": "18.2.19",
+      autoprefixer: "10.5.5",
       "eslint-config-next": "14.0.3",
       postcss: "8.5.28",
+      tailwindcss: "3.4.19",
     },
   };
   const policy = {
@@ -55,22 +57,26 @@ function fixture() {
       "@mui/material": "5.18.0",
       "ag-grid-community": "31.3.4",
       "ag-grid-react": "31.3.4",
+      autoprefixer: "10.5.5",
       next: "15.0.0",
       nextra: "3.3.1",
       "nextra-theme-docs": "3.3.1",
       postcss: "8.5.28",
+      tailwindcss: "3.4.19",
     },
     singleResolutionPackages: [
       "@mui/icons-material",
       "@mui/material",
       "ag-grid-community",
       "ag-grid-react",
+      "autoprefixer",
       "next",
       "nextra",
       "nextra-theme-docs",
       "postcss",
       "react",
       "react-dom",
+      "tailwindcss",
     ],
     temporaryExceptions: [
       {
