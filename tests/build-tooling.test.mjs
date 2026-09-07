@@ -71,7 +71,7 @@ function compareExports(arguments_) {
   );
 }
 
-test("dependency verifier confirms the installed and locked PostCSS version", () => {
+test("dependency verifier confirms reviewed PostCSS and MUI React resolutions", () => {
   assert.doesNotThrow(() =>
     execFileSync(
       process.execPath,

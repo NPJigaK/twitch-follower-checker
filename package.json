@@ -19,8 +19,8 @@
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.1",
     "@material-tailwind/react": "2.1.9",
-    "@mui/icons-material": "5.15.9",
-    "@mui/material": "5.15.9",
+    "@mui/icons-material": "5.18.0",
+    "@mui/material": "5.18.0",
     "ag-grid-community": "31.3.4",
     "ag-grid-react": "31.3.4",
     "classnames": "2.3.2",
@@ -45,6 +45,8 @@
     "typescript": "5.9.3"
   },
   "resolutions": {
+    "@mui/material/react-is": "18.2.0",
+    "@mui/utils/react-is": "18.2.0",
     "postcss": "8.5.28"
   }
 }

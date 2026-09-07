@@ -15,6 +15,8 @@ function fixture() {
   const manifest = {
     packageManager: "yarn@4.12.0",
     dependencies: {
+      "@mui/icons-material": "5.18.0",
+      "@mui/material": "5.18.0",
       "ag-grid-community": "31.0.3",
       "ag-grid-react": "31.0.3",
       next: "14.1.0",
@@ -36,6 +38,7 @@ function fixture() {
     packageManager: "yarn@4.12.0",
     requireExactDirectVersions: true,
     sameVersionGroups: [
+      ["@mui/icons-material", "@mui/material"],
       ["ag-grid-community", "ag-grid-react"],
       ["nextra", "nextra-theme-docs"],
       ["react", "react-dom"],
@@ -48,6 +51,8 @@ function fixture() {
     ],
     nodeTypesPackage: "@types/node",
     minimumVersions: {
+      "@mui/icons-material": "5.18.0",
+      "@mui/material": "5.18.0",
       "ag-grid-community": "31.3.4",
       "ag-grid-react": "31.3.4",
       next: "15.0.0",
@@ -56,6 +61,8 @@ function fixture() {
       postcss: "8.5.28",
     },
     singleResolutionPackages: [
+      "@mui/icons-material",
+      "@mui/material",
       "ag-grid-community",
       "ag-grid-react",
       "next",
@@ -169,6 +176,15 @@ test("rejects mismatched coupled package versions", () => {
     installedVersions.set("ag-grid-react", "31.0.4");
   });
   assert(failures.some((failure) => failure.includes("same version")));
+});
+
+test("rejects mismatched Material UI package versions", () => {
+  const failures = failuresFor(({ manifest, installedVersions, lockfileVersions }) => {
+    manifest.dependencies["@mui/icons-material"] = "5.17.0";
+    installedVersions.set("@mui/icons-material", "5.17.0");
+    lockfileVersions.set("@mui/icons-material", new Set(["5.17.0"]));
+  });
+  assert(failures.some((failure) => failure.includes("must use the same version")));
 });
 
 test("rejects an undeclared prerelease dependency", () => {
