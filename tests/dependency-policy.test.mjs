@@ -15,6 +15,7 @@ function fixture() {
   const manifest = {
     packageManager: "yarn@4.12.0",
     dependencies: {
+      "@material-tailwind/react": "2.1.10",
       "@mui/icons-material": "5.18.0",
       "@mui/material": "5.18.0",
       "ag-grid-community": "31.0.3",
@@ -53,6 +54,7 @@ function fixture() {
     ],
     nodeTypesPackage: "@types/node",
     minimumVersions: {
+      "@material-tailwind/react": "2.1.10",
       "@mui/icons-material": "5.18.0",
       "@mui/material": "5.18.0",
       "ag-grid-community": "31.3.4",
@@ -65,6 +67,7 @@ function fixture() {
       tailwindcss: "3.4.19",
     },
     singleResolutionPackages: [
+      "@material-tailwind/react",
       "@mui/icons-material",
       "@mui/material",
       "ag-grid-community",
