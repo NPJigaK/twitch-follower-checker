@@ -8,9 +8,9 @@
     "build": "next build && next-sitemap",
     "compare:artifacts": "node scripts/compare-static-exports.mjs",
     "verify:artifact": "node scripts/verify-static-export.mjs",
-    "verify:dependencies": "node scripts/verify-dependency-resolutions.mjs",
+    "verify:dependencies": "node scripts/verify-dependency-policy.mjs && node scripts/verify-dependency-resolutions.mjs",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint . --ext .js --ext .mjs --ext .ts --ext .tsx --ignore-pattern .next --ignore-pattern out --ignore-pattern coverage",
     "test": "node --test",
     "typecheck": "tsc --noEmit"
   },
@@ -22,9 +22,9 @@
     "@mui/material": "5.15.9",
     "ag-grid-community": "31.0.3",
     "ag-grid-react": "31.0.3",
-    "classnames": "^2.3.2",
+    "classnames": "2.3.2",
     "next": "14.1.0",
-    "next-sitemap": "^4.2.3",
+    "next-sitemap": "4.2.3",
     "nextra": "3.0.0-alpha.12",
     "nextra-theme-docs": "3.0.0-alpha.8",
     "react": "18.2.0",
@@ -32,7 +32,7 @@
     "react-social-login-buttons": "3.9.1"
   },
   "devDependencies": {
-    "@types/node": "20.11.17",
+    "@types/node": "24.13.3",
     "@types/react": "18.2.42",
     "@types/react-dom": "18.2.19",
     "autoprefixer": "10.4.16",
