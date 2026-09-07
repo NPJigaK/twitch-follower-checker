@@ -457,9 +457,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@material-tailwind/react@npm:2.1.9":
-  version: 2.1.9
-  resolution: "@material-tailwind/react@npm:2.1.9"
+"@material-tailwind/react@npm:2.1.10":
+  version: 2.1.10
+  resolution: "@material-tailwind/react@npm:2.1.10"
   dependencies:
     "@floating-ui/react": "npm:0.19.0"
     classnames: "npm:2.3.2"
@@ -473,7 +473,7 @@ __metadata:
   peerDependencies:
     react: ^16 || ^17 || ^18
     react-dom: ^16 || ^17 || ^18
-  checksum: 10c0/0cb74e2b497f3e5ef64133139afda505e0c5892577b64dcbc4e33579aafa1988f149e675e0014c57505f17ea8ab66670981a0941bde6f0c72a2afb3287fbb062
+  checksum: 10c0/1ff89ea29a830789490bf1f523054eae17b3ed3043b604601e24bf07bac35810898a66b90ddcfb8492728de0462c79dc07a910ee15ff23f3dc8f12528269a232
   languageName: node
   linkType: hard
 
@@ -7947,7 +7947,7 @@ __metadata:
   dependencies:
     "@emotion/react": "npm:11.14.0"
     "@emotion/styled": "npm:11.14.1"
-    "@material-tailwind/react": "npm:2.1.9"
+    "@material-tailwind/react": "npm:2.1.10"
     "@mui/icons-material": "npm:5.18.0"
     "@mui/material": "npm:5.18.0"
     "@playwright/test": "npm:1.63.0"
