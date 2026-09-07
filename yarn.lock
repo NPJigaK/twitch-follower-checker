@@ -1226,12 +1226,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:20.11.17":
-  version: 20.11.17
-  resolution: "@types/node@npm:20.11.17"
+"@types/node@npm:24.13.3":
+  version: 24.13.3
+  resolution: "@types/node@npm:24.13.3"
   dependencies:
-    undici-types: "npm:~5.26.4"
-  checksum: 10c0/1f30dae80b416cbf38f133a619ffb0e9fb9e7bc58f82d900bf73816ae5781740c4640892bf5971dd9c12570d5d05241646be3e7540bb4e059322ec6af4e51e15
+    undici-types: "npm:~7.18.0"
+  checksum: 10c0/a5bc08f49b9581dcdca90e02cd77197a3c799840807664942e5cd5161a553d4d2ae8064f7e3294410d748d7d098b5c1848be7fa50c06f29c4193ab16be4e59eb
   languageName: node
   linkType: hard
 
@@ -1944,7 +1944,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"classnames@npm:2.3.2, classnames@npm:^2.3.2":
+"classnames@npm:2.3.2":
   version: 2.3.2
   resolution: "classnames@npm:2.3.2"
   checksum: 10c0/cd50ead57b4f97436aaa9f9885c6926323efc7c2bea8e3d4eb10e4e972aa6a1cfca1c7a0e06f8a199ca7498d4339e30bb6002e589e61c9f21248cbf3e8b0b18d
@@ -6039,7 +6039,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"next-sitemap@npm:^4.2.3":
+"next-sitemap@npm:4.2.3":
   version: 4.2.3
   resolution: "next-sitemap@npm:4.2.3"
   dependencies:
@@ -7872,17 +7872,17 @@ __metadata:
     "@material-tailwind/react": "npm:2.1.9"
     "@mui/icons-material": "npm:5.15.9"
     "@mui/material": "npm:5.15.9"
-    "@types/node": "npm:20.11.17"
+    "@types/node": "npm:24.13.3"
     "@types/react": "npm:18.2.42"
     "@types/react-dom": "npm:18.2.19"
     ag-grid-community: "npm:31.0.3"
     ag-grid-react: "npm:31.0.3"
     autoprefixer: "npm:10.4.16"
-    classnames: "npm:^2.3.2"
+    classnames: "npm:2.3.2"
     eslint: "npm:8.56.0"
     eslint-config-next: "npm:14.0.3"
     next: "npm:14.1.0"
-    next-sitemap: "npm:^4.2.3"
+    next-sitemap: "npm:4.2.3"
     nextra: "npm:3.0.0-alpha.12"
     nextra-theme-docs: "npm:3.0.0-alpha.8"
     postcss: "npm:8.5.28"
@@ -7996,10 +7996,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici-types@npm:~5.26.4":
-  version: 5.26.5
-  resolution: "undici-types@npm:5.26.5"
-  checksum: 10c0/bb673d7876c2d411b6eb6c560e0c571eef4a01c1c19925175d16e3a30c4c428181fb8d7ae802a261f283e4166a0ac435e2f505743aa9e45d893f9a3df017b501
+"undici-types@npm:~7.18.0":
+  version: 7.18.2
+  resolution: "undici-types@npm:7.18.2"
+  checksum: 10c0/85a79189113a238959d7a647368e4f7c5559c3a404ebdb8fc4488145ce9426fcd82252a844a302798dfc0e37e6fb178ff481ed03bc4caf634c5757d9ef43521d
   languageName: node
   linkType: hard
 

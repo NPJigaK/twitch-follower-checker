@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "packageManager": "yarn@4.12.0",
+  "requireExactDirectVersions": true,
+  "sameVersionGroups": [
+    ["ag-grid-community", "ag-grid-react"],
+    ["nextra", "nextra-theme-docs"],
+    ["react", "react-dom"]
+  ],
+  "sameMajorGroups": [
+    ["next", "eslint-config-next"],
+    ["nextra", "nextra-theme-docs"],
+    ["react", "@types/react"],
+    ["react-dom", "@types/react-dom"]
+  ],
+  "nodeTypesPackage": "@types/node",
+  "minimumVersions": {
+    "ag-grid-community": "31.3.4",
+    "ag-grid-react": "31.3.4",
+    "next": "15.0.0",
+    "nextra": "3.3.1",
+    "nextra-theme-docs": "3.3.1",
+    "postcss": "8.5.28"
+  },
+  "singleResolutionPackages": [
+    "ag-grid-community",
+    "ag-grid-react",
+    "next",
+    "nextra",
+    "nextra-theme-docs",
+    "postcss",
+    "react",
+    "react-dom"
+  ],
+  "temporaryExceptions": [
+    {
+      "rule": "minimumVersion",
+      "package": "ag-grid-community",
+      "version": "31.0.3",
+      "issue": "https://github.com/NPJigaK/twitch-follower-checker/issues/226",
+      "expiresOn": "2026-10-07"
+    },
+    {
+      "rule": "minimumVersion",
+      "package": "ag-grid-react",
+      "version": "31.0.3",
+      "issue": "https://github.com/NPJigaK/twitch-follower-checker/issues/226",
+      "expiresOn": "2026-10-07"
+    },
+    {
+      "rule": "minimumVersion",
+      "package": "next",
+      "version": "14.1.0",
+      "issue": "https://github.com/NPJigaK/twitch-follower-checker/issues/227",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "rule": "minimumVersion",
+      "package": "nextra",
+      "version": "3.0.0-alpha.12",
+      "issue": "https://github.com/NPJigaK/twitch-follower-checker/issues/227",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "rule": "minimumVersion",
+      "package": "nextra-theme-docs",
+      "version": "3.0.0-alpha.8",
+      "issue": "https://github.com/NPJigaK/twitch-follower-checker/issues/227",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "rule": "prerelease",
+      "package": "nextra",
+      "version": "3.0.0-alpha.12",
+      "issue": "https://github.com/NPJigaK/twitch-follower-checker/issues/227",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "rule": "prerelease",
+      "package": "nextra-theme-docs",
+      "version": "3.0.0-alpha.8",
+      "issue": "https://github.com/NPJigaK/twitch-follower-checker/issues/227",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "rule": "sameVersion",
+      "package": "nextra",
+      "version": "3.0.0-alpha.12",
+      "issue": "https://github.com/NPJigaK/twitch-follower-checker/issues/227",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "rule": "sameVersion",
+      "package": "nextra-theme-docs",
+      "version": "3.0.0-alpha.8",
+      "issue": "https://github.com/NPJigaK/twitch-follower-checker/issues/227",
+      "expiresOn": "2026-12-31"
+    }
+  ]
+}
