@@ -1,152 +1,326 @@
-import { useEffect, useState, useCallback } from "react";
-import { clientId, accessTokenKey, storedAllFollowersKey } from "./constants";
-import { debugLogger } from "./debugLogger";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  lastCheckedDateKey,
+  storedAllFollowersKey,
+  clientId,
+} from "./constants";
+import {
+  commitFollowerSnapshot,
+  diffFollowers,
+  readStoredSnapshot,
+  type SnapshotCommitError,
+  type SnapshotReadError,
+} from "./followerSnapshot";
+import {
+  runFollowerRefreshWorkflow,
+  type CompleteFollowerSnapshot,
+} from "./followerRefreshWorkflow";
+import { RefreshCoordinator } from "./refreshCoordinator";
+import {
+  fetchAllFollowers,
+  getAuthenticatedUser,
+  TwitchRequestError,
+  type TwitchRequestErrorCode,
+} from "./twitchApi";
 
-export function useIsTwitchTokenAvailable() {
-  const [isTwitchTokenAvailable, setIsTwitchTokenAvailable] = useState<
-    null | boolean
-  >(null);
+export type FollowerRefreshProblemCode =
+  | TwitchRequestErrorCode
+  | "storage_unavailable"
+  | "stored_snapshot_invalid"
+  | "storage_write_failed"
+  | "storage_rollback_failed"
+  | "unexpected";
 
-  debugLogger("useIsTwitchTokenAvailable");
-  useEffect(() => {
-    const checkAndStoreAccessToken = async () => {
-      let accessTokenFromHash = null;
-      debugLogger("checkAndStoreAccessToken");
-      if (typeof window !== "undefined") {
-        const hashParams = new URLSearchParams(
-          window.location.hash.substring(1)
-        );
-        accessTokenFromHash = hashParams.get("access_token");
-      }
+export type FollowerRefreshProblem = Readonly<{
+  code: FollowerRefreshProblemCode;
+  message: string;
+  retryAt: number | null;
+  requiresReauthentication: boolean;
+}>;
 
-      if (accessTokenFromHash) {
-        // localstorageにaccess_tokenを保存
-        localStorage.setItem(accessTokenKey, accessTokenFromHash);
-        // URLからハッシュ部分（アクセストークン）を削除する
-        window.location.hash = "";
-      }
+const REFRESH_MESSAGES: Record<FollowerRefreshProblemCode, string> = {
+  auth_invalid:
+    "Your Twitch session is no longer valid. Please authenticate with Twitch again.",
+  permission_denied:
+    "Twitch did not allow follower access. Please authenticate again and approve the follower permission.",
+  bad_request:
+    "Twitch rejected the follower request. Your previous follower lists were kept.",
+  rate_limited:
+    "Twitch is temporarily rate limiting requests. Try again after the displayed wait time.",
+  server_error:
+    "Twitch is temporarily unavailable. Your previous follower lists were kept.",
+  network:
+    "Twitch could not be reached. Check your connection and try again.",
+  timeout:
+    "The Twitch request took too long. Your previous follower lists were kept.",
+  aborted: "The follower refresh was cancelled.",
+  invalid_json:
+    "Twitch returned an unexpected response. Your previous follower lists were kept.",
+  invalid_response:
+    "Twitch returned an unexpected response. Your previous follower lists were kept.",
+  non_authoritative_snapshot:
+    "Twitch returned incomplete follower data. Your previous baseline was not changed.",
+  pagination_loop:
+    "Twitch returned incomplete pagination data. Your previous baseline was not changed.",
+  storage_unavailable:
+    "Browser storage is unavailable. Your previous baseline was not changed.",
+  stored_snapshot_invalid:
+    "The stored follower baseline is invalid. Clear this site's stored data before trying again.",
+  storage_write_failed:
+    "The follower baseline could not be saved. The previous baseline and check date were kept.",
+  storage_rollback_failed:
+    "The follower baseline could not be saved, and browser storage could not confirm the previous value. Reload before making another baseline change.",
+  unexpected:
+    "The follower lists could not be refreshed. Your previous baseline was not changed.",
+};
 
-      // localstorageからaccess_tokenを取得
-      const accessToken = localStorage.getItem(accessTokenKey);
-      if (!accessToken) {
-        setIsTwitchTokenAvailable(false);
-        return;
-      }
+const problem = (
+  code: FollowerRefreshProblemCode,
+  options: {
+    retryAt?: number | null;
+    requiresReauthentication?: boolean;
+  } = {}
+): FollowerRefreshProblem => ({
+  code,
+  message: REFRESH_MESSAGES[code],
+  retryAt: options.retryAt ?? null,
+  requiresReauthentication: options.requiresReauthentication ?? false,
+});
 
-      // access_tokenがexpiredしていないかfetchで確認
-      const response = await fetch("https://id.twitch.tv/oauth2/validate", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
+const mapTwitchProblem = (cause: TwitchRequestError): FollowerRefreshProblem =>
+  problem(cause.code, {
+    retryAt:
+      cause.code === "rate_limited"
+        ? cause.rateLimitReset !== undefined
+          ? cause.rateLimitReset * 1000
+          : Date.now() + 60_000
+        : null,
+    requiresReauthentication:
+      cause.code === "auth_invalid" || cause.code === "permission_denied",
+  });
+
+const mapUnknownProblem = (cause: unknown): FollowerRefreshProblem =>
+  cause instanceof TwitchRequestError
+    ? mapTwitchProblem(cause)
+    : problem("unexpected");
+
+const mapReadProblem = (error: SnapshotReadError): FollowerRefreshProblem =>
+  error === "storage_unavailable"
+    ? problem("storage_unavailable")
+    : problem("stored_snapshot_invalid");
+
+const mapCommitProblem = (
+  error: SnapshotCommitError
+): FollowerRefreshProblem =>
+  error === "storage_unavailable"
+    ? problem("storage_unavailable")
+    : error === "rollback_failed"
+      ? problem("storage_rollback_failed")
+    : error === "invalid_snapshot" || error === "invalid_argument"
+      ? problem("stored_snapshot_invalid")
+      : problem("storage_write_failed");
+
+const browserStorage = (): Storage | null => {
+  try {
+    return window.localStorage;
+  } catch {
+    return null;
+  }
+};
+
+export type UseNowAllFollowersOptions = {
+  accessToken: string;
+  authenticatedUserId: string;
+  onAuthenticationInvalid: (
+    reason: "invalid_token" | "missing_scope"
+  ) => void;
+};
+
+export const useNowAllFollowers = ({
+  accessToken,
+  authenticatedUserId,
+  onAuthenticationInvalid,
+}: UseNowAllFollowersOptions) => {
+  const committedSnapshotRef = useRef<CompleteFollowerSnapshot | null>(null);
+
+  const coordinator = useMemo(
+    () =>
+      new RefreshCoordinator<CompleteFollowerSnapshot, FollowerRefreshProblem>(
+        async (signal) => {
+          const result = await runFollowerRefreshWorkflow<FollowerRefreshProblem>(
+            {
+              expectedBroadcasterId: authenticatedUserId,
+              getAuthenticatedUserId: async (requestSignal) => {
+                const user = await getAuthenticatedUser(
+                  accessToken,
+                  clientId,
+                  authenticatedUserId,
+                  { signal: requestSignal }
+                );
+                return user.id;
+              },
+              getAllFollowers: (broadcasterId, requestSignal) =>
+                fetchAllFollowers(
+                  accessToken,
+                  clientId,
+                  broadcasterId,
+                  { signal: requestSignal }
+                ),
+              readBaseline: (broadcasterId) => {
+                const storage = browserStorage();
+                if (storage === null) {
+                  return {
+                    ok: false,
+                    error: problem("storage_unavailable"),
+                  };
+                }
+                const stored = readStoredSnapshot({
+                  storage,
+                  baseKey: storedAllFollowersKey,
+                  legacyDateKey: lastCheckedDateKey,
+                  broadcasterId,
+                });
+                if (!stored.ok) {
+                  return { ok: false, error: mapReadProblem(stored.error) };
+                }
+                return {
+                  ok: true,
+                  baseline: stored.found
+                    ? {
+                        followers: stored.snapshot,
+                        lastCheckedAt: stored.checkedAt,
+                      }
+                    : null,
+                };
+              },
+              writeInitialBaseline: (
+                broadcasterId,
+                followers,
+                checkedAt
+              ) => {
+                const storage = browserStorage();
+                if (storage === null) {
+                  return {
+                    ok: false,
+                    error: problem("storage_unavailable"),
+                  };
+                }
+                const committed = commitFollowerSnapshot({
+                  storage,
+                  baseKey: storedAllFollowersKey,
+                  broadcasterId,
+                  followers,
+                  checkedAt,
+                });
+                return committed.ok
+                  ? { ok: true }
+                  : {
+                      ok: false,
+                      error: mapCommitProblem(committed.error),
+                    };
+              },
+              diffFollowers,
+              now: () => new Date().toISOString(),
+              mapError: mapUnknownProblem,
+              abortedError: () => problem("aborted"),
+            },
+            signal
+          );
+
+          if (result.ok && result.value.baselineInitialized) {
+            committedSnapshotRef.current = result.value;
+          }
+          return result;
         },
-      });
-      const data = await response.json();
-
-      if (response.status === 401 || data.expires_in < 3600) {
-        setIsTwitchTokenAvailable(false);
-      } else {
-        setIsTwitchTokenAvailable(true);
-      }
-    };
-
-    checkAndStoreAccessToken();
-  }, []);
-
-  return isTwitchTokenAvailable;
-}
-
-export const useNowAllFollowers = () => {
-  const [nowAllFollowers, setNowAllFollowers] = useState<any[] | null>(null);
-  const [newAllFollowers, setNewAllFollowers] = useState<any[] | null>(null);
-  const [oldAllFollowers, setOldAllFollowers] = useState<any[] | null>(null);
-  debugLogger("useNowAllFollowers");
-  const fetchFollowers = useCallback(
-    async (channelId: string, cursor = ""): Promise<any[]> => {
-      const url = `https://api.twitch.tv/helix/channels/followers?broadcaster_id=${channelId}&first=100&after=${cursor}`;
-
-      const response = await fetch(url, {
-        headers: {
-          "Client-ID": clientId,
-          Authorization: `Bearer ${localStorage.getItem(accessTokenKey)}`,
-        },
-      });
-
-      const data = await response.json();
-      const followers = data.data; // 取得したフォロワーの配列
-
-      if (data.pagination && data.pagination.cursor) {
-        // ページネーションがある場合、再帰的に次のページを取得
-        const nextCursor = data.pagination.cursor;
-        const nextFollowers = await fetchFollowers(channelId, nextCursor);
-        followers.push(...nextFollowers);
-      }
-      debugLogger("fetchFollowers");
-      return followers;
-    },
-    [] // 依存配列は空のまま
+        mapUnknownProblem
+      ),
+    [accessToken, authenticatedUserId]
   );
 
-  type User = { user_id: string; [key: string]: any };
-  const findDifference = useCallback((oldArray: User[], newArray: User[]) => {
-    const oldUserIds = oldArray.map((user) => user.user_id);
-    const newUserIds = newArray.map((user) => user.user_id);
-
-    const removedUsers = oldArray.filter(
-      (user) => !newUserIds.includes(user.user_id)
-    );
-    const addedUsers = newArray.filter(
-      (user) => !oldUserIds.includes(user.user_id)
-    );
-
-    return { removedUsers, addedUsers };
-  }, []);
-
-  const refresh = useCallback(async () => {
-    debugLogger("refresh");
-
-    const res = await fetch("https://api.twitch.tv/helix/users", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem(accessTokenKey)}`,
-        "Client-Id": clientId,
-      },
-    });
-    const resJson = await res.json();
-    const followers = await fetchFollowers(resJson.data[0].id);
-
-    if (!localStorage.getItem(storedAllFollowersKey)) {
-      // addedUsers の差分が全てのユーザーにならないように、初期値はfollowers
-      localStorage.setItem(storedAllFollowersKey, JSON.stringify(followers));
-    }
-
-    const result = await findDifference(
-      followers,
-      JSON.parse(localStorage.getItem(storedAllFollowersKey) as string)
-    );
-
-    debugLogger(result.removedUsers);
-    debugLogger(result.addedUsers);
-    setNowAllFollowers(followers);
-    setNewAllFollowers(result.removedUsers);
-    setOldAllFollowers(result.addedUsers);
-  }, [fetchFollowers, findDifference]); // fetchFollowers は依存配列に含まれています
+  const [refreshState, setRefreshState] = useState(() =>
+    coordinator.getState()
+  );
 
   useEffect(() => {
-    debugLogger("refresh");
-    refresh(); // コンポーネントがマウントされた時に refresh 関数を呼び出します
-  }, [refresh]); // refresh は依存配列に含まれています
+    const unsubscribe = coordinator.subscribe(setRefreshState);
+    coordinator.activate();
+    void coordinator.refresh();
 
-  const storeNowFollowes = useCallback(() => {
-    debugLogger("storeNowFollowes");
-    localStorage.setItem(
-      storedAllFollowersKey,
-      JSON.stringify(nowAllFollowers ?? [])
+    return () => {
+      unsubscribe();
+      coordinator.deactivate();
+    };
+  }, [coordinator]);
+
+  useEffect(() => {
+    const refreshProblem = refreshState.error;
+    if (!refreshProblem?.requiresReauthentication) {
+      return;
+    }
+    onAuthenticationInvalid(
+      refreshProblem.code === "auth_invalid"
+        ? "invalid_token"
+        : "missing_scope"
     );
-  }, [nowAllFollowers]);
+  }, [onAuthenticationInvalid, refreshState.error]);
+
+  const refresh = useCallback(() => coordinator.refresh(), [coordinator]);
+
+  const commitCurrentSnapshot = useCallback((): boolean => {
+    const candidate = coordinator.getCommitCandidate();
+    if (
+      candidate === null ||
+      committedSnapshotRef.current === candidate.value
+    ) {
+      return false;
+    }
+
+    const storage = browserStorage();
+    if (storage === null) {
+      coordinator.invalidate(problem("storage_unavailable"));
+      return false;
+    }
+
+    const checkedAt = new Date().toISOString();
+    const result = commitFollowerSnapshot({
+      storage,
+      baseKey: storedAllFollowersKey,
+      broadcasterId: candidate.value.broadcasterId,
+      followers: candidate.value.followers,
+      checkedAt,
+    });
+    if (!result.ok) {
+      coordinator.invalidate(mapCommitProblem(result.error));
+      return false;
+    }
+
+    const updatedSnapshot = { ...candidate.value, lastCheckedAt: checkedAt };
+    committedSnapshotRef.current = updatedSnapshot;
+    return coordinator.replaceCommittedValue(
+      candidate.generation,
+      updatedSnapshot
+    );
+  }, [coordinator]);
+
+  const snapshot = refreshState.value;
+  const commitCandidate = coordinator.getCommitCandidate();
+  const canCommitBaseline =
+    commitCandidate !== null &&
+    committedSnapshotRef.current !== commitCandidate.value;
 
   return {
-    nowAllFollowers,
-    newAllFollowers,
-    oldAllFollowers,
+    nowAllFollowers: snapshot?.followers ?? null,
+    newAllFollowers: snapshot?.newFollowers ?? null,
+    oldAllFollowers: snapshot?.unfollowedFollowers ?? null,
+    lastCheckedAt: snapshot?.lastCheckedAt ?? null,
+    status: refreshState.status,
+    error: refreshState.error,
+    stale: refreshState.stale,
+    isRefreshing:
+      refreshState.status === "idle" || refreshState.status === "loading",
+    retryAt: refreshState.error?.retryAt ?? null,
+    canCommitBaseline,
     refresh,
-    storeNowFollowes,
+    commitCurrentSnapshot,
   };
 };

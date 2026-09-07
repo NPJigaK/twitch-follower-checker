@@ -1,11 +1,19 @@
 const isDebugMode = (): boolean => {
   if (typeof window !== "undefined") {
     // Make it server-side compatible.
-    return (
+    if (
       window.location.hash.includes("debug") ||
-      window.location.hostname === "localhost" ||
-      localStorage.getItem("isDebug") != undefined
-    );
+      window.location.hostname === "localhost"
+    ) {
+      return true;
+    }
+
+    try {
+      return window.localStorage.getItem("isDebug") !== null;
+    } catch {
+      // Debug logging must never prevent the storage-error UI from rendering.
+      return false;
+    }
   }
   return false;
 };
