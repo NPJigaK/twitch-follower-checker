@@ -1923,6 +1923,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"classnames@npm:2.5.1":
+  version: 2.5.1
+  resolution: "classnames@npm:2.5.1"
+  checksum: 10c0/afff4f77e62cea2d79c39962980bf316bacb0d7c49e13a21adaadb9221e1c6b9d3cdb829d8bb1b23c406f4e740507f37e1dcf506f7e3b7113d17c5bab787aa69
+  languageName: node
+  linkType: hard
+
 "client-only@npm:0.0.1, client-only@npm:^0.0.1":
   version: 0.0.1
   resolution: "client-only@npm:0.0.1"
@@ -7957,7 +7964,7 @@ __metadata:
     ag-grid-community: "npm:31.3.4"
     ag-grid-react: "npm:31.3.4"
     autoprefixer: "npm:10.5.5"
-    classnames: "npm:2.3.2"
+    classnames: "npm:2.5.1"
     eslint: "npm:8.56.0"
     eslint-config-next: "npm:14.0.3"
     next: "npm:14.1.0"
