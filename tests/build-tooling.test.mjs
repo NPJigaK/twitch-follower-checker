@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
+import { createRequire } from "node:module";
 import {
   mkdirSync,
   mkdtempSync,
@@ -12,6 +13,14 @@ import { dirname, join, resolve, sep } from "node:path";
 import { after, test } from "node:test";
 
 const workspace = resolve(import.meta.dirname, "..");
+const require = createRequire(import.meta.url);
+const autoprefixer = require("autoprefixer");
+const postcss = require("postcss");
+const postcssConfig = require("../postcss.config.js");
+const { getSupportedBrowsers } = require("next/dist/build/utils");
+const packageManifest = JSON.parse(
+  readFileSync(join(workspace, "package.json"), "utf8"),
+);
 const temporaryRoot = mkdtempSync(join(tmpdir(), "tfc-build-tooling-"));
 const resolvedTemporaryRoot = resolve(temporaryRoot);
 const resolvedSystemTemporaryDirectory = `${resolve(tmpdir())}${sep}`;
@@ -70,6 +79,39 @@ function compareExports(arguments_) {
     { encoding: "utf8" },
   );
 }
+
+test("Autoprefixer compatibility targets do not override Next.js browser targets", () => {
+  assert.equal(packageManifest.browserslist, undefined);
+  assert.deepEqual(getSupportedBrowsers(workspace, false), [
+    "chrome 64",
+    "edge 79",
+    "firefox 67",
+    "opera 51",
+    "safari 12",
+  ]);
+  assert.deepEqual(postcssConfig.plugins.autoprefixer.overrideBrowserslist, [
+    "defaults",
+    "Chrome >= 109",
+    "Edge >= 120",
+    "Firefox >= 115",
+    "Safari >= 16.6",
+    "iOS >= 15.6",
+    "Opera >= 105",
+    "Samsung >= 22",
+  ]);
+});
+
+test("Autoprefixer emits the reviewed legacy WebKit UI fallbacks", async () => {
+  const result = await postcss([
+    autoprefixer(postcssConfig.plugins.autoprefixer),
+  ]).process(
+    ".compatibility-probe{backdrop-filter:blur(1px);hyphens:auto}",
+    { from: undefined },
+  );
+
+  assert.match(result.css, /-webkit-backdrop-filter:blur\(1px\)/);
+  assert.match(result.css, /-webkit-hyphens:auto/);
+});
 
 test("dependency verifier confirms reviewed PostCSS and MUI React resolutions", () => {
   assert.doesNotThrow(() =>
