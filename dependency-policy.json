@@ -35,20 +35,6 @@
   "temporaryExceptions": [
     {
       "rule": "minimumVersion",
-      "package": "ag-grid-community",
-      "version": "31.0.3",
-      "issue": "https://github.com/NPJigaK/twitch-follower-checker/issues/226",
-      "expiresOn": "2026-10-07"
-    },
-    {
-      "rule": "minimumVersion",
-      "package": "ag-grid-react",
-      "version": "31.0.3",
-      "issue": "https://github.com/NPJigaK/twitch-follower-checker/issues/226",
-      "expiresOn": "2026-10-07"
-    },
-    {
-      "rule": "minimumVersion",
       "package": "next",
       "version": "14.1.0",
       "issue": "https://github.com/NPJigaK/twitch-follower-checker/issues/227",
