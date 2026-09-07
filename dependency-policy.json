@@ -30,7 +30,8 @@
     "nextra-theme-docs",
     "postcss",
     "react",
-    "react-dom"
+    "react-dom",
+    "typescript"
   ],
   "temporaryExceptions": [
     {
