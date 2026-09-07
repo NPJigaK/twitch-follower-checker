@@ -18,22 +18,45 @@ import RefreshListsButton from "./RefreshListsButton";
 import CheckDoneButton from "./CheckDoneButton";
 import { useNowAllFollowers } from "@/lib/accessTwitch";
 import { debugLogger } from "@/lib/debugLogger";
-import { lastCheckedDateKey, storedAllFollowersKey } from "@/lib/constants";
 
-export default function AppContainer() {
+const ISO_UTC_TIMESTAMP =
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+
+export type AppContainerProps = {
+  accessToken: string;
+  twitchUserId: string;
+  onAuthenticationInvalid: (
+    reason: "invalid_token" | "missing_scope"
+  ) => void;
+};
+
+export default function AppContainer({
+  accessToken,
+  twitchUserId,
+  onAuthenticationInvalid,
+}: AppContainerProps) {
   debugLogger("AppContainer");
   const [activeTab, setActiveTab] = useState("Follower List");
-  const [lastCheckedDate, setLastCheckedDate] = useState<string | null>(
-    localStorage.getItem(lastCheckedDateKey)
-  );
+  const [checkStatus, setCheckStatus] = useState<string | null>(null);
 
   const {
     nowAllFollowers,
     newAllFollowers,
     oldAllFollowers,
+    lastCheckedAt,
+    status,
+    error,
+    stale,
+    isRefreshing,
+    retryAt,
+    canCommitBaseline,
     refresh,
-    storeNowFollowes,
-  } = useNowAllFollowers();
+    commitCurrentSnapshot,
+  } = useNowAllFollowers({
+    accessToken,
+    authenticatedUserId: twitchUserId,
+    onAuthenticationInvalid,
+  });
 
   debugLogger("AppContainer2");
   const gridRef1 = useRef<AgGridReact<any>>(null);
@@ -62,7 +85,13 @@ export default function AppContainer() {
   );
 
   function CustomLoadingCellRenderer() {
-    return <Spinner color="purple" className="h-16 w-16 text-gray-900/50" />;
+    return (
+      <Spinner
+        color="purple"
+        className="h-16 w-16 text-gray-900/50"
+        aria-hidden="true"
+      />
+    );
   }
 
   const loadingCellRenderer = useMemo(() => {
@@ -80,38 +109,32 @@ export default function AppContainer() {
     params.api.sizeColumnsToFit();
   }, []);
 
-  const refreshLists = useCallback(async () => {
+  useEffect(() => {
+    data.forEach((item) => {
+      const api = item.gridRef.current?.api;
+      if (!api) {
+        return;
+      }
+      if (isRefreshing) {
+        api.showLoadingOverlay();
+      } else {
+        api.hideOverlay();
+      }
+    });
+  }, [data, isRefreshing]);
+
+  const refreshLists = useCallback(() => {
     debugLogger("refreshLists");
-    data.forEach((item) => {
-      if (item.gridRef.current) {
-        item.gridRef.current.api.showLoadingOverlay();
-      }
-    });
-    await refresh();
-    data.forEach((item) => {
-      if (item.gridRef.current) {
-        item.gridRef.current.api.hideOverlay();
-      }
-    });
-  }, [refresh, data]);
+    setCheckStatus(null);
+    return refresh();
+  }, [refresh]);
 
   const onChecked = useCallback(() => {
     debugLogger("onChecked");
-    storeNowFollowes();
-    const ftls = formatToLocaleString(new Date());
-    localStorage.setItem(lastCheckedDateKey, ftls);
-    setLastCheckedDate(ftls);
-  }, [storeNowFollowes]);
-
-  useEffect(() => {
-    debugLogger("onChecked();");
-    if (
-      !localStorage.getItem(lastCheckedDateKey) &&
-      localStorage.getItem(storedAllFollowersKey)
-    ) {
-      onChecked();
+    if (commitCurrentSnapshot()) {
+      setCheckStatus("Follower baseline and check date saved.");
     }
-  }, [onChecked]);
+  }, [commitCurrentSnapshot]);
 
   function formatToLocaleString(date: Date): string {
     return date.toLocaleString(undefined, {
@@ -124,10 +147,53 @@ export default function AppContainer() {
     });
   }
 
+  function formatStoredDate(value: string): string {
+    // Legacy releases stored an already-localized string. Re-parsing values
+    // such as 06/09/2026 would swap month/day in another locale, so only the
+    // unambiguous UTC format written by the new snapshot envelope is parsed.
+    if (!ISO_UTC_TIMESTAMP.test(value)) {
+      return value;
+    }
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? value : formatToLocaleString(parsed);
+  }
+
+  const statusMessage = isRefreshing
+    ? nowAllFollowers === null
+      ? "Loading follower lists. Check done will be available after a complete refresh."
+      : "Refreshing follower lists. The last loaded lists remain available while you wait."
+    : checkStatus ?? "Follower lists updated.";
+
   return (
     <div className="mt-5">
-      <RefreshListsButton onRefresh={refreshLists} />
-      <Tabs value={activeTab}>
+      <RefreshListsButton
+        onRefresh={refreshLists}
+        isRefreshing={isRefreshing}
+        retryAt={retryAt}
+      />
+      {status === "error" && error ? (
+        <div
+          className="mb-4 min-w-0 break-words rounded border border-red-300 bg-red-50 p-3 text-sm text-red-900 dark:border-red-700 dark:bg-red-950 dark:text-red-100"
+          role="alert"
+          aria-atomic="true"
+        >
+          {error.message}{" "}
+          {stale
+            ? "Showing the last successfully loaded follower lists. Check done is unavailable until a complete refresh succeeds."
+            : "No follower list was accepted. Use Refresh Lists to try again."}
+        </div>
+      ) : (
+        <div
+          className="mb-4 min-w-0 break-words text-sm dark:text-white"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {statusMessage}
+        </div>
+      )}
+      <div aria-busy={isRefreshing}>
+        <Tabs value={activeTab}>
         <TabsHeader
           className={classNames(
             "rounded-none",
@@ -194,11 +260,13 @@ export default function AppContainer() {
                 <div className="flex items-center">
                   <CheckDoneButton
                     onChecked={onChecked}
-                    isDisabled={activeTab === "Follower List"}
+                    isDisabled={
+                      activeTab === "Follower List" || !canCommitBaseline
+                    }
                   />
-                  {lastCheckedDate !== null && (
+                  {lastCheckedAt !== null && (
                     <span className="ml-4 dark:text-white !text-sm sm:!text-base">
-                      Last checked: {lastCheckedDate}
+                      Last checked: {formatStoredDate(lastCheckedAt)}
                     </span>
                   )}
                 </div>
@@ -258,7 +326,8 @@ export default function AppContainer() {
             </TabPanel>
           ))}
         </TabsBody>
-      </Tabs>
+        </Tabs>
+      </div>
     </div>
   );
 }
