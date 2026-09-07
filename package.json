@@ -12,6 +12,7 @@
     "start": "next start",
     "lint": "eslint . --ext .js --ext .mjs --ext .ts --ext .tsx --ignore-pattern .next --ignore-pattern out --ignore-pattern coverage",
     "test": "node --test",
+    "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -32,6 +33,7 @@
     "react-social-login-buttons": "3.9.1"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "@types/node": "24.13.3",
     "@types/react": "18.2.42",
     "@types/react-dom": "18.2.19",
