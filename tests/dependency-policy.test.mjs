@@ -13,7 +13,7 @@ const workspace = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 function fixture() {
   const manifest = {
-    packageManager: "yarn@4.12.0",
+    packageManager: "yarn@4.18.0",
     dependencies: {
       "@material-tailwind/react": "2.1.10",
       "@mui/icons-material": "5.18.0",
@@ -39,7 +39,7 @@ function fixture() {
   };
   const policy = {
     schemaVersion: 1,
-    packageManager: "yarn@4.12.0",
+    packageManager: "yarn@4.18.0",
     requireExactDirectVersions: true,
     sameVersionGroups: [
       ["@mui/icons-material", "@mui/material"],
