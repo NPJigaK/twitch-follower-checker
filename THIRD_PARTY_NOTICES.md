@@ -7,7 +7,7 @@ The PolyForm Perimeter License in `LICENSE` applies to the original Twitch Follo
 The following third-party material is available under the Apache License, Version 2.0. A copy of that license is included at [`THIRD_PARTY_LICENSES/Apache-2.0.txt`](THIRD_PARTY_LICENSES/Apache-2.0.txt). This does not apply the Apache License to Twitch Follower Checker itself.
 
 - `@playwright/test` 1.63.0 — <https://github.com/microsoft/playwright/blob/main/LICENSE>
-- `typescript` 5.9.3 — <https://github.com/microsoft/TypeScript/blob/main/LICENSE.txt>
+- `typescript` 6.0.3 — <https://github.com/microsoft/TypeScript/blob/main/LICENSE.txt>
 - Open Sans Regular embedded in `public/nav-icon.svg` — digitized data copyright © 2010–2011 Google Corporation; <https://github.com/googlefonts/opensans>
 - Google Material Icons used through `@mui/icons-material` — <https://github.com/google/material-design-icons/blob/master/LICENSE>
 
