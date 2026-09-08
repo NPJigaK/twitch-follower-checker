@@ -22,7 +22,7 @@ The following third-party material is available under the Apache License, Versio
 - `next-sitemap` 4.2.3 — <https://github.com/iamvishnusankar/next-sitemap/blob/master/LICENSE>
 - `nextra` 3.0.0-alpha.12 and `nextra-theme-docs` 3.0.0-alpha.8 — <https://github.com/shuding/nextra/blob/main/LICENSE>
 - `react` 18.2.0 and `react-dom` 18.2.0 — <https://github.com/facebook/react/blob/main/LICENSE>
-- `@types/node` 24.13.3, `@types/react` 18.2.42, and `@types/react-dom` 18.2.19 — <https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/LICENSE>
+- `@types/node` 24.13.3, `@types/react` 18.2.42, and `@types/react-dom` 18.3.7 — <https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/LICENSE>
 - `autoprefixer` 10.5.5 and `postcss` 8.5.28 — <https://github.com/postcss/postcss/blob/main/LICENSE>
 - `eslint` 8.56.0 — <https://github.com/eslint/eslint/blob/main/LICENSE>
 - `tailwindcss` 3.4.19 — <https://github.com/tailwindlabs/tailwindcss/blob/v3/LICENSE>
