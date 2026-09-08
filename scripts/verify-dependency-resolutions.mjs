@@ -1,6 +1,7 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, realpathSync } from "node:fs";
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
+import { sharedReactRuntimeFailures } from "./shared-react-runtime-policy.mjs";
 
 const expectedPostcssVersion = "8.5.28";
 const workspace = resolve(import.meta.dirname, "..");
@@ -13,7 +14,7 @@ const installedManifest = JSON.parse(
 );
 const lockfileVersions = new Set();
 
-function resolvedDependencyVersion(packageName, dependencyName) {
+function resolvedDependency(packageName, dependencyName) {
   const packageManifestPath = resolve(
     workspace,
     "node_modules",
@@ -21,8 +22,13 @@ function resolvedDependencyVersion(packageName, dependencyName) {
     "package.json",
   );
   const packageRequire = createRequire(packageManifestPath);
-  const dependencyManifestPath = packageRequire.resolve(`${dependencyName}/package.json`);
-  return JSON.parse(readFileSync(dependencyManifestPath, "utf8")).version;
+  const dependencyManifestPath = realpathSync(
+    packageRequire.resolve(`${dependencyName}/package.json`),
+  );
+  return {
+    manifestPath: dependencyManifestPath,
+    version: JSON.parse(readFileSync(dependencyManifestPath, "utf8")).version,
+  };
 }
 
 try {
@@ -51,7 +57,7 @@ if (
 
 const expectedReactIsVersion = packageManifest.dependencies?.react;
 const muiReactIsResolutions = ["@mui/material", "@mui/utils"].map(
-  (packageName) => [packageName, resolvedDependencyVersion(packageName, "react-is")],
+  (packageName) => [packageName, resolvedDependency(packageName, "react-is").version],
 );
 
 if (
@@ -67,6 +73,52 @@ if (
   process.exit(1);
 }
 
+const reactRuntimePackages = ["react", "react-dom"];
+const reviewedReactConsumers = [
+  "@material-tailwind/react",
+  "@mui/material",
+  "ag-grid-react",
+  "next",
+  "nextra",
+  "react-social-login-buttons",
+];
+const rootReactRuntimes = new Map(
+  reactRuntimePackages.map((dependencyName) => {
+    const manifestPath = realpathSync(
+      resolve(workspace, "node_modules", dependencyName, "package.json"),
+    );
+    return [
+      dependencyName,
+      {
+        manifestPath,
+        version: JSON.parse(readFileSync(manifestPath, "utf8")).version,
+      },
+    ];
+  }),
+);
+const consumerReactRuntimes = new Map(
+  reviewedReactConsumers.map((packageName) => [
+    packageName,
+    new Map(
+      reactRuntimePackages.map((dependencyName) => [
+        dependencyName,
+        resolvedDependency(packageName, dependencyName),
+      ]),
+    ),
+  ]),
+);
+
+const reactRuntimeFailures = sharedReactRuntimeFailures({
+  manifest: packageManifest,
+  rootRuntimes: rootReactRuntimes,
+  consumerRuntimes: consumerReactRuntimes,
+  scopedConsumer: "@material-tailwind/react",
+});
+if (reactRuntimeFailures.length > 0) {
+  reactRuntimeFailures.forEach((failure) => console.error(`- ${failure}`));
+  process.exit(1);
+}
+
 console.log(
-  `Dependency resolutions verified: PostCSS ${expectedPostcssVersion}; MUI react-is ${expectedReactIsVersion}.`,
+  `Dependency resolutions verified: PostCSS ${expectedPostcssVersion}; MUI react-is ${expectedReactIsVersion}; shared React runtime ${expectedReactIsVersion} across ${reviewedReactConsumers.length} consumers.`,
 );
