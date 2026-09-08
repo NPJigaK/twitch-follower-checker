@@ -1,0 +1,16 @@
+# Legal and contribution policy
+/LICENSE                                      @NPJigaK
+/README.md                                    @NPJigaK
+/CONTRIBUTING.md                              @NPJigaK
+/CONTRIBUTOR_LICENSE_AGREEMENT.md             @NPJigaK
+/THIRD_PARTY_NOTICES.md                       @NPJigaK
+/THIRD_PARTY_LICENSES/**                      @NPJigaK
+/pages/**/contribute.mdx                      @NPJigaK
+
+# Repository automation, dependencies, deployment, and ownership rules
+/.github/**                                   @NPJigaK
+/package.json                                 @NPJigaK
+/yarn.lock                                    @NPJigaK
+/dependency-policy.json                       @NPJigaK
+/next.config.mjs                              @NPJigaK
+/CNAME                                        @NPJigaK
