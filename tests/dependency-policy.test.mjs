@@ -21,7 +21,7 @@ function fixture() {
       "ag-grid-community": "31.0.3",
       "ag-grid-react": "31.0.3",
       classnames: "2.5.1",
-      next: "14.1.0",
+      next: "14.2.35",
       nextra: "3.0.0-alpha.12",
       "nextra-theme-docs": "3.0.0-alpha.8",
       react: "18.2.0",
@@ -32,7 +32,7 @@ function fixture() {
       "@types/react": "18.2.42",
       "@types/react-dom": "18.3.7",
       autoprefixer: "10.5.5",
-      "eslint-config-next": "14.0.3",
+      "eslint-config-next": "14.2.35",
       postcss: "8.5.28",
       tailwindcss: "3.4.19",
     },
@@ -44,11 +44,11 @@ function fixture() {
     sameVersionGroups: [
       ["@mui/icons-material", "@mui/material"],
       ["ag-grid-community", "ag-grid-react"],
+      ["next", "eslint-config-next"],
       ["nextra", "nextra-theme-docs"],
       ["react", "react-dom"],
     ],
     sameMajorGroups: [
-      ["next", "eslint-config-next"],
       ["nextra", "nextra-theme-docs"],
       ["react", "@types/react"],
       ["react-dom", "@types/react-dom"],
@@ -101,7 +101,7 @@ function fixture() {
       {
         rule: "minimumVersion",
         package: "next",
-        version: "14.1.0",
+        version: "14.2.35",
         issue,
         expiresOn: "2026-12-31",
       },
@@ -185,6 +185,14 @@ test("rejects mismatched coupled package versions", () => {
   const failures = failuresFor(({ manifest, installedVersions }) => {
     manifest.dependencies["ag-grid-react"] = "31.0.4";
     installedVersions.set("ag-grid-react", "31.0.4");
+  });
+  assert(failures.some((failure) => failure.includes("same version")));
+});
+
+test("rejects mismatched Next.js and ESLint config patch versions", () => {
+  const failures = failuresFor(({ manifest, installedVersions }) => {
+    manifest.devDependencies["eslint-config-next"] = "14.2.34";
+    installedVersions.set("eslint-config-next", "14.2.34");
   });
   assert(failures.some((failure) => failure.includes("same version")));
 });

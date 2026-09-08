@@ -5,11 +5,11 @@
   "sameVersionGroups": [
     ["@mui/icons-material", "@mui/material"],
     ["ag-grid-community", "ag-grid-react"],
+    ["next", "eslint-config-next"],
     ["nextra", "nextra-theme-docs"],
     ["react", "react-dom"]
   ],
   "sameMajorGroups": [
-    ["next", "eslint-config-next"],
     ["nextra", "nextra-theme-docs"],
     ["react", "@types/react"],
     ["react-dom", "@types/react-dom"]
@@ -49,7 +49,7 @@
     {
       "rule": "minimumVersion",
       "package": "next",
-      "version": "14.1.0",
+      "version": "14.2.35",
       "issue": "https://github.com/NPJigaK/twitch-follower-checker/issues/227",
       "expiresOn": "2026-12-31"
     },
