@@ -29,14 +29,14 @@
     "nextra": "3.0.0-alpha.12",
     "nextra-theme-docs": "3.0.0-alpha.12",
     "react": "18.3.1",
-    "react-dom": "18.3.1",
+    "react-dom": "19.2.8",
     "react-social-login-buttons": "4.1.1"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
     "@types/node": "24.13.3",
     "@types/react": "18.2.42",
-    "@types/react-dom": "18.3.7",
+    "@types/react-dom": "19.2.7",
     "autoprefixer": "10.5.5",
     "eslint": "8.57.1",
     "eslint-config-next": "14.2.35",
