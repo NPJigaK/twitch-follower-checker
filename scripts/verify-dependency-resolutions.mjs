@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, realpathSync } from "node:fs";
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
 
@@ -13,7 +13,7 @@ const installedManifest = JSON.parse(
 );
 const lockfileVersions = new Set();
 
-function resolvedDependencyVersion(packageName, dependencyName) {
+function resolvedDependency(packageName, dependencyName) {
   const packageManifestPath = resolve(
     workspace,
     "node_modules",
@@ -21,8 +21,13 @@ function resolvedDependencyVersion(packageName, dependencyName) {
     "package.json",
   );
   const packageRequire = createRequire(packageManifestPath);
-  const dependencyManifestPath = packageRequire.resolve(`${dependencyName}/package.json`);
-  return JSON.parse(readFileSync(dependencyManifestPath, "utf8")).version;
+  const dependencyManifestPath = realpathSync(
+    packageRequire.resolve(`${dependencyName}/package.json`),
+  );
+  return {
+    manifestPath: dependencyManifestPath,
+    version: JSON.parse(readFileSync(dependencyManifestPath, "utf8")).version,
+  };
 }
 
 try {
@@ -51,7 +56,7 @@ if (
 
 const expectedReactIsVersion = packageManifest.dependencies?.react;
 const muiReactIsResolutions = ["@mui/material", "@mui/utils"].map(
-  (packageName) => [packageName, resolvedDependencyVersion(packageName, "react-is")],
+  (packageName) => [packageName, resolvedDependency(packageName, "react-is").version],
 );
 
 if (
@@ -67,6 +72,82 @@ if (
   process.exit(1);
 }
 
+const expectedReactRuntimeVersions = new Map([
+  ["react", packageManifest.dependencies?.react],
+  ["react-dom", packageManifest.dependencies?.["react-dom"]],
+]);
+const reviewedReactConsumers = [
+  "@material-tailwind/react",
+  "@mui/material",
+  "ag-grid-react",
+  "next",
+  "nextra",
+  "react-social-login-buttons",
+];
+const rootReactRuntimes = new Map(
+  [...expectedReactRuntimeVersions].map(([dependencyName]) => {
+    const manifestPath = realpathSync(
+      resolve(workspace, "node_modules", dependencyName, "package.json"),
+    );
+    return [
+      dependencyName,
+      {
+        manifestPath,
+        version: JSON.parse(readFileSync(manifestPath, "utf8")).version,
+      },
+    ];
+  }),
+);
+const materialTailwindReactRuntimes = new Map(
+  [...expectedReactRuntimeVersions].map(([dependencyName]) => [
+    dependencyName,
+    resolvedDependency("@material-tailwind/react", dependencyName),
+  ]),
+);
+const consumerReactRuntimes = new Map(
+  reviewedReactConsumers.map((packageName) => [
+    packageName,
+    new Map(
+      [...expectedReactRuntimeVersions].map(([dependencyName]) => [
+        dependencyName,
+        resolvedDependency(packageName, dependencyName),
+      ]),
+    ),
+  ]),
+);
+
+if (
+  new Set(expectedReactRuntimeVersions.values()).size !== 1 ||
+  [...expectedReactRuntimeVersions].some(([dependencyName, expectedVersion]) => {
+    const rootRuntime = rootReactRuntimes.get(dependencyName);
+    const materialTailwindRuntime =
+      materialTailwindReactRuntimes.get(dependencyName);
+    return (
+      typeof expectedVersion !== "string" ||
+      packageManifest.resolutions?.[
+        `@material-tailwind/react/${dependencyName}`
+      ] !== expectedVersion ||
+      rootRuntime?.version !== expectedVersion ||
+      materialTailwindRuntime?.version !== expectedVersion ||
+      materialTailwindRuntime.manifestPath !== rootRuntime.manifestPath ||
+      reviewedReactConsumers.some((packageName) => {
+        const consumerRuntime = consumerReactRuntimes
+          .get(packageName)
+          ?.get(dependencyName);
+        return (
+          consumerRuntime?.version !== expectedVersion ||
+          consumerRuntime?.manifestPath !== rootRuntime?.manifestPath
+        );
+      })
+    );
+  })
+) {
+  console.error(
+    "Expected every reviewed browser dependency to resolve one shared React runtime",
+  );
+  process.exit(1);
+}
+
 console.log(
-  `Dependency resolutions verified: PostCSS ${expectedPostcssVersion}; MUI react-is ${expectedReactIsVersion}.`,
+  `Dependency resolutions verified: PostCSS ${expectedPostcssVersion}; MUI react-is ${expectedReactIsVersion}; shared React runtime ${expectedReactIsVersion} across ${reviewedReactConsumers.length} consumers.`,
 );

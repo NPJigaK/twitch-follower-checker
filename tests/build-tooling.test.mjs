@@ -144,7 +144,7 @@ test("Autoprefixer emits the reviewed legacy WebKit UI fallbacks", async () => {
   assert.match(result.css, /-webkit-hyphens:auto/);
 });
 
-test("dependency verifier confirms reviewed PostCSS and MUI React resolutions", () => {
+test("dependency verifier confirms PostCSS, MUI, and shared React resolutions", () => {
   assert.doesNotThrow(() =>
     execFileSync(
       process.execPath,
