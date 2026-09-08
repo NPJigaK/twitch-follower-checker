@@ -18,13 +18,13 @@ The following third-party material is available under the Apache License, Versio
 - `@mui/material` 5.18.0 and `@mui/icons-material` 5.18.0 — <https://github.com/mui/material-ui/blob/master/LICENSE>
 - `ag-grid-community` 31.3.4 and `ag-grid-react` 31.3.4 — <https://github.com/ag-grid/ag-grid/blob/latest/LICENSE.txt>
 - `classnames` 2.5.1 — <https://github.com/JedWatson/classnames/blob/master/LICENSE>
-- `next` 14.1.0 and `eslint-config-next` 14.0.3 — <https://github.com/vercel/next.js/blob/canary/license.md>
+- `next` 14.2.35 and `eslint-config-next` 14.2.35 — <https://github.com/vercel/next.js/blob/canary/license.md>
 - `next-sitemap` 4.2.3 — <https://github.com/iamvishnusankar/next-sitemap/blob/master/LICENSE>
 - `nextra` 3.0.0-alpha.12 and `nextra-theme-docs` 3.0.0-alpha.8 — <https://github.com/shuding/nextra/blob/main/LICENSE>
 - `react` 18.2.0 and `react-dom` 18.2.0 — <https://github.com/facebook/react/blob/main/LICENSE>
 - `@types/node` 24.13.3, `@types/react` 18.2.42, and `@types/react-dom` 18.3.7 — <https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/LICENSE>
 - `autoprefixer` 10.5.5 and `postcss` 8.5.28 — <https://github.com/postcss/postcss/blob/main/LICENSE>
-- `eslint` 8.56.0 — <https://github.com/eslint/eslint/blob/main/LICENSE>
+- `eslint` 8.57.1 — <https://github.com/eslint/eslint/blob/main/LICENSE>
 - `tailwindcss` 3.4.19 — <https://github.com/tailwindlabs/tailwindcss/blob/v3/LICENSE>
 
 ## react-social-login-buttons
