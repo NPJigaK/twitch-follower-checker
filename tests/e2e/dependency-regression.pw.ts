@@ -7,6 +7,50 @@ const BROADCASTER_ID = "channel-e2e";
 const SNAPSHOT_KEY = `previousFollowersKey:v1:${encodeURIComponent(BROADCASTER_ID)}`;
 const BASELINE_CHECKED_AT = "2026-01-01T00:00:00.000Z";
 const OPAQUE_CURSOR = "opaque+cursor&with=reserved=1#fixture";
+const EXPECTED_FOLLOWER_SEARCH_HREFS = [
+  "/de/how_to_use/#follower-pr%C3%BCfen",
+  "/de/how_to_use/#follower-liste",
+  "/de/how_to_use/#neue-follower-liste",
+  "/de/how_to_use/#neueste-informationen-abrufen",
+  "/de/how_to_use/#f-was-kann-ich-tun-wenn-das-laden-langsam-ist",
+  "/de/#was-ist-der-twitch-follower-checker",
+  "/de/#was-ist-der-twitch-follower-checker",
+  "/de/#hauptfunktionen",
+  "/de/#hauptfunktionen",
+  "/de/#hauptfunktionen",
+  "/de/#wie-verwendet-man-den-twitch-follower-checker",
+  "/en/#what-is-twitch-follower-checker",
+  "/en/#what-is-twitch-follower-checker",
+  "/en/#main-features",
+  "/en/#main-features",
+  "/en/#main-features",
+  "/en/#how-to-use-twitch-follower-checker",
+  "/es/#qu%C3%A9-es-twitch-follower-checker",
+  "/es/#qu%C3%A9-es-twitch-follower-checker",
+  "/es/#c%C3%B3mo-utilizar-twitch-follower-checker",
+  "/fr/#quest-ce-que-twitch-follower-checker-",
+  "/fr/#quest-ce-que-twitch-follower-checker-",
+  "/fr/#comment-utiliser-twitch-follower-checker",
+  "/pt/#o-que-%C3%A9-o-twitch-follower-checker",
+  "/pt/#o-que-%C3%A9-o-twitch-follower-checker",
+  "/pt/#como-usar-o-twitch-follower-checker",
+  "/ru/#%D1%87%D1%82%D0%BE-%D1%82%D0%B0%D0%BA%D0%BE%D0%B5-twitch-follower-checker",
+  "/ru/#%D1%87%D1%82%D0%BE-%D1%82%D0%B0%D0%BA%D0%BE%D0%B5-twitch-follower-checker",
+  "/ru/#%D0%BA%D0%B0%D0%BA-%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D1%8C-twitch-follower-checker",
+  "/de/contribute/",
+  "/en/contribute/",
+  "/en/how_to_use/#twitch-authentication",
+  "/en/how_to_use/#checking-followers",
+  "/en/how_to_use/#follower-list",
+  "/en/how_to_use/#fetching-latest-information",
+  "/en/how_to_use/#q-what-should-i-do-if-loading-is-slow",
+  "/es/contribute/",
+  "/fr/contribute/",
+  "/ko/how_to_use/#follower-list",
+  "/pt/contribute/",
+  "/ru/contribute/",
+  "/ja/how_to_use/#follower-list",
+] as const;
 
 type Follower = Readonly<{
   user_id: string;
@@ -450,6 +494,89 @@ test("all localized documentation routes hydrate from the static export", async 
     }
   }
 
+  await audit.assertClean();
+});
+
+test("documentation search preserves the production result and keyboard order", async ({
+  page,
+}) => {
+  const audit = await installNetworkAudit(page);
+  await page.goto("/en/how_to_use/");
+  const input = page.getByRole("searchbox");
+  const searchIndexResponse = page.waitForResponse((response) => {
+    const url = new URL(response.url());
+    return (
+      url.origin === LOCAL_ORIGIN &&
+      url.pathname === "/_next/static/chunks/nextra-data-en-US.json" &&
+      response.status() === 200
+    );
+  });
+
+  await input.pressSequentially("follower", { delay: 25 });
+  await searchIndexResponse;
+  const search = page.locator("div.nextra-search").filter({ has: input });
+  const links = search.getByRole("link");
+  await expect(links).toHaveCount(EXPECTED_FOLLOWER_SEARCH_HREFS.length);
+
+  const hrefs = await links.evaluateAll((elements) =>
+    elements.map((element) => element.getAttribute("href")),
+  );
+  expect(hrefs).toEqual(EXPECTED_FOLLOWER_SEARCH_HREFS);
+
+  const ariaSnapshot = await search.ariaSnapshot();
+  const accessibleHrefs = Array.from(
+    ariaSnapshot.matchAll(/^\s*- \/url: (.+)$/gm),
+    (match) => match[1],
+  );
+  expect(accessibleHrefs).toEqual(EXPECTED_FOLLOWER_SEARCH_HREFS);
+
+  await input.press("ArrowDown");
+  await expect(links.nth(1)).toBeFocused();
+  await page.keyboard.press("ArrowUp");
+  await expect(links.first()).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(
+    `${LOCAL_ORIGIN}${EXPECTED_FOLLOWER_SEARCH_HREFS[0]}`,
+  );
+  await audit.assertClean();
+});
+
+test("mobile documentation search preserves the production result order", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const audit = await installNetworkAudit(page);
+  await page.goto("/en/how_to_use/");
+  const searchIndexResponse = page.waitForResponse((response) => {
+    const url = new URL(response.url());
+    return (
+      url.origin === LOCAL_ORIGIN &&
+      url.pathname === "/_next/static/chunks/nextra-data-en-US.json" &&
+      response.status() === 200
+    );
+  });
+  await page.keyboard.press("Control+k");
+  const input = page.getByRole("searchbox");
+  await expect(input).toBeVisible();
+
+  await input.pressSequentially("follower", { delay: 25 });
+  await searchIndexResponse;
+  const search = page.locator("div.nextra-search").filter({ has: input });
+  const links = search.getByRole("link");
+  await expect(links).toHaveCount(EXPECTED_FOLLOWER_SEARCH_HREFS.length);
+  expect(
+    await links.evaluateAll((elements) =>
+      elements.map((element) => element.getAttribute("href")),
+    ),
+  ).toEqual(EXPECTED_FOLLOWER_SEARCH_HREFS);
+
+  const ariaSnapshot = await search.ariaSnapshot();
+  expect(
+    Array.from(
+      ariaSnapshot.matchAll(/^\s*- \/url: (.+)$/gm),
+      (match) => match[1],
+    ),
+  ).toEqual(EXPECTED_FOLLOWER_SEARCH_HREFS);
   await audit.assertClean();
 });
 

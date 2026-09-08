@@ -5,7 +5,7 @@
   "packageManager": "yarn@4.18.0",
   "scripts": {
     "dev": "next dev",
-    "build": "next build && next-sitemap",
+    "build": "next build && node scripts/normalize-nextra-search-index.mjs out && next-sitemap",
     "compare:artifacts": "node scripts/compare-static-exports.mjs",
     "verify:artifact": "node scripts/verify-static-export.mjs",
     "verify:dependencies": "node scripts/verify-dependency-policy.mjs && node scripts/verify-dependency-resolutions.mjs",

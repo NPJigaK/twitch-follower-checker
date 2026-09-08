@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "commit": "ad885a2152e17dffaa2593834a47744845e5b607",
+    "buildId": "Ga1-tZSGhzbbXSALEJ0wq",
+    "asset": "https://twitch-follower-checker.devkey.jp/_next/static/chunks/nextra-data-en-US.json",
+    "capturedAtUtc": "2026-09-08T02:45:05Z",
+    "etag": "W/\"6a9f639c-9624\"",
+    "bodySha256": "a86ec41fb5b1182b8bde8e33d5c503361f7550ed6087944c74f4d7df30054586"
+  },
+  "routeOrderSha256": {
+    "nextra-data-en-US.json": "bfdf54af1441de7a47c85a7ffee2d2cbe31e4f42aa6caf1a9a62a7e5cf7dfa4b"
+  },
+  "indexes": {
+    "nextra-data-en-US.json": [
+      "/de/contribute",
+      "/de/how_to_use",
+      "/de",
+      "/en/contribute",
+      "/en/how_to_use",
+      "/en",
+      "/es/how_to_use",
+      "/es/contribute",
+      "/es",
+      "/fr/contribute",
+      "/fr/how_to_use",
+      "/fr",
+      "/",
+      "/ja/contribute",
+      "/ja/how_to_use",
+      "/ja",
+      "/ko/contribute",
+      "/jp",
+      "/ko/how_to_use",
+      "/ko",
+      "/list",
+      "/pt/contribute",
+      "/pt",
+      "/ru/contribute",
+      "/pt/how_to_use",
+      "/ru/how_to_use",
+      "/ru"
+    ]
+  }
+}
