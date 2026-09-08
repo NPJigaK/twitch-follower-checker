@@ -1,6 +1,7 @@
 import { readFileSync, realpathSync } from "node:fs";
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
+import { sharedReactRuntimeFailures } from "./shared-react-runtime-policy.mjs";
 
 const expectedPostcssVersion = "8.5.28";
 const workspace = resolve(import.meta.dirname, "..");
@@ -72,10 +73,7 @@ if (
   process.exit(1);
 }
 
-const expectedReactRuntimeVersions = new Map([
-  ["react", packageManifest.dependencies?.react],
-  ["react-dom", packageManifest.dependencies?.["react-dom"]],
-]);
+const reactRuntimePackages = ["react", "react-dom"];
 const reviewedReactConsumers = [
   "@material-tailwind/react",
   "@mui/material",
@@ -85,7 +83,7 @@ const reviewedReactConsumers = [
   "react-social-login-buttons",
 ];
 const rootReactRuntimes = new Map(
-  [...expectedReactRuntimeVersions].map(([dependencyName]) => {
+  reactRuntimePackages.map((dependencyName) => {
     const manifestPath = realpathSync(
       resolve(workspace, "node_modules", dependencyName, "package.json"),
     );
@@ -98,17 +96,11 @@ const rootReactRuntimes = new Map(
     ];
   }),
 );
-const materialTailwindReactRuntimes = new Map(
-  [...expectedReactRuntimeVersions].map(([dependencyName]) => [
-    dependencyName,
-    resolvedDependency("@material-tailwind/react", dependencyName),
-  ]),
-);
 const consumerReactRuntimes = new Map(
   reviewedReactConsumers.map((packageName) => [
     packageName,
     new Map(
-      [...expectedReactRuntimeVersions].map(([dependencyName]) => [
+      reactRuntimePackages.map((dependencyName) => [
         dependencyName,
         resolvedDependency(packageName, dependencyName),
       ]),
@@ -116,35 +108,14 @@ const consumerReactRuntimes = new Map(
   ]),
 );
 
-if (
-  new Set(expectedReactRuntimeVersions.values()).size !== 1 ||
-  [...expectedReactRuntimeVersions].some(([dependencyName, expectedVersion]) => {
-    const rootRuntime = rootReactRuntimes.get(dependencyName);
-    const materialTailwindRuntime =
-      materialTailwindReactRuntimes.get(dependencyName);
-    return (
-      typeof expectedVersion !== "string" ||
-      packageManifest.resolutions?.[
-        `@material-tailwind/react/${dependencyName}`
-      ] !== expectedVersion ||
-      rootRuntime?.version !== expectedVersion ||
-      materialTailwindRuntime?.version !== expectedVersion ||
-      materialTailwindRuntime.manifestPath !== rootRuntime.manifestPath ||
-      reviewedReactConsumers.some((packageName) => {
-        const consumerRuntime = consumerReactRuntimes
-          .get(packageName)
-          ?.get(dependencyName);
-        return (
-          consumerRuntime?.version !== expectedVersion ||
-          consumerRuntime?.manifestPath !== rootRuntime?.manifestPath
-        );
-      })
-    );
-  })
-) {
-  console.error(
-    "Expected every reviewed browser dependency to resolve one shared React runtime",
-  );
+const reactRuntimeFailures = sharedReactRuntimeFailures({
+  manifest: packageManifest,
+  rootRuntimes: rootReactRuntimes,
+  consumerRuntimes: consumerReactRuntimes,
+  scopedConsumer: "@material-tailwind/react",
+});
+if (reactRuntimeFailures.length > 0) {
+  reactRuntimeFailures.forEach((failure) => console.error(`- ${failure}`));
   process.exit(1);
 }
 
