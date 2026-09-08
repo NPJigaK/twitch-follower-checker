@@ -1444,10 +1444,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ag-charts-types@npm:14.1.0":
+  version: 14.1.0
+  resolution: "ag-charts-types@npm:14.1.0"
+  checksum: 10c0/ded7ad98fb6795629938bc7d652bfaa8fc249e5dfbeef00d03371f805b2f0da2652ff9f17326ff57cb850b23f633cf81f7628858973c6e3582daf0b8918484f9
+  languageName: node
+  linkType: hard
+
 "ag-grid-community@npm:31.3.4":
   version: 31.3.4
   resolution: "ag-grid-community@npm:31.3.4"
   checksum: 10c0/65597ac57a27e5bd9a7ab7b5ae88677e3f4b4c904c0ef39f254a2c4dda4e2f3c1b62c69394d78320f2de4c175dd374e76e8293976065bfcc24ff81314847dce3
+  languageName: node
+  linkType: hard
+
+"ag-grid-community@npm:36.1.0":
+  version: 36.1.0
+  resolution: "ag-grid-community@npm:36.1.0"
+  dependencies:
+    ag-charts-types: "npm:14.1.0"
+    ag-stack: "npm:36.1.0"
+  checksum: 10c0/1743905d4918a3aa3448b93dfe181d6b3828ca0732cac72e510e23c827a6473ef7abb68e542ea03b6e5773d36d18ab93d6d6c1360675534f1c6ddbc274de3120
   languageName: node
   linkType: hard
 
@@ -1461,6 +1478,13 @@ __metadata:
     react: ^16.3.0 || ^17.0.0 || ^18.0.0
     react-dom: ^16.3.0 || ^17.0.0 || ^18.0.0
   checksum: 10c0/892bbdccbeae4fa4b9626cf188cb01c3aba69d920562ef40da99cee54e04902d92d35230f27927ddeae760c4ffe6358e8521415dc85569c4aab08559a0dd3966
+  languageName: node
+  linkType: hard
+
+"ag-stack@npm:36.1.0":
+  version: 36.1.0
+  resolution: "ag-stack@npm:36.1.0"
+  checksum: 10c0/9840ceccc7ad73e09e3ce8b50c2e57618b7e9ce2d43cb59573c435ab7998462d9bd4b11c99f0a7926bbb5eb6f0b7b0ff63e2495ee8545c402e005ab849a9081a
   languageName: node
   linkType: hard
 
@@ -7983,7 +8007,7 @@ __metadata:
     "@types/node": "npm:24.13.3"
     "@types/react": "npm:18.2.42"
     "@types/react-dom": "npm:18.3.7"
-    ag-grid-community: "npm:31.3.4"
+    ag-grid-community: "npm:36.1.0"
     ag-grid-react: "npm:31.3.4"
     autoprefixer: "npm:10.5.5"
     classnames: "npm:2.5.1"

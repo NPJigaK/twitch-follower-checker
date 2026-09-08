@@ -21,7 +21,7 @@
     "@material-tailwind/react": "2.1.10",
     "@mui/icons-material": "9.4.0",
     "@mui/material": "9.4.0",
-    "ag-grid-community": "31.3.4",
+    "ag-grid-community": "36.1.0",
     "ag-grid-react": "31.3.4",
     "classnames": "2.5.1",
     "next": "14.2.35",
