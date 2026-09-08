@@ -30,7 +30,7 @@ function fixture() {
     devDependencies: {
       "@types/node": "24.13.3",
       "@types/react": "18.2.42",
-      "@types/react-dom": "18.2.19",
+      "@types/react-dom": "18.3.7",
       autoprefixer: "10.5.5",
       "eslint-config-next": "14.0.3",
       postcss: "8.5.28",
