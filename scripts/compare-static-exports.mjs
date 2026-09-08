@@ -60,29 +60,6 @@ function digestMap(files, predicate, transform = (value) => value) {
   );
 }
 
-function canonicalStaticAsset(contents, relativePath) {
-  if (!/^_next\/static\/chunks\/nextra-data-[^/]+\.json$/.test(relativePath)) {
-    return contents;
-  }
-
-  const searchData = JSON.parse(contents.toString("utf8"));
-  return JSON.stringify(
-    Object.fromEntries(
-      Object.keys(searchData)
-        .sort()
-        .map((route) => [route, searchData[route]]),
-    ),
-  );
-}
-
-function nextraRouteOrder(files) {
-  const searchFile = files.find(({ relativePath }) =>
-    /^_next\/static\/chunks\/nextra-data-[^/]+\.json$/.test(relativePath),
-  );
-  if (!searchFile) return undefined;
-  return Object.keys(JSON.parse(readFileSync(searchFile.absolutePath, "utf8")));
-}
-
 function compareMaps(label, baseline, candidate) {
   const paths = new Set([...baseline.keys(), ...candidate.keys()]);
   for (const path of [...paths].sort()) {
@@ -133,8 +110,8 @@ const isStableStaticAsset = ({ relativePath }) =>
   !/(?:^|\/)(?:_buildManifest|_ssgManifest)\.js$/.test(relativePath);
 compareMaps(
   "static asset",
-  digestMap(baselineFiles, isStableStaticAsset, canonicalStaticAsset),
-  digestMap(candidateFiles, isStableStaticAsset, canonicalStaticAsset),
+  digestMap(baselineFiles, isStableStaticAsset),
+  digestMap(candidateFiles, isStableStaticAsset),
 );
 
 function manifestDigests(directory, ids) {
@@ -182,18 +159,6 @@ if (!uiOnly) {
 if (failures.length > 0) {
   failures.forEach((failure) => console.error(`- ${failure}`));
   process.exit(1);
-}
-
-const baselineNextraOrder = nextraRouteOrder(baselineFiles);
-const candidateNextraOrder = nextraRouteOrder(candidateFiles);
-if (
-  baselineNextraOrder &&
-  candidateNextraOrder &&
-  baselineNextraOrder.join("\n") !== candidateNextraOrder.join("\n")
-) {
-  console.warn(
-    "Nextra search route insertion order differs; per-route content and heading order still match.",
-  );
 }
 
 console.log(

@@ -5,6 +5,7 @@ import {
   statSync,
 } from "node:fs";
 import { extname, join, relative, resolve, sep } from "node:path";
+import { verifyNextraSearchIndexes } from "./normalize-nextra-search-index.mjs";
 
 const outputDirectory = resolve(process.argv[2] ?? "out");
 const locales = ["de", "en", "es", "fr", "ja", "ko", "pt", "ru"];
@@ -97,6 +98,16 @@ const htmlFiles = [...artifactFiles].filter((filePath) => filePath.endsWith(".ht
 const javascriptFiles = [...artifactFiles].filter((filePath) => filePath.endsWith(".js"));
 const cssFiles = [...artifactFiles].filter((filePath) => filePath.endsWith(".css"));
 const sourceMaps = [...artifactFiles].filter((filePath) => filePath.endsWith(".map"));
+
+try {
+  verifyNextraSearchIndexes(outputDirectory);
+} catch (error) {
+  failures.push(
+    error instanceof Error
+      ? error.message
+      : "Nextra search-index verification failed",
+  );
+}
 
 if (htmlFiles.length !== expectedHtmlFiles.length) {
   failures.push(
