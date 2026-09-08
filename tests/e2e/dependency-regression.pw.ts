@@ -130,6 +130,12 @@ const safeRequestPath = (request: Request): string => {
   return `${request.method()} ${url.origin}${url.pathname}`;
 };
 
+const browserNavigationCancellationReasons = new Set([
+  "NS_BINDING_ABORTED",
+  "net::ERR_ABORTED",
+  "cancelled",
+]);
+
 const isSeparatelyAuditedNetworkMessage = (
   message: string,
   allowedHttpStatuses: readonly number[]
@@ -323,8 +329,26 @@ const installNetworkAudit = async (
   });
   page.on("requestfailed", (request) => {
     const url = new URL(request.url());
-    if (url.origin === LOCAL_ORIGIN) {
-      localFailures.push(safeRequestPath(request));
+    // Browsers legitimately cancel generated assets that were prefetched or
+    // became unnecessary during a later navigation. Missing assets still
+    // produce audited HTTP errors, and every non-cancellation transport error
+    // remains a failure.
+    const wasBenignStaticAssetCancellation =
+      !request.isNavigationRequest() &&
+      url.pathname.startsWith("/_next/static/") &&
+      browserNavigationCancellationReasons.has(
+        request.failure()?.errorText ?? ""
+      );
+    if (
+      url.origin === LOCAL_ORIGIN &&
+      !wasBenignStaticAssetCancellation
+    ) {
+      const headers = request.headers();
+      const purpose = headers["sec-purpose"] ?? headers.purpose ?? "none";
+      const reason = request.failure()?.errorText ?? "unknown";
+      localFailures.push(
+        `${safeRequestPath(request)} [${request.resourceType()}; purpose=${purpose}; failure=${reason}]`
+      );
     }
   });
   page.on("response", (response) => {
@@ -491,6 +515,9 @@ test("all localized documentation routes hydrate from the static export", async 
       await expect(page.locator("html")).toHaveAttribute("lang", language);
       await expect(page.locator("article main")).toBeVisible();
       await expect(page.locator("article main h1, article main h2").first()).toBeVisible();
+      // Drain route prefetches before the next deliberate full navigation so
+      // WebKit does not surface their cancellation as a spurious page error.
+      await page.waitForLoadState("networkidle");
     }
   }
 
@@ -602,6 +629,7 @@ test("legacy list route and custom 404 preserve their static navigation contract
   expect(listResponse?.status()).toBe(200);
   await page.waitForURL(`${LOCAL_ORIGIN}/`);
   await expect(page.getByText("Authenticate with Twitch", { exact: true })).toBeVisible();
+  await page.waitForLoadState("networkidle");
 
   const notFoundResponse = await page.goto(missingPath);
   expect(notFoundResponse?.status()).toBe(404);
