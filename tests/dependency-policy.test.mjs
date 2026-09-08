@@ -16,8 +16,8 @@ function fixture() {
     packageManager: "yarn@4.18.0",
     dependencies: {
       "@material-tailwind/react": "2.1.10",
-      "@mui/icons-material": "5.18.0",
-      "@mui/material": "5.18.0",
+      "@mui/icons-material": "9.4.0",
+      "@mui/material": "9.4.0",
       "ag-grid-community": "31.0.3",
       "ag-grid-react": "31.0.3",
       classnames: "2.5.1",
@@ -56,8 +56,8 @@ function fixture() {
     nodeTypesPackage: "@types/node",
     minimumVersions: {
       "@material-tailwind/react": "2.1.10",
-      "@mui/icons-material": "5.18.0",
-      "@mui/material": "5.18.0",
+      "@mui/icons-material": "9.4.0",
+      "@mui/material": "9.4.0",
       "ag-grid-community": "31.3.4",
       "ag-grid-react": "31.3.4",
       autoprefixer: "10.5.5",

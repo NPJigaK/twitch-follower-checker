@@ -15,7 +15,7 @@ The following third-party material is available under the Apache License, Versio
 
 - `@emotion/react` 11.14.0 and `@emotion/styled` 11.14.1 — <https://github.com/emotion-js/emotion/blob/main/LICENSE>
 - `@material-tailwind/react` 2.1.10 — <https://github.com/creativetimofficial/material-tailwind>
-- `@mui/material` 5.18.0 and `@mui/icons-material` 5.18.0 — <https://github.com/mui/material-ui/blob/master/LICENSE>
+- `@mui/material` 9.4.0 and `@mui/icons-material` 9.4.0 — <https://github.com/mui/material-ui/blob/master/LICENSE>
 - `ag-grid-community` 31.3.4 and `ag-grid-react` 31.3.4 — <https://github.com/ag-grid/ag-grid/blob/latest/LICENSE.txt>
 - `classnames` 2.5.1 — <https://github.com/JedWatson/classnames/blob/master/LICENSE>
 - `next` 14.2.35 and `eslint-config-next` 14.2.35 — <https://github.com/vercel/next.js/blob/canary/license.md>
