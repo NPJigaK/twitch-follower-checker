@@ -1,6 +1,5 @@
 import { useRouter } from "next/router";
-import { createButton, createSvgIcon } from "react-social-login-buttons";
-import T from "prop-types";
+import { createButton } from "react-social-login-buttons";
 import { clientId, redirectUri, scope } from "@/lib/constants";
 import { Card, CardFooter, Typography } from "@material-tailwind/react";
 import { navigateToUserLocalePage } from "@/lib/navigateToUserLocalePage";
@@ -23,14 +22,9 @@ function TwitchIcon() {
   );
 }
 
-TwitchIcon.propTypes = {
-  width: T.oneOfType([T.number, T.string]),
-  height: T.oneOfType([T.number, T.string]),
-};
-
 const config = {
   text: "Authenticate with Twitch",
-  icon: createSvgIcon(TwitchIcon),
+  icon: TwitchIcon,
   style: {
     background: "#a970ff",
     margin: "50px auto",

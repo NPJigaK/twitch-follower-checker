@@ -6882,12 +6882,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-social-login-buttons@npm:3.9.1":
-  version: 3.9.1
-  resolution: "react-social-login-buttons@npm:3.9.1"
+"react-social-login-buttons@npm:4.1.1":
+  version: 4.1.1
+  resolution: "react-social-login-buttons@npm:4.1.1"
   peerDependencies:
-    react: ^15.0.0 || ^16.0.0 || ^17.x || ^18.x
-  checksum: 10c0/2bfc309cb499ac5a8226a8156717331b68d69599b4809de9ec1f2c771fe3c1021b6e742897270a3eff1e157cf2e654591fc1ac25b51c70a2bdb707fca04087ee
+    react: ^16.0.0 || ^17.x || ^18.x || ^19.x
+  checksum: 10c0/184b32757342a3bb52c73326cc355ec56c477c928524b8e7f37839b5641cef8352559c667f72e864ea716b4afe5e8602f10d9ed26d604390ba33adcbfc4e460a
   languageName: node
   linkType: hard
 
@@ -8010,7 +8010,7 @@ __metadata:
     postcss: "npm:8.5.28"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
-    react-social-login-buttons: "npm:3.9.1"
+    react-social-login-buttons: "npm:4.1.1"
     tailwindcss: "npm:3.4.19"
     typescript: "npm:5.9.3"
   languageName: unknown
