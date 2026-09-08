@@ -3507,7 +3507,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"flexsearch@npm:^0.7.31":
+"flexsearch@npm:0.7.31":
   version: 0.7.31
   resolution: "flexsearch@npm:0.7.31"
   checksum: 10c0/d465770d9bbfabcd1628b1c5e6acbb2b283c7e473d79b0c59f1ccbd3d13e392be98943e71a3dc4b311e6d901e5528a640b5ae914fbee603f0c14692720714f11
@@ -6200,15 +6200,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nextra-theme-docs@npm:3.0.0-alpha.8":
-  version: 3.0.0-alpha.8
-  resolution: "nextra-theme-docs@npm:3.0.0-alpha.8"
+"nextra-theme-docs@npm:3.0.0-alpha.12":
+  version: 3.0.0-alpha.12
+  resolution: "nextra-theme-docs@npm:3.0.0-alpha.12"
   dependencies:
     "@headlessui/react": "npm:^1.7.17"
     "@popperjs/core": "npm:^2.11.8"
     clsx: "npm:^2.0.0"
     escape-string-regexp: "npm:^5.0.0"
-    flexsearch: "npm:^0.7.31"
+    flexsearch: "npm:0.7.31"
     focus-visible: "npm:^5.2.0"
     intersection-observer: "npm:^0.12.2"
     next-themes: "npm:^0.2.1"
@@ -6216,10 +6216,10 @@ __metadata:
     zod: "npm:^3.22.3"
   peerDependencies:
     next: ">=13"
-    nextra: 3.0.0-alpha.8
+    nextra: 3.0.0-alpha.12
     react: ">=16.13.1"
     react-dom: ">=16.13.1"
-  checksum: 10c0/b04acbe20ebc72fa56a780309ea268176230836ffbba3e34f8ade945090d3a34dc0afeb792f0276233ab96b0a06a6b077dc9cbbf080a08a4d2850ec6580b1a11
+  checksum: 10c0/35acfe9465a5a45bec3c8eca997d4dbf721a1c724b4b81c491ec824db33e95f0004cc210071a3f7fbfc3361ad5369935d917b1373dd66a69b7861525a4ad385a
   languageName: node
   linkType: hard
 
@@ -8006,7 +8006,7 @@ __metadata:
     next: "npm:14.2.35"
     next-sitemap: "npm:4.2.3"
     nextra: "npm:3.0.0-alpha.12"
-    nextra-theme-docs: "npm:3.0.0-alpha.8"
+    nextra-theme-docs: "npm:3.0.0-alpha.12"
     postcss: "npm:8.5.28"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"

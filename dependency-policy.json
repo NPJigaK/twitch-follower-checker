@@ -65,7 +65,7 @@
     {
       "rule": "minimumVersion",
       "package": "nextra-theme-docs",
-      "version": "3.0.0-alpha.8",
+      "version": "3.0.0-alpha.12",
       "issue": "https://github.com/NPJigaK/twitch-follower-checker/issues/227",
       "expiresOn": "2026-12-31"
     },
@@ -79,21 +79,7 @@
     {
       "rule": "prerelease",
       "package": "nextra-theme-docs",
-      "version": "3.0.0-alpha.8",
-      "issue": "https://github.com/NPJigaK/twitch-follower-checker/issues/227",
-      "expiresOn": "2026-12-31"
-    },
-    {
-      "rule": "sameVersion",
-      "package": "nextra",
       "version": "3.0.0-alpha.12",
-      "issue": "https://github.com/NPJigaK/twitch-follower-checker/issues/227",
-      "expiresOn": "2026-12-31"
-    },
-    {
-      "rule": "sameVersion",
-      "package": "nextra-theme-docs",
-      "version": "3.0.0-alpha.8",
       "issue": "https://github.com/NPJigaK/twitch-follower-checker/issues/227",
       "expiresOn": "2026-12-31"
     }
