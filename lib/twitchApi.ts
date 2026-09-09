@@ -44,7 +44,7 @@ export type TwitchRequestErrorCode =
   | "aborted"
   | "invalid_json"
   | "invalid_response"
-  | "non_authoritative_snapshot"
+  | "follower_details_unavailable"
   | "pagination_loop";
 
 export interface TwitchRequestErrorOptions {
@@ -112,8 +112,8 @@ const ERROR_MESSAGES: Record<TwitchRequestErrorCode, string> = {
   aborted: "The Twitch request was cancelled.",
   invalid_json: "Twitch returned invalid JSON.",
   invalid_response: "Twitch returned an invalid response.",
-  non_authoritative_snapshot:
-    "Twitch did not return an authoritative follower snapshot.",
+  follower_details_unavailable:
+    "Twitch did not return follower details.",
   pagination_loop: "Twitch returned an invalid pagination cursor.",
 };
 
@@ -590,7 +590,7 @@ const parseFollowerPage = (
   if (!Array.isArray(response.data)) {
     // A successful response with only `total` is not an empty follower list;
     // treating it as [] would corrupt the baseline.
-    throw createError("non_authoritative_snapshot");
+    throw createError("follower_details_unavailable");
   }
   if (!hasOwn(response, "pagination") || !isRecord(response.pagination)) {
     throw createError("invalid_response");
@@ -632,8 +632,16 @@ const makeFollowersUrl = (
 };
 
 /**
- * Fetch every follower page.  Any page error rejects the whole operation, so
- * callers can retain their previous valid snapshot and avoid partial writes.
+ * Enumerate follower rows through Twitch's terminal cursor. Twitch documents
+ * list cursors as dynamic: pages can be empty or contain duplicates, and this
+ * endpoint's `total` can change during pagination. Consequently, `total` is a
+ * diagnostic value rather than a point-in-time completeness checksum.
+ *
+ * Any transport, schema, or cursor error still rejects the whole operation so
+ * callers can retain their previous valid baseline. A traversal that reports
+ * a positive total but never exposes even one follower detail also rejects;
+ * accepting that ambiguous response as [] could erase a valid baseline when
+ * Twitch has returned count-only data because follower details are unavailable.
  */
 export const fetchAllFollowers = async (
   token: string,
@@ -648,9 +656,11 @@ export const fetchAllFollowers = async (
   const allFollowers: Follower[] = [];
   const seenUserIds = new Set<string>();
   const visitedCursors = new Set<string>();
+  let maximumReportedTotal = 0;
   let cursor: string | undefined;
 
   while (true) {
+    const isFirstPage = cursor === undefined;
     if (cursor !== undefined) {
       if (visitedCursors.has(cursor)) {
         throw createError("pagination_loop");
@@ -665,6 +675,14 @@ export const fetchAllFollowers = async (
       options
     );
     const page = parseFollowerPage(response);
+    maximumReportedTotal = Math.max(maximumReportedTotal, page.total);
+
+    // Twitch documents count-only responses when follower details are not
+    // authorized. An empty first page with a positive total is indistinguishable
+    // from that response and must never be accepted as an empty baseline.
+    if (isFirstPage && page.followers.length === 0 && page.total > 0) {
+      throw createError("follower_details_unavailable");
+    }
 
     for (const follower of page.followers) {
       // Dynamic Twitch lists can repeat a row across cursor pages.  Keep one
@@ -677,16 +695,8 @@ export const fetchAllFollowers = async (
     }
 
     if (page.nextCursor === undefined) {
-      // `total` may move while a dynamic list is paged, so equality is not a
-      // coherent-snapshot guarantee. It is still a safe lower-bound check:
-      // accepting fewer unique rows than Twitch reports at the terminal page
-      // would knowingly turn a partial traversal into an authoritative list.
-      // Conversely, rows already traversed may outnumber a later, lower total
-      // when users unfollow during pagination. Retaining those rows delays
-      // their removal until the next refresh instead of inventing a deletion
-      // from a list that Twitch documents as dynamic.
-      if (allFollowers.length < page.total) {
-        throw createError("non_authoritative_snapshot");
+      if (allFollowers.length === 0 && maximumReportedTotal > 0) {
+        throw createError("follower_details_unavailable");
       }
       return allFollowers;
     }
