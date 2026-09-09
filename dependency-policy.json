@@ -47,34 +47,5 @@
     "tailwindcss",
     "typescript"
   ],
-  "temporaryExceptions": [
-    {
-      "rule": "minimumVersion",
-      "package": "nextra",
-      "version": "3.0.0-alpha.12",
-      "issue": "https://github.com/NPJigaK/twitch-follower-checker/issues/227",
-      "expiresOn": "2026-12-31"
-    },
-    {
-      "rule": "minimumVersion",
-      "package": "nextra-theme-docs",
-      "version": "3.0.0-alpha.12",
-      "issue": "https://github.com/NPJigaK/twitch-follower-checker/issues/227",
-      "expiresOn": "2026-12-31"
-    },
-    {
-      "rule": "prerelease",
-      "package": "nextra",
-      "version": "3.0.0-alpha.12",
-      "issue": "https://github.com/NPJigaK/twitch-follower-checker/issues/227",
-      "expiresOn": "2026-12-31"
-    },
-    {
-      "rule": "prerelease",
-      "package": "nextra-theme-docs",
-      "version": "3.0.0-alpha.12",
-      "issue": "https://github.com/NPJigaK/twitch-follower-checker/issues/227",
-      "expiresOn": "2026-12-31"
-    }
-  ]
+  "temporaryExceptions": []
 }

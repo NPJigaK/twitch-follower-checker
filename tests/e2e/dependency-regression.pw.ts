@@ -472,23 +472,42 @@ const openAuthenticatedApp = async (
   return { audit, twitch: audit.twitch as TwitchMock };
 };
 
-test("unauthenticated root remains usable at a narrow dark viewport", async ({
+test("unauthenticated root remains usable across the responsive theme matrix", async ({
   page,
 }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.emulateMedia({ colorScheme: "dark" });
+  test.setTimeout(60_000);
   const audit = await installNetworkAudit(page);
+  const cases = [
+    { width: 320, height: 700, colorScheme: "light" },
+    { width: 320, height: 700, colorScheme: "dark" },
+    { width: 390, height: 844, colorScheme: "light" },
+    { width: 390, height: 844, colorScheme: "dark" },
+    { width: 1280, height: 900, colorScheme: "light" },
+    { width: 1280, height: 900, colorScheme: "dark" },
+  ] as const;
 
-  const response = await page.goto("/");
-  expect(response?.status()).toBe(200);
-  await expect(page.getByText("Authenticate with Twitch", { exact: true })).toBeVisible();
-  await expect(page.locator("html")).toHaveClass(/dark/);
+  for (const { width, height, colorScheme } of cases) {
+    await page.setViewportSize({ width, height });
+    await page.emulateMedia({ colorScheme });
+    const response = await page.goto("/");
+    expect(response?.status()).toBe(200);
+    await expect(
+      page.getByText("Authenticate with Twitch", { exact: true }),
+    ).toBeVisible();
+    if (colorScheme === "dark") {
+      await expect(page.locator("html")).toHaveClass(/dark/);
+    } else {
+      await expect(page.locator("html")).not.toHaveClass(/dark/);
+    }
 
-  const horizontalOverflow = await page.evaluate(() =>
-    Math.max(document.body.scrollWidth, document.documentElement.scrollWidth) -
-      document.documentElement.clientWidth
-  );
-  expect(horizontalOverflow).toBeLessThanOrEqual(1);
+    const horizontalOverflow = await page.evaluate(() =>
+      Math.max(
+        document.body.scrollWidth,
+        document.documentElement.scrollWidth,
+      ) - document.documentElement.clientWidth,
+    );
+    expect(horizontalOverflow).toBeLessThanOrEqual(1);
+  }
   await audit.assertClean();
 });
 
@@ -529,7 +548,9 @@ test("documentation search preserves the production result and keyboard order", 
 }) => {
   const audit = await installNetworkAudit(page);
   await page.goto("/en/how_to_use/");
-  const input = page.getByRole("searchbox");
+  const input = page.locator('input[type="search"]:visible');
+  await expect(input).toHaveAttribute("role", "combobox");
+  await expect(input).toHaveAttribute("aria-autocomplete", "list");
   const searchIndexResponse = page.waitForResponse((response) => {
     const url = new URL(response.url());
     return (
@@ -541,27 +562,36 @@ test("documentation search preserves the production result and keyboard order", 
 
   await input.pressSequentially("follower", { delay: 25 });
   await searchIndexResponse;
-  const search = page.locator("div.nextra-search").filter({ has: input });
-  const links = search.getByRole("link");
-  await expect(links).toHaveCount(EXPECTED_FOLLOWER_SEARCH_HREFS.length);
+  await expect(input).toHaveAttribute("aria-expanded", "true");
+  const results = page.getByRole("listbox");
+  const options = results.getByRole("option");
+  await expect(options).toHaveCount(EXPECTED_FOLLOWER_SEARCH_HREFS.length);
 
-  const hrefs = await links.evaluateAll((elements) =>
+  const hrefs = await options.evaluateAll((elements) =>
     elements.map((element) => element.getAttribute("href")),
   );
   expect(hrefs).toEqual(EXPECTED_FOLLOWER_SEARCH_HREFS);
 
-  const ariaSnapshot = await search.ariaSnapshot();
-  const accessibleHrefs = Array.from(
-    ariaSnapshot.matchAll(/^\s*- \/url: (.+)$/gm),
-    (match) => match[1],
+  const firstOptionId = await options.first().getAttribute("id");
+  const secondOptionId = await options.nth(1).getAttribute("id");
+  expect(firstOptionId).not.toBeNull();
+  expect(secondOptionId).not.toBeNull();
+  await expect(input).toHaveAttribute(
+    "aria-activedescendant",
+    firstOptionId as string,
   );
-  expect(accessibleHrefs).toEqual(EXPECTED_FOLLOWER_SEARCH_HREFS);
-
   await input.press("ArrowDown");
-  await expect(links.nth(1)).toBeFocused();
-  await page.keyboard.press("ArrowUp");
-  await expect(links.first()).toBeFocused();
-  await page.keyboard.press("Enter");
+  await expect(input).toHaveAttribute(
+    "aria-activedescendant",
+    secondOptionId as string,
+  );
+  await expect(input).toBeFocused();
+  await input.press("ArrowUp");
+  await expect(input).toHaveAttribute(
+    "aria-activedescendant",
+    firstOptionId as string,
+  );
+  await input.press("Enter");
   await expect(page).toHaveURL(
     `${LOCAL_ORIGIN}${EXPECTED_FOLLOWER_SEARCH_HREFS[0]}`,
   );
@@ -583,27 +613,37 @@ test("mobile documentation search preserves the production result order", async 
     );
   });
   await page.keyboard.press("Control+k");
-  const input = page.getByRole("searchbox");
+  const input = page.locator('input[type="search"]:visible');
   await expect(input).toBeVisible();
+  await expect(input).toHaveAttribute("role", "combobox");
+  await expect(input).toHaveAttribute("aria-autocomplete", "list");
 
   await input.pressSequentially("follower", { delay: 25 });
   await searchIndexResponse;
-  const search = page.locator("div.nextra-search").filter({ has: input });
-  const links = search.getByRole("link");
-  await expect(links).toHaveCount(EXPECTED_FOLLOWER_SEARCH_HREFS.length);
+  await expect(input).toHaveAttribute("aria-expanded", "true");
+  const results = page.getByRole("listbox");
+  const options = results.getByRole("option");
+  await expect(options).toHaveCount(EXPECTED_FOLLOWER_SEARCH_HREFS.length);
   expect(
-    await links.evaluateAll((elements) =>
+    await options.evaluateAll((elements) =>
       elements.map((element) => element.getAttribute("href")),
     ),
   ).toEqual(EXPECTED_FOLLOWER_SEARCH_HREFS);
 
-  const ariaSnapshot = await search.ariaSnapshot();
-  expect(
-    Array.from(
-      ariaSnapshot.matchAll(/^\s*- \/url: (.+)$/gm),
-      (match) => match[1],
-    ),
-  ).toEqual(EXPECTED_FOLLOWER_SEARCH_HREFS);
+  const firstOptionId = await options.first().getAttribute("id");
+  const secondOptionId = await options.nth(1).getAttribute("id");
+  expect(firstOptionId).not.toBeNull();
+  expect(secondOptionId).not.toBeNull();
+  await expect(input).toHaveAttribute(
+    "aria-activedescendant",
+    firstOptionId as string,
+  );
+  await input.press("ArrowDown");
+  await expect(input).toHaveAttribute(
+    "aria-activedescendant",
+    secondOptionId as string,
+  );
+  await expect(input).toBeFocused();
   await audit.assertClean();
 });
 
@@ -720,6 +760,62 @@ test("synthetic authenticated lists keep grid, diff, filter, pagination, and com
       (request) => request.hasAfter && request.after === OPAQUE_CURSOR
     )
   ).toBe(true);
+  await audit.assertClean();
+});
+
+test("authenticated main tool remains usable across the responsive theme matrix", async ({
+  page,
+}) => {
+  test.setTimeout(60_000);
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.emulateMedia({ colorScheme: "light" });
+  const { audit } = await openAuthenticatedApp(page);
+  const cases = [
+    { width: 390, height: 844, colorScheme: "light" },
+    { width: 390, height: 844, colorScheme: "dark" },
+    { width: 1280, height: 900, colorScheme: "light" },
+    { width: 1280, height: 900, colorScheme: "dark" },
+  ] as const;
+
+  for (const { width, height, colorScheme } of cases) {
+    await page.setViewportSize({ width, height });
+    await page.emulateMedia({ colorScheme });
+    await page.reload();
+    await expect(applicationStatus(page)).toHaveText("Follower lists updated.");
+
+    const followerPanel = activePanel(page, "Follower List");
+    await expect(followerPanel.getByRole("treegrid")).toBeVisible();
+    await expect(
+      followerPanel.getByText("Retained Viewer", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Refresh follower lists" }),
+    ).toBeVisible();
+    await expect(
+      followerPanel.getByRole("button", { name: "Check done" }),
+    ).toBeDisabled();
+    for (const tab of [
+      "Follower List",
+      "New followed List",
+      "Unfollowed List",
+    ]) {
+      await expect(page.getByRole("tab", { name: tab })).toBeVisible();
+    }
+    if (colorScheme === "dark") {
+      await expect(page.locator("html")).toHaveClass(/dark/);
+    } else {
+      await expect(page.locator("html")).not.toHaveClass(/dark/);
+    }
+
+    const horizontalOverflow = await page.evaluate(() =>
+      Math.max(
+        document.body.scrollWidth,
+        document.documentElement.scrollWidth,
+      ) - document.documentElement.clientWidth,
+    );
+    expect(horizontalOverflow).toBeLessThanOrEqual(1);
+  }
+
   await audit.assertClean();
 });
 

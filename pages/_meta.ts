@@ -2,37 +2,37 @@ const hideDocs = {
   ja: {
     type: "page",
     title: "ドキュメント",
-    display: "hidden",
+    display: "children",
   },
   ko: {
     type: "page",
     title: "문서",
-    display: "hidden",
+    display: "children",
   },
   de: {
     type: "page",
     title: "Dokumentation",
-    display: "hidden",
+    display: "children",
   },
   es: {
     type: "page",
     title: "Documentación",
-    display: "hidden",
+    display: "children",
   },
   fr: {
     type: "page",
     title: "Documentation",
-    display: "hidden",
+    display: "children",
   },
   pt: {
     type: "page",
     title: "Documentação",
-    display: "hidden",
+    display: "children",
   },
   ru: {
     type: "page",
     title: "Документация",
-    display: "hidden",
+    display: "children",
   },
 };
 

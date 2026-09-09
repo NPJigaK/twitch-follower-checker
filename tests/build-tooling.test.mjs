@@ -27,6 +27,10 @@ const { getSupportedBrowsers } = require("next/dist/build/utils");
 const packageManifest = JSON.parse(
   readFileSync(join(workspace, "package.json"), "utf8"),
 );
+const yarnConfiguration = readFileSync(
+  join(workspace, ".yarnrc.yml"),
+  "utf8",
+).replaceAll("\r\n", "\n");
 const temporaryRoot = mkdtempSync(join(tmpdir(), "tfc-build-tooling-"));
 const resolvedTemporaryRoot = resolve(temporaryRoot);
 const resolvedSystemTemporaryDirectory = `${resolve(tmpdir())}${sep}`;
@@ -152,6 +156,30 @@ test("dependency verifier confirms PostCSS, MUI, and shared React resolutions", 
       { cwd: workspace, stdio: "pipe" },
     ),
   );
+});
+
+test("Twoslash receives the repository's exact TypeScript provider", () => {
+  const typescriptVersion = packageManifest.devDependencies.typescript;
+  const twoslashEntry = require.resolve("@shikijs/twoslash");
+  const twoslashManifest = JSON.parse(
+    readFileSync(resolve(dirname(twoslashEntry), "..", "package.json"), "utf8"),
+  );
+  assert.equal(typeof typescriptVersion, "string");
+  assert.equal(twoslashManifest.version, "1.29.2");
+  assert.match(
+    yarnConfiguration,
+    new RegExp(
+      `packageExtensions:\\n  "@shikijs/twoslash@1\\.29\\.2":\\n    dependencies:\\n      typescript: "${typescriptVersion.replaceAll(".", "\\.")}"(?:\\n|$)`,
+    ),
+  );
+  const twoslashRequire = createRequire(
+    resolve(dirname(twoslashEntry), "..", "package.json"),
+  );
+  assert.equal(
+    twoslashRequire("typescript/package.json").version,
+    typescriptVersion,
+  );
+  assert.equal(require("typescript/package.json").version, typescriptVersion);
 });
 
 test("artifact comparison normalizes build IDs and sitemap dates", () => {
