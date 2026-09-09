@@ -6,6 +6,55 @@ body {
   font-feature-settings: "rlig" 1, "calt" 1;
 }
 
+/*
+ * Stable Nextra includes every top-level page tree in its mobile menu. Keep
+ * the language picker as the cross-locale navigation and expose only the
+ * current locale's documentation tree in the mobile sidebar. Browsers that
+ * do not support :has() fall back to Nextra's complete (but longer) menu.
+ */
+.nextra-menu-mobile
+  > li:has(
+    > button:is(
+        [data-href="/en"],
+        [data-href="/de"],
+        [data-href="/es"],
+        [data-href="/fr"],
+        [data-href="/ja"],
+        [data-href="/ko"],
+        [data-href="/pt"],
+        [data-href="/ru"]
+      )
+  ) {
+  display: none;
+}
+
+html[lang="en-US"]
+  .nextra-menu-mobile
+  > li:has(> button[data-href="/en"]),
+html[lang="de-DE"]
+  .nextra-menu-mobile
+  > li:has(> button[data-href="/de"]),
+html[lang="es-ES"]
+  .nextra-menu-mobile
+  > li:has(> button[data-href="/es"]),
+html[lang="fr-FR"]
+  .nextra-menu-mobile
+  > li:has(> button[data-href="/fr"]),
+html[lang="ja-JP"]
+  .nextra-menu-mobile
+  > li:has(> button[data-href="/ja"]),
+html[lang="ko-KR"]
+  .nextra-menu-mobile
+  > li:has(> button[data-href="/ko"]),
+html[lang="pt-BR"]
+  .nextra-menu-mobile
+  > li:has(> button[data-href="/pt"]),
+html[lang="ru-RU"]
+  .nextra-menu-mobile
+  > li:has(> button[data-href="/ru"]) {
+  display: list-item;
+}
+
 .home-content p {
   margin-top: 1.5em;
   line-height: 1.75em;

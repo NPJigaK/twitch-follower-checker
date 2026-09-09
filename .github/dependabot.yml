@@ -74,16 +74,6 @@ updates:
       - dependency-name: "*"
         update-types:
           - "version-update:semver-major"
-      # Moving from the current prerelease to stable Nextra is tracked by #227.
-      # Remove these version-only ignores after that migration is complete.
-      - dependency-name: "nextra"
-        update-types:
-          - "version-update:semver-minor"
-          - "version-update:semver-patch"
-      - dependency-name: "nextra-theme-docs"
-        update-types:
-          - "version-update:semver-minor"
-          - "version-update:semver-patch"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

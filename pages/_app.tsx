@@ -4,6 +4,7 @@ import type { ReactElement } from "react";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import Script from "next/script";
+import { syncDocumentLocale } from "@/lib/documentLocale";
 import { GTM_ID, pageview } from "@/lib/gtm";
 import { updateDocsHeaderLink } from "@/lib/updateDocsHeaderLink";
 
@@ -19,13 +20,9 @@ export default function App({ Component, pageProps }: AppProps): ReactElement {
   }, [router.events]);
 
   useEffect(() => {
-    const handleRouteChange = () => updateDocsHeaderLink();
-    handleRouteChange();
-    router.events.on("routeChangeComplete", handleRouteChange);
-    return () => {
-      router.events.off("routeChangeComplete", handleRouteChange);
-    };
-  }, [router.events]);
+    syncDocumentLocale(router.asPath);
+    updateDocsHeaderLink();
+  }, [router.asPath]);
 
   return (
     <>

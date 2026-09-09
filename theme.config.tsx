@@ -1,5 +1,24 @@
+import type { ComponentProps } from "react";
 import type { DocsThemeConfig } from "nextra-theme-docs";
-import { useConfig } from "nextra-theme-docs";
+import { Navbar, useConfig } from "nextra-theme-docs";
+
+const localizedDocsRoutes = new Set([
+  "/de",
+  "/es",
+  "/fr",
+  "/ja",
+  "/ko",
+  "/pt",
+  "/ru",
+]);
+
+const ApplicationNavbar = ({ items }: ComponentProps<typeof Navbar>) => (
+  <Navbar
+    items={items.filter(
+      (item) => !("route" in item && localizedDocsRoutes.has(item.route)),
+    )}
+  />
+);
 
 const logo = (
   <svg
@@ -30,6 +49,12 @@ const logo = (
 );
 
 const config: DocsThemeConfig = {
+  // Nextra 3 stable changed its light background default to rgb(250 250 250).
+  // Preserve the existing application surface while migrating the docs theme.
+  backgroundColor: {
+    dark: "17,17,17",
+    light: "255,255,255",
+  },
   project: {
     icon: null,
     link: "https://github.com/NPJigaK/twitch-follower-checker",
@@ -37,6 +62,9 @@ const config: DocsThemeConfig = {
   docsRepositoryBase:
     "https://github.com/NPJigaK/twitch-follower-checker/tree/main",
   logo,
+  navbar: {
+    component: ApplicationNavbar,
+  },
   head: function useHead() {
     const { title, frontMatter } = useConfig();
 
