@@ -153,6 +153,8 @@ const isSeparatelyAuditedNetworkMessage = (
 
 class TwitchMock {
   private nextFollowerStatus: number | null = null;
+  private nextTerminalFollowerTotal: number | null = null;
+  private nextEmptyPositiveTotal: number | null = null;
   private nextFollowerHold:
     | Readonly<{ started: Deferred; release: Deferred }>
     | null = null;
@@ -164,6 +166,14 @@ class TwitchMock {
 
   failNextFollowerRequest(status: number): void {
     this.nextFollowerStatus = status;
+  }
+
+  reportNextTerminalFollowerTotal(total: number): void {
+    this.nextTerminalFollowerTotal = total;
+  }
+
+  returnNextEmptyPositiveFollowerPage(total: number): void {
+    this.nextEmptyPositiveTotal = total;
   }
 
   holdNextFollowerRequest(): FollowerHold {
@@ -247,6 +257,16 @@ class TwitchMock {
     const after = url.searchParams.get("after");
     this.followerRequests.push({ hasAfter, after });
 
+    if (!hasAfter && this.nextEmptyPositiveTotal !== null) {
+      const total = this.nextEmptyPositiveTotal;
+      this.nextEmptyPositiveTotal = null;
+      await route.fulfill({
+        status: 200,
+        json: { data: [], total, pagination: {} },
+      });
+      return;
+    }
+
     if (this.nextFollowerStatus !== null) {
       const status = this.nextFollowerStatus;
       this.nextFollowerStatus = null;
@@ -285,11 +305,14 @@ class TwitchMock {
       return;
     }
 
+    const terminalTotal =
+      this.nextTerminalFollowerTotal ?? currentFollowers.length;
+    this.nextTerminalFollowerTotal = null;
     await route.fulfill({
       status: 200,
       json: {
         data: secondFollowerPage,
-        total: currentFollowers.length,
+        total: terminalTotal,
         pagination: {},
       },
     });
@@ -884,5 +907,71 @@ test("failed manual refresh is recoverable and never mutates the baseline", asyn
   await expect(applicationStatus(page)).toHaveText("Follower lists updated.");
   await expect(alert).toHaveCount(0);
   await expect(checkDone).toBeEnabled();
+  await audit.assertClean();
+});
+
+test("dynamic terminal totals do not reject a completed cursor traversal", async ({
+  page,
+}) => {
+  const { audit, twitch } = await openAuthenticatedApp(page);
+  const storedBeforeRefresh = await page.evaluate(
+    (key) => localStorage.getItem(key),
+    SNAPSHOT_KEY
+  );
+
+  twitch.reportNextTerminalFollowerTotal(currentFollowers.length + 3);
+  await page.getByRole("button", { name: "Refresh follower lists" }).click();
+
+  await expect(applicationStatus(page)).toHaveText("Follower lists updated.");
+  await expect(applicationAlert(page)).toHaveCount(0);
+  const followerPanel = activePanel(page, "Follower List");
+  await expect(
+    followerPanel.getByText("Retained Viewer", { exact: true })
+  ).toBeVisible();
+  await page.getByRole("tab", { name: "New followed List" }).click();
+  await expect(
+    activePanel(page, "New followed List").getByRole("button", {
+      name: "Check done",
+    })
+  ).toBeEnabled();
+  expect(await page.evaluate((key) => localStorage.getItem(key), SNAPSHOT_KEY)).toBe(
+    storedBeforeRefresh
+  );
+  await audit.assertClean();
+});
+
+test("an empty positive response remains fail-closed with a specific recovery message", async ({
+  page,
+}) => {
+  const { audit, twitch } = await openAuthenticatedApp(page);
+  const baselineBeforeFailure = await page.evaluate(
+    (key) => localStorage.getItem(key),
+    SNAPSHOT_KEY
+  );
+
+  twitch.returnNextEmptyPositiveFollowerPage(8);
+  await page.getByRole("button", { name: "Refresh follower lists" }).click();
+
+  const alert = applicationAlert(page);
+  await expect(alert).toContainText(
+    "Twitch returned a follower count without follower details."
+  );
+  await expect(alert).toContainText(
+    "Showing the last successfully loaded follower lists."
+  );
+  await expect(
+    activePanel(page, "Follower List").getByText("Retained Viewer", {
+      exact: true,
+    })
+  ).toBeVisible();
+  await page.getByRole("tab", { name: "New followed List" }).click();
+  await expect(
+    activePanel(page, "New followed List").getByRole("button", {
+      name: "Check done",
+    })
+  ).toBeDisabled();
+  expect(await page.evaluate((key) => localStorage.getItem(key), SNAPSHOT_KEY)).toBe(
+    baselineBeforeFailure
+  );
   await audit.assertClean();
 });

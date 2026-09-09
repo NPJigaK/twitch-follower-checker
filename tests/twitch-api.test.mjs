@@ -396,27 +396,27 @@ test("fetchAllFollowers deduplicates repeated rows within one page", async () =>
   );
 });
 
-test("fetchAllFollowers rejects non-authoritative and malformed/partial pages", async (t) => {
+test("fetchAllFollowers distinguishes unavailable details from malformed/partial pages", async (t) => {
   const cases = [
     [
       { total: 10, pagination: {} },
-      "non_authoritative_snapshot",
+      "follower_details_unavailable",
       "total-only response",
     ],
     [
       { data: [], total: 10, pagination: {} },
-      "non_authoritative_snapshot",
+      "follower_details_unavailable",
       "empty first page with positive total",
+    ],
+    [
+      { data: [], total: 10, pagination: { cursor: "next" } },
+      "follower_details_unavailable",
+      "empty positive first page cannot be rescued by an advertised cursor",
     ],
     [
       { data: [follower("a")], total: 1 },
       "invalid_response",
       "missing pagination object",
-    ],
-    [
-      { data: [follower("a")], total: 2, pagination: {} },
-      "non_authoritative_snapshot",
-      "terminal first page contains fewer rows than total",
     ],
     [
       { data: [{ user_id: "a" }], total: 1, pagination: {} },
@@ -469,22 +469,103 @@ test("fetchAllFollowers rejects non-authoritative and malformed/partial pages", 
     );
   });
 
-  await t.test("an incomplete terminal page rejects the accumulated rows", async () => {
+  await t.test("missing follower details on a later page reject accumulated rows", async () => {
     const { fetchImpl } = queuedFetch(
       jsonResponse({
         data: [follower("a")],
         total: 2,
         pagination: { cursor: "next" },
       }),
-      jsonResponse({ data: [], total: 2, pagination: {} })
+      jsonResponse({ total: 2, pagination: {} })
     );
     await assertTwitchError(
       fetchAllFollowers("token", "client-123", "broadcaster", {
         fetchImpl,
       }),
-      "non_authoritative_snapshot"
+      "follower_details_unavailable"
     );
   });
+
+  await t.test(
+    "a fully empty traversal remains unavailable if a later page reports followers",
+    async () => {
+      const { fetchImpl } = queuedFetch(
+        jsonResponse({
+          data: [],
+          total: 0,
+          pagination: { cursor: "next" },
+        }),
+        jsonResponse({ data: [], total: 2, pagination: {} })
+      );
+      await assertTwitchError(
+        fetchAllFollowers("token", "client-123", "broadcaster", {
+          fetchImpl,
+        }),
+        "follower_details_unavailable"
+      );
+    }
+  );
+
+  await t.test(
+    "a dynamic empty terminal page is accepted when valid rows were already traversed",
+    async () => {
+      const expected = follower("a");
+      const { fetchImpl } = queuedFetch(
+        jsonResponse({
+          data: [expected],
+          total: 2,
+          pagination: { cursor: "next" },
+        }),
+        jsonResponse({ data: [], total: 3, pagination: {} })
+      );
+
+      assert.deepEqual(
+        await fetchAllFollowers("token", "client-123", "broadcaster", {
+          fetchImpl,
+        }),
+        [expected]
+      );
+    }
+  );
+
+  await t.test(
+    "a terminal total larger than the returned rows is diagnostic rather than authoritative",
+    async () => {
+      const expected = follower("a");
+      const { fetchImpl } = queuedFetch(
+        jsonResponse({ data: [expected], total: 2, pagination: {} })
+      );
+
+      assert.deepEqual(
+        await fetchAllFollowers("token", "client-123", "broadcaster", {
+          fetchImpl,
+        }),
+        [expected]
+      );
+    }
+  );
+
+  await t.test(
+    "duplicate dynamic rows remain accepted when the terminal total increases",
+    async () => {
+      const expected = follower("a");
+      const { fetchImpl } = queuedFetch(
+        jsonResponse({
+          data: [expected],
+          total: 2,
+          pagination: { cursor: "next" },
+        }),
+        jsonResponse({ data: [expected], total: 3, pagination: {} })
+      );
+
+      assert.deepEqual(
+        await fetchAllFollowers("token", "client-123", "broadcaster", {
+          fetchImpl,
+        }),
+        [expected]
+      );
+    }
+  );
 
   await t.test(
     "a total decrease during pagination retains already traversed rows",
@@ -510,8 +591,8 @@ test("fetchAllFollowers rejects non-authoritative and malformed/partial pages", 
   await t.test("a later page cannot contain rows when its total is zero", async () => {
     const { fetchImpl } = queuedFetch(
       jsonResponse({
-        data: [],
-        total: 0,
+        data: [follower("a")],
+        total: 2,
         pagination: { cursor: "next" },
       }),
       jsonResponse({

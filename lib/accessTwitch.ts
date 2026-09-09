@@ -58,8 +58,8 @@ const REFRESH_MESSAGES: Record<FollowerRefreshProblemCode, string> = {
     "Twitch returned an unexpected response. Your previous follower lists were kept.",
   invalid_response:
     "Twitch returned an unexpected response. Your previous follower lists were kept.",
-  non_authoritative_snapshot:
-    "Twitch returned incomplete follower data. Your previous baseline was not changed.",
+  follower_details_unavailable:
+    "Twitch returned a follower count without follower details. Your previous baseline was not changed.",
   pagination_loop:
     "Twitch returned incomplete pagination data. Your previous baseline was not changed.",
   storage_unavailable:
