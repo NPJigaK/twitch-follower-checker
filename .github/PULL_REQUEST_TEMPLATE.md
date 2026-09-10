@@ -6,6 +6,25 @@
 
 <!-- List the commands or manual checks you ran. -->
 
+## Browser and assistive-technology verification
+
+<!-- Required for browser-facing output or interaction changes; see BROWSER_SUPPORT.md. -->
+
+Impact: `None — browser artifact unchanged` | `Browser output` | `User interaction`
+
+Applicable Playwright projects: `<names>` | `N/A — <specific reason>`
+
+Viewport/device/orientation/input coverage: `<summary>`
+
+Result/report: `<CI run or exact command/result>`
+
+Native assistive technology: `Not run` | `<environment/version/date/result>`
+
+- [ ] I ran every applicable engine/device project or explained why an environment is unavailable.
+- [ ] I did not treat emulation, Playwright accessibility assertions, or axe output as native AT proof.
+- [ ] I used synthetic fixtures only and linked redacted evidence.
+- [ ] I recorded any visible or interaction regression and linked its issue.
+
 ## External Contract Review
 
 <!--

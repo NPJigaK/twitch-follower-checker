@@ -1,7 +1,37 @@
-import { expect, test, type Page, type Request, type Route } from "@playwright/test";
+import {
+  expect,
+  test,
+  type Locator,
+  type Page,
+  type Request,
+  type Route,
+} from "@playwright/test";
 import axe from "axe-core";
 
-const LOCAL_ORIGIN = "http://127.0.0.1:4173";
+const rawTestPort = process.env.PLAYWRIGHT_TEST_PORT ?? "4173";
+const testPort = Number(rawTestPort);
+if (!/^[1-9]\d{0,4}$/.test(rawTestPort) || testPort > 65_535) {
+  throw new Error(
+    "PLAYWRIGHT_TEST_PORT must be a canonical integer from 1 through 65535",
+  );
+}
+const LOCAL_ORIGIN = `http://127.0.0.1:${testPort}`;
+const responsiveThemeCases = [
+  { width: 320, height: 700, colorScheme: "light" },
+  { width: 320, height: 700, colorScheme: "dark" },
+  { width: 390, height: 844, colorScheme: "light" },
+  { width: 390, height: 844, colorScheme: "dark" },
+  { width: 412, height: 915, colorScheme: "light" },
+  { width: 412, height: 915, colorScheme: "dark" },
+  { width: 768, height: 1024, colorScheme: "light" },
+  { width: 768, height: 1024, colorScheme: "dark" },
+  { width: 1024, height: 768, colorScheme: "light" },
+  { width: 1024, height: 768, colorScheme: "dark" },
+  { width: 1280, height: 900, colorScheme: "light" },
+  { width: 1280, height: 900, colorScheme: "dark" },
+  { width: 1440, height: 900, colorScheme: "light" },
+  { width: 1440, height: 900, colorScheme: "dark" },
+] as const;
 const SYNTHETIC_TOKEN = "synthetic-e2e-token-not-a-real-credential";
 const CLIENT_ID = "h0pe6dkb6r51jzkk27ujasldoqgio9";
 const BROADCASTER_ID = "channel-e2e";
@@ -324,6 +354,7 @@ type NetworkAuditOptions = Readonly<{
   mockTwitch?: boolean;
   allowedLocalStatus?: (url: URL, status: number) => boolean;
   allowedConsoleHttpStatuses?: readonly number[];
+  mockedExternalNavigation?: (url: URL, request: Request) => boolean;
 }>;
 
 const installNetworkAudit = async (
@@ -335,6 +366,7 @@ const installNetworkAudit = async (
   const localFailures: string[] = [];
   const localHttpErrors: string[] = [];
   const unexpectedExternalRequests: string[] = [];
+  const mockedExternalNavigations: string[] = [];
   const twitch = options.mockTwitch ? new TwitchMock() : null;
 
   page.on("pageerror", (error) => {
@@ -396,6 +428,19 @@ const installNetworkAudit = async (
     }
 
     if (
+      request.isNavigationRequest() &&
+      options.mockedExternalNavigation?.(url, request)
+    ) {
+      mockedExternalNavigations.push(url.href);
+      await route.fulfill({
+        status: 200,
+        contentType: "text/html; charset=utf-8",
+        body: "<!doctype html><title>Mocked reviewed external destination</title>",
+      });
+      return;
+    }
+
+    if (
       url.origin === "https://www.googletagmanager.com" &&
       (url.pathname === "/gtm.js" || url.pathname === "/ns.html")
     ) {
@@ -429,6 +474,7 @@ const installNetworkAudit = async (
 
   return {
     twitch,
+    mockedExternalNavigations,
     assertClean: async () => {
       await page.waitForLoadState("networkidle");
       expect(pageErrors, "browser page errors").toEqual([]);
@@ -479,6 +525,24 @@ const applicationStatus = (page: Page) =>
 const applicationAlert = (page: Page) =>
   page.locator('div[role="alert"][aria-atomic="true"]');
 
+const expectTouchControlInViewport = async (control: Locator): Promise<void> => {
+  await control.scrollIntoViewIfNeeded();
+  const box = await control.boundingBox();
+  const viewport = control.page().viewportSize();
+  expect(box).not.toBeNull();
+  expect(viewport).not.toBeNull();
+  if (box === null || viewport === null) {
+    return;
+  }
+
+  expect(box.width).toBeGreaterThanOrEqual(24);
+  expect(box.height).toBeGreaterThanOrEqual(24);
+  expect(box.x).toBeGreaterThanOrEqual(-1);
+  expect(box.y).toBeGreaterThanOrEqual(-1);
+  expect(box.x + box.width).toBeLessThanOrEqual(viewport.width + 1);
+  expect(box.y + box.height).toBeLessThanOrEqual(viewport.height + 1);
+};
+
 const openAuthenticatedApp = async (
   page: Page,
   options: Pick<NetworkAuditOptions, "allowedConsoleHttpStatuses"> = {}
@@ -501,20 +565,19 @@ test("unauthenticated root remains usable across the responsive theme matrix", a
 }) => {
   test.setTimeout(60_000);
   const audit = await installNetworkAudit(page);
-  const cases = [
-    { width: 320, height: 700, colorScheme: "light" },
-    { width: 320, height: 700, colorScheme: "dark" },
-    { width: 390, height: 844, colorScheme: "light" },
-    { width: 390, height: 844, colorScheme: "dark" },
-    { width: 1280, height: 900, colorScheme: "light" },
-    { width: 1280, height: 900, colorScheme: "dark" },
-  ] as const;
+  const initialCase = responsiveThemeCases[0];
 
-  for (const { width, height, colorScheme } of cases) {
+  await page.setViewportSize({
+    width: initialCase.width,
+    height: initialCase.height,
+  });
+  await page.emulateMedia({ colorScheme: initialCase.colorScheme });
+  const response = await page.goto("/");
+  expect(response?.status()).toBe(200);
+
+  for (const { width, height, colorScheme } of responsiveThemeCases) {
     await page.setViewportSize({ width, height });
     await page.emulateMedia({ colorScheme });
-    const response = await page.goto("/");
-    expect(response?.status()).toBe(200);
     await expect(
       page.getByText("Authenticate with Twitch", { exact: true }),
     ).toBeVisible();
@@ -531,6 +594,9 @@ test("unauthenticated root remains usable across the responsive theme matrix", a
       ) - document.documentElement.clientWidth,
     );
     expect(horizontalOverflow).toBeLessThanOrEqual(1);
+    // Let every engine finish any work triggered by the viewport/theme change
+    // before the next matrix entry.
+    await page.waitForLoadState("networkidle");
   }
   await audit.assertClean();
 });
@@ -998,19 +1064,10 @@ test("authenticated main tool remains usable across the responsive theme matrix"
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.emulateMedia({ colorScheme: "light" });
   const { audit } = await openAuthenticatedApp(page);
-  const cases = [
-    { width: 320, height: 700, colorScheme: "light" },
-    { width: 320, height: 700, colorScheme: "dark" },
-    { width: 390, height: 844, colorScheme: "light" },
-    { width: 390, height: 844, colorScheme: "dark" },
-    { width: 1280, height: 900, colorScheme: "light" },
-    { width: 1280, height: 900, colorScheme: "dark" },
-  ] as const;
 
-  for (const { width, height, colorScheme } of cases) {
+  for (const { width, height, colorScheme } of responsiveThemeCases) {
     await page.setViewportSize({ width, height });
     await page.emulateMedia({ colorScheme });
-    await page.reload();
     await expect(applicationStatus(page)).toHaveText("Follower lists updated.");
 
     const followerPanel = activePanel(page, "Follower List");
@@ -1024,6 +1081,7 @@ test("authenticated main tool remains usable across the responsive theme matrix"
     await expect(
       followerPanel.getByRole("button", { name: "Check done" }),
     ).toBeDisabled();
+    const tabBoxes: Array<Readonly<{ x: number; y: number; width: number; height: number }>> = [];
     for (const tab of [
       "Follower List",
       "New followed List",
@@ -1032,9 +1090,31 @@ test("authenticated main tool remains usable across the responsive theme matrix"
       const tabElement = page.getByRole("tab", { name: tab });
       await expect(tabElement).toBeVisible();
       const box = await tabElement.boundingBox();
-      expect(box).not.toBeNull();
-      expect(box?.width).toBeGreaterThanOrEqual(24);
-      expect(box?.height).toBeGreaterThanOrEqual(24);
+      if (box === null) {
+        throw new Error(`The ${tab} tab has no rendered bounds`);
+      }
+      expect(box.width).toBeGreaterThanOrEqual(24);
+      expect(box.height).toBeGreaterThanOrEqual(24);
+      expect(box.x).toBeGreaterThanOrEqual(-1);
+      expect(box.x + box.width).toBeLessThanOrEqual(width + 1);
+      tabBoxes.push(box);
+    }
+    for (let leftIndex = 0; leftIndex < tabBoxes.length; leftIndex += 1) {
+      for (let rightIndex = leftIndex + 1; rightIndex < tabBoxes.length; rightIndex += 1) {
+        const left = tabBoxes[leftIndex];
+        const right = tabBoxes[rightIndex];
+        const overlapWidth = Math.max(
+          0,
+          Math.min(left.x + left.width, right.x + right.width) -
+            Math.max(left.x, right.x),
+        );
+        const overlapHeight = Math.max(
+          0,
+          Math.min(left.y + left.height, right.y + right.height) -
+            Math.max(left.y, right.y),
+        );
+        expect(overlapWidth * overlapHeight).toBeLessThanOrEqual(0.5);
+      }
     }
     await page.getByRole("tab", { name: "New followed List" }).click();
     await expect(
@@ -1058,10 +1138,133 @@ test("authenticated main tool remains usable across the responsive theme matrix"
       ) - document.documentElement.clientWidth,
     );
     expect(horizontalOverflow).toBeLessThanOrEqual(1);
+    await page.waitForLoadState("networkidle");
   }
 
   await audit.assertClean();
 });
+
+test("legacy Japanese route preserves its reviewed external redirect contract", async ({
+  page,
+}) => {
+  const expectedDestination =
+    "https://blog.devkey.jp/posts/twitch-follower-checker/";
+  const audit = await installNetworkAudit(page, {
+    mockedExternalNavigation: (url) => url.href === expectedDestination,
+  });
+
+  const localResponse = await page.request.get(`${LOCAL_ORIGIN}/jp/`);
+  expect(localResponse.status()).toBe(200);
+  await page.goto("/jp/");
+  await expect(page).toHaveURL(expectedDestination);
+  expect(audit.mockedExternalNavigations).toEqual([expectedDestination]);
+  await audit.assertClean();
+});
+
+for (const colorScheme of ["light", "dark"] as const) {
+  test(`emulated touch devices preserve the core follower workflow after rotation (${colorScheme}) @touch`, async ({
+    page,
+  }, testInfo) => {
+    test.setTimeout(60_000);
+    expect(testInfo.project.name).toMatch(/-(?:phone|tablet)-emulated$/);
+    await page.emulateMedia({ colorScheme });
+    const { audit } = await openAuthenticatedApp(page);
+    await expect
+      .poll(() =>
+        page.locator("html").evaluate((element) =>
+          element.classList.contains("dark"),
+        ),
+      )
+      .toBe(colorScheme === "dark");
+    const initialViewport = page.viewportSize();
+    if (initialViewport === null) {
+      throw new Error("The emulated touch project must define a viewport");
+    }
+
+    const refresh = page.getByRole("button", { name: "Refresh follower lists" });
+    await refresh.tap();
+    await expect(applicationStatus(page)).toHaveText("Follower lists updated.");
+
+    const newTab = page.getByRole("tab", {
+      name: "New followed List",
+      exact: true,
+    });
+    await newTab.tap();
+    const newPanel = activePanel(page, "New followed List");
+    const search = newPanel.getByRole("textbox", {
+      name: "Search New followed List",
+    });
+    await search.tap();
+    await search.pressSequentially("Synthetic New 07");
+    await expect(
+      newPanel.getByText("Synthetic New 07", { exact: true }),
+    ).toBeVisible();
+
+    const checkDone = newPanel.getByRole("button", { name: "Check done" });
+    const criticalControls = [refresh, newTab, search, checkDone];
+    for (const control of criticalControls) {
+      await expectTouchControlInViewport(control);
+    }
+
+    await page.setViewportSize({
+      width: initialViewport.height,
+      height: initialViewport.width,
+    });
+    await expect
+      .poll(() => page.viewportSize())
+      .toEqual({
+        width: initialViewport.height,
+        height: initialViewport.width,
+      });
+    await expect(newTab).toHaveAttribute("aria-selected", "true");
+    await expect(search).toHaveValue("Synthetic New 07");
+    for (const control of criticalControls) {
+      await expectTouchControlInViewport(control);
+    }
+    const horizontalOverflow = await page.evaluate(() =>
+      Math.max(
+        document.body.scrollWidth,
+        document.documentElement.scrollWidth,
+      ) - document.documentElement.clientWidth,
+    );
+    expect(horizontalOverflow).toBeLessThanOrEqual(1);
+
+    await search.fill("");
+    const followerTab = page.getByRole("tab", {
+      name: "Follower List",
+      exact: true,
+    });
+    await followerTab.tap();
+    const followerPanel = activePanel(page, "Follower List");
+    const nextPage = followerPanel.locator('[aria-label="Next Page"]');
+    await nextPage.tap();
+    await expect(
+      followerPanel.getByText("Synthetic New 19", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      followerPanel.getByRole("link", {
+        name: "synthetic_new_19",
+        exact: true,
+      }),
+    ).toHaveAttribute("href", "https://www.twitch.tv/synthetic_new_19");
+
+    const unfollowedTab = page.getByRole("tab", {
+      name: "Unfollowed List",
+      exact: true,
+    });
+    await unfollowedTab.tap();
+    const unfollowedPanel = activePanel(page, "Unfollowed List");
+    const finalCheckDone = unfollowedPanel.getByRole("button", {
+      name: "Check done",
+    });
+    await finalCheckDone.tap();
+    await expect(applicationStatus(page)).toHaveText(
+      "Follower baseline and check date saved.",
+    );
+    await expect(finalCheckDone).toBeDisabled();
+    await audit.assertClean();
+  });
+}
 
 test("manual refresh exposes loading without discarding the last valid lists", async ({
   page,

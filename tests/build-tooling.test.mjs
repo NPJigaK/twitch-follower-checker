@@ -31,6 +31,18 @@ const yarnConfiguration = readFileSync(
   join(workspace, ".yarnrc.yml"),
   "utf8",
 ).replaceAll("\r\n", "\n");
+const playwrightConfiguration = readFileSync(
+  join(workspace, "playwright.config.ts"),
+  "utf8",
+).replaceAll("\r\n", "\n");
+const pagesWorkflow = readFileSync(
+  join(workspace, ".github", "workflows", "nextjs.yml"),
+  "utf8",
+).replaceAll("\r\n", "\n");
+const browserSupportPolicy = readFileSync(
+  join(workspace, "BROWSER_SUPPORT.md"),
+  "utf8",
+).replaceAll("\r\n", "\n");
 const temporaryRoot = mkdtempSync(join(tmpdir(), "tfc-build-tooling-"));
 const resolvedTemporaryRoot = resolve(temporaryRoot);
 const resolvedSystemTemporaryDirectory = `${resolve(tmpdir())}${sep}`;
@@ -146,6 +158,94 @@ test("Autoprefixer emits the reviewed legacy WebKit UI fallbacks", async () => {
 
   assert.match(result.css, /-webkit-backdrop-filter:blur\(1px\)/);
   assert.match(result.css, /-webkit-hyphens:auto/);
+});
+
+test("the protected build keeps the aggregate cross-browser and device gate", () => {
+  const projectBlocks = new Map(
+    [...playwrightConfiguration.matchAll(
+      /    \{\n      name: "([^"]+)",([\s\S]*?)\n    \},/g,
+    )].map((match) => [match[1], match[2]]),
+  );
+  const expectedProjects = [
+    ["chromium-desktop", 'devices["Desktop Chrome"]', "grepInvert: /@touch/"],
+    ["firefox-desktop", 'devices["Desktop Firefox"]', "grepInvert: /@touch/"],
+    ["webkit-desktop", 'devices["Desktop Safari"]', "grepInvert: /@touch/"],
+    ["chromium-phone-emulated", 'devices["Pixel 7"]', "grep: /@touch/"],
+    ["webkit-phone-emulated", 'devices["iPhone 15"]', "grep: /@touch/"],
+    ["chromium-tablet-emulated", 'devices["Galaxy Tab S9"]', "grep: /@touch/"],
+    ["webkit-tablet-emulated", 'devices["iPad Pro 11"]', "grep: /@touch/"],
+  ];
+  assert.equal(projectBlocks.size, expectedProjects.length);
+  for (const [project, descriptor, selector] of expectedProjects) {
+    const projectBlock = projectBlocks.get(project);
+    assert.ok(projectBlock, `${project} must remain configured`);
+    assert.ok(
+      projectBlock.includes(descriptor),
+      `${project} must use ${descriptor}`,
+    );
+    assert.ok(
+      projectBlock.includes(selector),
+      `${project} must retain its touch-suite partition`,
+    );
+  }
+
+  const buildJob = pagesWorkflow.match(
+    /\n  build:\n[\s\S]*?(?=\n  [A-Za-z0-9_-]+:\n|$)/,
+  )?.[0];
+  assert.ok(buildJob, "the protected build job must remain present");
+  assert.match(
+    buildJob,
+    /yarn playwright install --with-deps chromium firefox webkit/,
+  );
+  assert.match(
+    buildJob,
+    /name: Run cross-browser and emulated-device regression tests\n\s+run: yarn test:e2e/,
+  );
+
+  const playwrightList = execFileSync(
+    process.execPath,
+    [require.resolve("@playwright/test/cli"), "test", "--list"],
+    {
+      cwd: workspace,
+      encoding: "utf8",
+      env: { ...process.env, PLAYWRIGHT_TEST_PORT: "4211" },
+    },
+  ).replaceAll("\r\n", "\n");
+  assert.match(playwrightList, /Total: 73 tests in 2 files/);
+  for (const [project] of expectedProjects) {
+    const listedCount = playwrightList
+      .split("\n")
+      .filter((line) => line.includes(`[${project}]`)).length;
+    assert.equal(
+      listedCount,
+      project.endsWith("-desktop") ? 19 : 4,
+      `${project} must retain its expected aggregate assignments`,
+    );
+  }
+
+  const phaseBSection = browserSupportPolicy.match(
+    /## Native and manual Phase B matrix[\s\S]*?(?=\n## Pull-request release gate)/,
+  )?.[0];
+  assert.ok(phaseBSection, "the native Phase B matrix must remain present");
+  const phaseBRows = phaseBSection
+    .split("\n")
+    .filter((line) => /^\| .+ \| .+ \| Not yet verified \| — \|$/.test(line));
+  assert.equal(phaseBRows.length, 8);
+  for (const environment of [
+    "Windows NVDA + Firefox",
+    "Windows NVDA + Chrome, where available",
+    "macOS VoiceOver + Safari",
+    "iPhone VoiceOver + iOS Safari",
+    "iPad VoiceOver + iPadOS Safari",
+    "Android TalkBack + Chrome",
+    "Desktop browser zoom at 200%",
+    "Applicable WCAG reflow scenario",
+  ]) {
+    assert.ok(
+      phaseBRows.some((line) => line.startsWith(`| ${environment} |`)),
+      `${environment} must remain explicitly unverified`,
+    );
+  }
 });
 
 test("dependency verifier confirms PostCSS, MUI, and shared React resolutions", () => {
