@@ -18,6 +18,24 @@ yarn test
 yarn build
 ```
 
+## External contract review
+
+Changes that rely on behavior outside this repository require a proportionate external-contract review. This includes Twitch/API responses, OAuth, browser or platform behavior, framework and dependency contracts, and hosted-service behavior or configuration. The pull request template keeps this gate conditional: documentation-only or internal changes that do not depend on an external contract may mark it `N/A` with a specific reason. Lockfile-only transitive maintenance that cannot reach the browser or application runtime may use the abbreviated tier. Changes to externally governed runtime behavior, or any condition that rejects, discards, invalidates, or refuses an external response or state, require the full tier.
+
+For an applicable change:
+
+1. Complete or link the reusable [External Contract Review ledger and checklist](EXTERNAL_CONTRACT_REVIEW.md) in the pull request description.
+2. Use a primary official source for every contract claim. Record the exact URL or section, reviewed version or revision, and review date, then map each claim to the affected code and tests.
+3. Record what the provider guarantees, explicitly permits, does not guarantee or treats as dynamic, and what is only a local product assumption. A local assumption must not silently become an authoritative rejection condition.
+4. Challenge both directions: could accepting the input corrupt data or security state, and could rejecting it exclude a valid user or provider response? New or changed rejection conditions need positive, negative, and provider-permitted unusual-response tests.
+5. Where applicable, show that fail-closed paths preserve last-good data and timestamps, that the user has a recoverable UI or retry path, and that a browser journey covers changes to navigation, authentication, persistence, or core interaction.
+6. Use synthetic fixtures and redacted evidence only. Never put real access tokens, credentials, follower data, user data, or other sensitive information in tests or public review evidence.
+7. Recheck and record the contract when the provider documentation, API or OAuth version, framework or dependency version, or hosted-service behavior/configuration changes. The ledger explains the triggers and the evidence to retain for each category.
+
+Before merge, a reviewer must confirm that the selected tier is appropriate, that an applicable record is actually completed rather than linked to the blank template, and that no rejection condition is hidden behind `N/A`, `None`, the word `non-authoritative`, or an unlabeled local assumption.
+
+The completed [#298](https://github.com/NPJigaK/twitch-follower-checker/issues/298) incident and [PR #299](https://github.com/NPJigaK/twitch-follower-checker/pull/299) are the regression case study: a mutable `total` in a dynamic paginated Twitch response was treated as an authoritative completeness invariant. A new rejection rule must document the primary-source basis and test the provider-permitted counterexamples before it can be used to reject a response.
+
 ## Submission rules
 
 - Submit only material that you created or are authorized to contribute.
