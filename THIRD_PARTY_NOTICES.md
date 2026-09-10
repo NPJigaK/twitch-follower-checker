@@ -27,6 +27,10 @@ The following third-party material is available under the Apache License, Versio
 - `eslint` 8.57.1 — <https://github.com/eslint/eslint/blob/main/LICENSE>
 - `tailwindcss` 3.4.19 — <https://github.com/tailwindlabs/tailwindcss/blob/v3/LICENSE>
 
+## Mozilla Public License 2.0 material
+
+- `axe-core` 4.13.0 is used only by the browser accessibility regression tests and is available under the Mozilla Public License 2.0 — <https://github.com/dequelabs/axe-core/blob/develop/LICENSE>
+
 ## react-social-login-buttons
 
 `react-social-login-buttons` 4.1.1 includes an MIT license file identifying Copyright © 2018 Michal Szorád, while its package metadata declares `ISC`. Its distributed social-service icons also include upstream acknowledgements. See:
