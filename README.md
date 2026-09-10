@@ -15,6 +15,8 @@ Please check the [documentation](https://twitch-follower-checker.devkey.jp/en)!
 
 Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a contribution.
 
+Browser/device support and release-test expectations are documented in [BROWSER_SUPPORT.md](BROWSER_SUPPORT.md).
+
 ## License
 
 Twitch Follower Checker is source-available software licensed under the [PolyForm Perimeter License 1.0.1](LICENSE). Use of this software to provide a competing product or service is not permitted.

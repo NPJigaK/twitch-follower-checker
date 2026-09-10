@@ -18,6 +18,8 @@ yarn test
 yarn build
 ```
 
+For browser-reaching changes, read [BROWSER_SUPPORT.md](BROWSER_SUPPORT.md). The aggregate `yarn test:e2e` gate must cover every applicable Playwright project; a Chromium pass alone is insufficient. Playwright Firefox/WebKit and emulated devices are automation evidence only, not branded Firefox/Safari or real-device proof. axe/ARIA checks do not replace native assistive-technology testing; record native combinations as `Not verified` until they are actually run.
+
 ## External contract review
 
 Changes that rely on behavior outside this repository require a proportionate external-contract review. This includes Twitch/API responses, OAuth, browser or platform behavior, framework and dependency contracts, and hosted-service behavior or configuration. The pull request template keeps this gate conditional: documentation-only or internal changes that do not depend on an external contract may mark it `N/A` with a specific reason. Lockfile-only transitive maintenance that cannot reach the browser or application runtime may use the abbreviated tier. Changes to externally governed runtime behavior, or any condition that rejects, discards, invalidates, or refuses an external response or state, require the full tier.

@@ -6,7 +6,13 @@ import { fileURLToPath } from "node:url";
 const workspace = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const outputRoot = await realpath(resolve(workspace, "out"));
 const host = "127.0.0.1";
-const port = 4173;
+const rawPort = process.env.PLAYWRIGHT_TEST_PORT ?? "4173";
+const port = Number(rawPort);
+if (!/^[1-9]\d{0,4}$/.test(rawPort) || port > 65_535) {
+  throw new Error(
+    "PLAYWRIGHT_TEST_PORT must be a canonical integer from 1 through 65535",
+  );
+}
 
 const contentTypes = new Map([
   [".css", "text/css; charset=utf-8"],

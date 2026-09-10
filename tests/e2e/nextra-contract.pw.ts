@@ -1,6 +1,13 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
-const LOCAL_ORIGIN = "http://127.0.0.1:4173";
+const rawTestPort = process.env.PLAYWRIGHT_TEST_PORT ?? "4173";
+const testPort = Number(rawTestPort);
+if (!/^[1-9]\d{0,4}$/.test(rawTestPort) || testPort > 65_535) {
+  throw new Error(
+    "PLAYWRIGHT_TEST_PORT must be a canonical integer from 1 through 65535",
+  );
+}
+const LOCAL_ORIGIN = `http://127.0.0.1:${testPort}`;
 
 const localeDefinitions = {
   en: {
@@ -360,6 +367,10 @@ test.describe("Nextra 3.3.1 documentation contracts", () => {
       for (const pageInfo of pageDefinitions) {
         const path = routeFor(locale, pageInfo.key);
         await expectStaticRoute(page, path);
+        // WebKit reports cancelled same-origin prefetches as page errors when
+        // the next full navigation replaces the document. Drain the current
+        // route before continuing so genuine resource failures remain visible.
+        await page.waitForLoadState("networkidle");
 
         const tocLinks = page.locator('.nextra-toc a[href^="#"]');
         await expect(tocLinks).toHaveCount(pageInfo.tocCount);
@@ -514,11 +525,17 @@ test.describe("Nextra 3.3.1 documentation contracts", () => {
     });
     await searchInput.click();
     await searchIndexResponse;
-    await searchInput.fill("follower");
+    // Use the same real key-event path as a person typing. A direct value fill
+    // does not exercise Nextra's keyboard-driven search path consistently in
+    // Playwright WebKit.
+    await searchInput.pressSequentially("follower", { delay: 25 });
     const results = page.locator(".nextra-search-results:visible");
     await expect(results).toBeVisible();
     await expect(searchInput).toHaveAttribute("aria-expanded", "true");
     const options = results.getByRole("option");
+    // The index response can complete before FlexSearch has committed its
+    // asynchronous result list, especially in WebKit.
+    await expect(options).not.toHaveCount(0);
     const optionCount = await options.count();
     expect(optionCount).toBeGreaterThan(0);
     const firstOption = options.first();
@@ -592,7 +609,7 @@ test.describe("Nextra 3.3.1 documentation contracts", () => {
     });
     await searchInput.click();
     await searchIndexResponse;
-    await searchInput.fill("follower");
+    await searchInput.pressSequentially("follower", { delay: 25 });
     const results = page.locator(".nextra-search-results:visible");
     await expect(results).toBeVisible();
     await expect(searchInput).toHaveAttribute("aria-expanded", "true");
@@ -602,4 +619,70 @@ test.describe("Nextra 3.3.1 documentation contracts", () => {
     await expect(results).toBeHidden();
     await guard.assertClean();
   });
+
+  for (const colorScheme of ["light", "dark"] as const) {
+    test(`emulated touch devices operate localized navigation and documentation search (${colorScheme}) @touch`, async ({
+      page,
+    }, testInfo) => {
+      test.setTimeout(60_000);
+      expect(testInfo.project.name).toMatch(/-(?:phone|tablet)-emulated$/);
+      await page.emulateMedia({ colorScheme });
+      const guard = await installBrowserGuard(page);
+      await expectStaticRoute(page, "/ja/how_to_use/");
+      await expect
+        .poll(() =>
+          page.locator("html").evaluate((element) =>
+            element.classList.contains("dark"),
+          ),
+        )
+        .toBe(colorScheme === "dark");
+
+      const menuButton = page.locator('button[aria-label="Menu"]:visible');
+      if ((await menuButton.count()) === 1) {
+        await menuButton.tap();
+        await expectInViewport(page.locator(".nextra-menu-mobile"));
+      }
+      const contributeLink = page
+        .locator('a[href="/ja/contribute/"]:visible')
+        .first();
+      await expect(contributeLink).toBeVisible();
+      await contributeLink.tap();
+      // WebKit can cancel an intermediate client-navigation watcher while still
+      // completing the final route. Assert the stable user-visible URL instead
+      // of treating that superseded internal navigation as a product failure.
+      await expect(page).toHaveURL(`${LOCAL_ORIGIN}/ja/contribute/`);
+      await expect(page.locator("html")).toHaveAttribute("lang", "ja-JP");
+      await page.waitForLoadState("networkidle");
+
+      await expectStaticRoute(page, "/en/how_to_use/");
+      if ((await menuButton.count()) === 1) {
+        await menuButton.tap();
+        await expectInViewport(page.locator(".nextra-menu-mobile"));
+      }
+      const searchInput = page.locator('input[role="combobox"]:visible');
+      await expect(searchInput).toHaveCount(1);
+      const searchIndexResponse = page.waitForResponse((response) => {
+        const url = new URL(response.url());
+        return (
+          url.origin === LOCAL_ORIGIN &&
+          url.pathname === "/_next/static/chunks/nextra-data-en-US.json" &&
+          response.status() === 200
+        );
+      });
+      await searchInput.tap();
+      await searchIndexResponse;
+      await searchInput.pressSequentially("follower", { delay: 25 });
+      const results = page.locator(".nextra-search-results:visible");
+      await expect(results.getByRole("option")).not.toHaveCount(0);
+
+      const horizontalOverflow = await page.evaluate(() =>
+        Math.max(
+          document.body.scrollWidth,
+          document.documentElement.scrollWidth,
+        ) - document.documentElement.clientWidth,
+      );
+      expect(horizontalOverflow).toBeLessThanOrEqual(1);
+      await guard.assertClean();
+    });
+  }
 });
