@@ -1,4 +1,5 @@
 import { expect, test, type Page, type Request, type Route } from "@playwright/test";
+import axe from "axe-core";
 
 const LOCAL_ORIGIN = "http://127.0.0.1:4173";
 const SYNTHETIC_TOKEN = "synthetic-e2e-token-not-a-real-credential";
@@ -756,6 +757,12 @@ test("synthetic authenticated lists keep grid, diff, filter, pagination, and com
   ).toBeVisible();
   await expect(unfollowedPanel.getByText("Synthetic New 01", { exact: true })).not.toBeVisible();
 
+  await page.getByRole("tab", { name: "Follower List" }).click();
+  await expect(
+    followerPanel.getByText("Synthetic New 19", { exact: true })
+  ).toBeVisible();
+  await page.getByRole("tab", { name: "Unfollowed List" }).click();
+
   const checkDone = unfollowedPanel.getByRole("button", { name: "Check done" });
   await expect(checkDone).toBeEnabled();
   await checkDone.click();
@@ -786,6 +793,204 @@ test("synthetic authenticated lists keep grid, diff, filter, pagination, and com
   await audit.assertClean();
 });
 
+test("follower tabs expose keyboard and assistive technology relationships", async ({
+  page,
+}) => {
+  const { audit } = await openAuthenticatedApp(page);
+  const tablist = page.getByRole("tablist", { name: "Follower list tabs" });
+  const tabs = tablist.getByRole("tab");
+  const labels = [
+    "Follower List",
+    "New followed List",
+    "Unfollowed List",
+  ] as const;
+  const relationshipIds: string[] = [];
+
+  await expect(tabs).toHaveCount(labels.length);
+  await expect(tablist.locator(":scope > [role=tab]")).toHaveCount(labels.length);
+  await expect(tabs.nth(0)).toHaveAttribute("tabindex", "0");
+  await expect(tabs.nth(1)).toHaveAttribute("tabindex", "-1");
+  await expect(tabs.nth(2)).toHaveAttribute("tabindex", "-1");
+
+  for (const label of labels) {
+    const tab = page.getByRole("tab", { name: label, exact: true });
+    const panel = activePanel(page, label);
+    const tabId = await tab.getAttribute("id");
+    const panelId = await panel.getAttribute("id");
+    const search = panel.locator("input").first();
+    const searchId = await search.getAttribute("id");
+
+    expect(tabId).toMatch(/^[-a-z0-9]+$/);
+    expect(panelId).toMatch(/^[-a-z0-9]+$/);
+    expect(searchId).toMatch(/^[-a-z0-9]+$/);
+    relationshipIds.push(tabId as string, panelId as string, searchId as string);
+    await expect(tab).toHaveAttribute("aria-controls", panelId as string);
+    await expect(panel).toHaveAttribute("aria-labelledby", tabId as string);
+    await expect(panel.locator(`label[for="${searchId}"]`)).toHaveText("Search...");
+    await expect(search).toHaveAttribute("aria-label", `Search ${label}`);
+    await expect(panel.locator('[role="treegrid"]')).toHaveAttribute(
+      "aria-label",
+      `${label} grid`
+    );
+    await expect(
+      tab.locator("button, a, input, select, textarea, [tabindex]:not([tabindex='-1'])")
+    ).toHaveCount(0);
+  }
+  expect(new Set(relationshipIds).size).toBe(relationshipIds.length);
+
+  const followerTab = page.getByRole("tab", {
+    name: "Follower List",
+    exact: true,
+  });
+  const newTab = page.getByRole("tab", {
+    name: "New followed List",
+    exact: true,
+  });
+  const unfollowedTab = page.getByRole("tab", {
+    name: "Unfollowed List",
+    exact: true,
+  });
+  const followerPanel = activePanel(page, "Follower List");
+  const newPanel = activePanel(page, "New followed List");
+  const unfollowedPanel = activePanel(page, "Unfollowed List");
+
+  await expect(followerTab).toHaveAttribute("aria-selected", "true");
+  await expect(newTab).toHaveAttribute("aria-selected", "false");
+  await expect(unfollowedTab).toHaveAttribute("aria-selected", "false");
+  await expect(followerPanel).toBeVisible();
+  await expect(followerPanel).not.toHaveAttribute("inert");
+  await expect(followerPanel).toHaveAttribute("aria-hidden", "false");
+  await expect(newPanel).toHaveAttribute("inert", "");
+  await expect(newPanel).toHaveAttribute("aria-hidden", "true");
+  await expect(unfollowedPanel).toHaveAttribute("inert", "");
+  await expect(unfollowedPanel).toHaveAttribute("aria-hidden", "true");
+  await expect(
+    page.getByRole("tabpanel", { name: "Follower List", exact: true })
+  ).toHaveCount(1);
+  await expect(
+    page.getByRole("tabpanel", { name: "New followed List", exact: true })
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("tabpanel", { name: "Unfollowed List", exact: true })
+  ).toHaveCount(0);
+  await expect(newPanel.getByRole("textbox")).toBeHidden();
+  await expect(unfollowedPanel.getByRole("textbox")).toBeHidden();
+  await expect(followerPanel.getByRole("treegrid")).toHaveAccessibleName(
+    "Follower List grid"
+  );
+
+  await page.getByRole("button", { name: "Refresh follower lists" }).focus();
+  await page.keyboard.press("Tab");
+  await expect(followerTab).toBeFocused();
+
+  const downWasPrevented = await followerTab.evaluate((element) => {
+    const event = new KeyboardEvent("keydown", {
+      key: "ArrowDown",
+      bubbles: true,
+      cancelable: true,
+    });
+    element.dispatchEvent(event);
+    return event.defaultPrevented;
+  });
+  expect(downWasPrevented).toBe(false);
+
+  await followerTab.focus();
+  await followerTab.press("ArrowRight");
+  await expect(newTab).toBeFocused();
+  await expect(newTab).toHaveAttribute("tabindex", "0");
+  await expect(followerTab).toHaveAttribute("tabindex", "-1");
+  await expect(newTab).toHaveAttribute("aria-selected", "true");
+  await expect(newPanel).toBeVisible();
+  await expect(newPanel).not.toHaveAttribute("inert");
+  await expect(newPanel).toHaveAttribute("aria-hidden", "false");
+  await expect(newPanel.getByRole("treegrid")).toHaveAccessibleName(
+    "New followed List grid"
+  );
+  await expect(followerPanel).toHaveAttribute("inert", "");
+  await expect(followerPanel).toHaveAttribute("aria-hidden", "true");
+  await expect(
+    page.getByRole("tabpanel", { name: "Follower List", exact: true })
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("tabpanel", { name: "New followed List", exact: true })
+  ).toHaveCount(1);
+
+  await newTab.focus();
+  await page.keyboard.press("Tab");
+  const newSearch = newPanel.getByRole("textbox", {
+    name: "Search New followed List",
+  });
+  await expect(newSearch).toBeFocused();
+  await newSearch.fill("Synthetic New 07");
+  await page.keyboard.press("Shift+Tab");
+  await expect(newTab).toBeFocused();
+
+  await newTab.press("ArrowRight");
+  await expect(unfollowedTab).toBeFocused();
+  await expect(newPanel).toHaveAttribute("inert", "");
+  await expect
+    .poll(() =>
+      newPanel.evaluate((panel) => panel.contains(document.activeElement))
+    )
+    .toBe(false);
+  await unfollowedTab.press("ArrowLeft");
+  await expect(newTab).toBeFocused();
+  await expect(newSearch).toHaveValue("Synthetic New 07");
+  await expect(newPanel.getByText("Synthetic New 07", { exact: true })).toBeVisible();
+  await newTab.press("End");
+  await expect(unfollowedTab).toBeFocused();
+  await expect(unfollowedPanel.getByRole("treegrid")).toHaveAccessibleName(
+    "Unfollowed List grid"
+  );
+  await unfollowedTab.press("Home");
+  await expect(followerTab).toBeFocused();
+  await followerTab.press("ArrowLeft");
+  await expect(unfollowedTab).toBeFocused();
+  await unfollowedTab.press("ArrowRight");
+  await expect(followerTab).toBeFocused();
+  await followerTab.press(" ");
+  await expect(followerTab).toHaveAttribute("aria-selected", "true");
+
+  await page.addScriptTag({ content: axe.source });
+  const structuralViolations = await page.evaluate(async () => {
+    const results = await (window as any).axe.run("main", {
+      // The #212 contract is the tab/panel accessibility structure. Keep this
+      // deterministic and pair it with the real keyboard assertions above;
+      // visual color-contrast work is not silently folded into this UI-neutral
+      // interaction fix.
+      runOnly: {
+        type: "rule",
+        values: [
+          "aria-allowed-attr",
+          "aria-hidden-focus",
+          "aria-prohibited-attr",
+          "aria-required-attr",
+          "aria-required-children",
+          "aria-required-parent",
+          "aria-roles",
+          "aria-valid-attr-value",
+          "aria-valid-attr",
+          "duplicate-id-aria",
+          "label",
+          "nested-interactive",
+          "tabindex",
+        ],
+      },
+    });
+    return results.violations
+      .map(
+        ({ id, impact, nodes }: { id: string; impact: string | null; nodes: any[] }) => ({
+          id,
+          impact,
+          targets: nodes.map((node) => node.target),
+        })
+      );
+  });
+  expect(structuralViolations).toEqual([]);
+
+  await audit.assertClean();
+});
+
 test("authenticated main tool remains usable across the responsive theme matrix", async ({
   page,
 }) => {
@@ -794,6 +999,8 @@ test("authenticated main tool remains usable across the responsive theme matrix"
   await page.emulateMedia({ colorScheme: "light" });
   const { audit } = await openAuthenticatedApp(page);
   const cases = [
+    { width: 320, height: 700, colorScheme: "light" },
+    { width: 320, height: 700, colorScheme: "dark" },
     { width: 390, height: 844, colorScheme: "light" },
     { width: 390, height: 844, colorScheme: "dark" },
     { width: 1280, height: 900, colorScheme: "light" },
@@ -822,8 +1029,22 @@ test("authenticated main tool remains usable across the responsive theme matrix"
       "New followed List",
       "Unfollowed List",
     ]) {
-      await expect(page.getByRole("tab", { name: tab })).toBeVisible();
+      const tabElement = page.getByRole("tab", { name: tab });
+      await expect(tabElement).toBeVisible();
+      const box = await tabElement.boundingBox();
+      expect(box).not.toBeNull();
+      expect(box?.width).toBeGreaterThanOrEqual(24);
+      expect(box?.height).toBeGreaterThanOrEqual(24);
     }
+    await page.getByRole("tab", { name: "New followed List" }).click();
+    await expect(
+      page.getByRole("tab", { name: "New followed List" })
+    ).toHaveAttribute("aria-selected", "true");
+    await page.getByRole("tab", { name: "Unfollowed List" }).click();
+    await expect(
+      page.getByRole("tab", { name: "Unfollowed List" })
+    ).toHaveAttribute("aria-selected", "true");
+    await page.getByRole("tab", { name: "Follower List" }).click();
     if (colorScheme === "dark") {
       await expect(page.locator("html")).toHaveClass(/dark/);
     } else {

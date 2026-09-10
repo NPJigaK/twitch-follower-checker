@@ -1,4 +1,14 @@
-import { useState, useCallback, useEffect, useMemo, useRef } from "react";
+import {
+  useState,
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  type ComponentProps,
+  type ComponentType,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from "react";
 import classNames from "classnames";
 import {
   Tabs,
@@ -11,6 +21,7 @@ import {
 } from "@material-tailwind/react";
 import Link from "next/link";
 import SearchIcon from "@mui/icons-material/Search";
+import type { GridReadyEvent } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
@@ -18,6 +29,15 @@ import RefreshListsButton from "./RefreshListsButton";
 import CheckDoneButton from "./CheckDoneButton";
 import { useNowAllFollowers } from "@/lib/accessTwitch";
 import { debugLogger } from "@/lib/debugLogger";
+
+// Material Tailwind's TabPanel forwards DOM props at runtime, but its
+// published MotionProps type omits `id`. Keep the runtime component while
+// exposing the DOM relationship attributes needed by the tabs pattern.
+type AccessibleTabPanelProps = ComponentProps<typeof TabPanel> & {
+  id?: string;
+  inert?: "";
+};
+const AccessibleTabPanel = TabPanel as ComponentType<AccessibleTabPanelProps>;
 
 const ISO_UTC_TIMESTAMP =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
@@ -38,6 +58,7 @@ export default function AppContainer({
   debugLogger("AppContainer");
   const [activeTab, setActiveTab] = useState("Follower List");
   const [checkStatus, setCheckStatus] = useState<string | null>(null);
+  const tabsId = useId().replaceAll(":", "").toLowerCase();
 
   const {
     nowAllFollowers,
@@ -62,6 +83,7 @@ export default function AppContainer({
   const gridRef1 = useRef<AgGridReact<any>>(null);
   const gridRef2 = useRef<AgGridReact<any>>(null);
   const gridRef3 = useRef<AgGridReact<any>>(null);
+  const tabRefs = useRef<Array<HTMLLIElement | null>>([]);
 
   const data = useMemo(
     () => [
@@ -69,19 +91,74 @@ export default function AppContainer({
         label: "Follower List",
         value: nowAllFollowers,
         gridRef: gridRef1,
+        tabId: `follower-list-tab-${tabsId}`,
+        panelId: `follower-list-panel-${tabsId}`,
+        searchId: `follower-list-search-${tabsId}`,
       },
       {
         label: "New followed List",
         value: newAllFollowers,
         gridRef: gridRef2,
+        tabId: `new-followed-list-tab-${tabsId}`,
+        panelId: `new-followed-list-panel-${tabsId}`,
+        searchId: `new-followed-list-search-${tabsId}`,
       },
       {
         label: "Unfollowed List",
         value: oldAllFollowers,
         gridRef: gridRef3,
+        tabId: `unfollowed-list-tab-${tabsId}`,
+        panelId: `unfollowed-list-panel-${tabsId}`,
+        searchId: `unfollowed-list-search-${tabsId}`,
       },
     ],
-    [nowAllFollowers, newAllFollowers, oldAllFollowers]
+    [nowAllFollowers, newAllFollowers, oldAllFollowers, tabsId]
+  );
+
+  const onTabKeyDown = useCallback(
+    (event: ReactKeyboardEvent<HTMLLIElement>, index: number) => {
+      let nextIndex: number | null = null;
+
+      switch (event.key) {
+        case "ArrowRight":
+          nextIndex = (index + 1) % data.length;
+          break;
+        case "ArrowLeft":
+          nextIndex = (index - 1 + data.length) % data.length;
+          break;
+        case "Home":
+          nextIndex = 0;
+          break;
+        case "End":
+          nextIndex = data.length - 1;
+          break;
+        case "Enter":
+        case " ":
+        case "Spacebar":
+          // Material Tailwind renders tabs as <li role="tab">, so it does
+          // not provide the native button activation behavior for Enter or
+          // Space. Trigger the same click path used by mouse activation.
+          event.preventDefault();
+          event.currentTarget.click();
+          return;
+        default:
+          return;
+      }
+
+      event.preventDefault();
+      const nextTab = data[nextIndex];
+      const nextTabElement = tabRefs.current[nextIndex];
+      if (nextTabElement) {
+        // Clicking keeps Material Tailwind's internal tab state in sync with
+        // our accessible selected state. Focus is moved after activation so
+        // the roving tab stop follows the selected tab.
+        nextTabElement.click();
+        nextTabElement.focus();
+      } else {
+        setActiveTab(nextTab.label);
+      }
+    },
+    [data]
   );
 
   function CustomLoadingCellRenderer() {
@@ -107,6 +184,10 @@ export default function AppContainer({
   const onGridSizeChanged = useCallback((params: any) => {
     debugLogger("onGridSizeChanged");
     params.api.sizeColumnsToFit();
+  }, []);
+
+  const onGridReady = useCallback((params: GridReadyEvent, label: string) => {
+    params.api.setGridAriaProperty("label", `${label} grid`);
   }, []);
 
   useEffect(() => {
@@ -195,6 +276,7 @@ export default function AppContainer({
       <div aria-busy={isRefreshing}>
         <Tabs value={activeTab}>
         <TabsHeader
+          aria-label="Follower list tabs"
           className={classNames(
             "rounded-none",
             "border-b",
@@ -213,10 +295,18 @@ export default function AppContainer({
             ),
           }}
         >
-          {data.map(({ label }) => (
+          {data.map(({ label, tabId, panelId }, index) => (
             <Tab
               key={label}
               value={label}
+              ref={(element) => {
+                tabRefs.current[index] = element;
+              }}
+              id={tabId}
+              aria-controls={panelId}
+              aria-selected={activeTab === label}
+              tabIndex={activeTab === label ? 0 : -1}
+              onKeyDown={(event) => onTabKeyDown(event, index)}
               onClick={() => setActiveTab(label)}
               className={classNames(
                 activeTab === label ? "dark:text-white" : "text-gray-500",
@@ -229,8 +319,15 @@ export default function AppContainer({
           ))}
         </TabsHeader>
         <TabsBody>
-          {data.map(({ label, value, gridRef }) => (
-            <TabPanel key={label} value={label}>
+          {data.map(({ label, value, gridRef, tabId, panelId, searchId }) => (
+            <AccessibleTabPanel
+              key={label}
+              value={label}
+              id={panelId}
+              aria-labelledby={tabId}
+              inert={activeTab !== label ? "" : undefined}
+              aria-hidden={activeTab !== label}
+            >
               <div
                 className={classNames(
                   "flex",
@@ -247,9 +344,11 @@ export default function AppContainer({
                 <div className="w-56 mr-3">
                   <Input
                     label="Search..."
+                    labelProps={{ htmlFor: searchId }}
                     icon={<SearchIcon />}
                     crossOrigin=""
-                    id="filter-text-box"
+                    id={searchId}
+                    aria-label={`Search ${label}`}
                     onInput={(event) =>
                       gridRef.current?.api.setQuickFilter(
                         (event.target as HTMLInputElement).value
@@ -319,11 +418,12 @@ export default function AppContainer({
                   paginationPageSize={15}
                   onFirstDataRendered={onFirstDataRendered}
                   onGridSizeChanged={onGridSizeChanged}
+                  onGridReady={(params) => onGridReady(params, label)}
                   loadingOverlayComponent={loadingCellRenderer}
                   suppressDragLeaveHidesColumns={true}
                 ></AgGridReact>
               </div>
-            </TabPanel>
+            </AccessibleTabPanel>
           ))}
         </TabsBody>
         </Tabs>
