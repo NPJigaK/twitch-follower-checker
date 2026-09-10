@@ -565,12 +565,19 @@ test("unauthenticated root remains usable across the responsive theme matrix", a
 }) => {
   test.setTimeout(60_000);
   const audit = await installNetworkAudit(page);
+  const initialCase = responsiveThemeCases[0];
+
+  await page.setViewportSize({
+    width: initialCase.width,
+    height: initialCase.height,
+  });
+  await page.emulateMedia({ colorScheme: initialCase.colorScheme });
+  const response = await page.goto("/");
+  expect(response?.status()).toBe(200);
 
   for (const { width, height, colorScheme } of responsiveThemeCases) {
     await page.setViewportSize({ width, height });
     await page.emulateMedia({ colorScheme });
-    const response = await page.goto("/");
-    expect(response?.status()).toBe(200);
     await expect(
       page.getByText("Authenticate with Twitch", { exact: true }),
     ).toBeVisible();
@@ -587,9 +594,8 @@ test("unauthenticated root remains usable across the responsive theme matrix", a
       ) - document.documentElement.clientWidth,
     );
     expect(horizontalOverflow).toBeLessThanOrEqual(1);
-    // Let WebKit finish same-origin stylesheet and route prefetch work before
-    // the next deliberate full navigation. Otherwise, cancelling that work
-    // during page replacement is reported as a page-level Fetch API error.
+    // Let every engine finish any work triggered by the viewport/theme change
+    // before the next matrix entry.
     await page.waitForLoadState("networkidle");
   }
   await audit.assertClean();
