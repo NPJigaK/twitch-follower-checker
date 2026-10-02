@@ -1,5 +1,16 @@
 # Twitch Follower Checker User Guide
 
+[![Latest release](https://img.shields.io/github/v/release/NPJigaK/twitch-follower-checker?display_name=tag&sort=semver&label=latest%20release)](https://github.com/NPJigaK/twitch-follower-checker/releases/latest)
+[![CI](https://img.shields.io/github/actions/workflow/status/NPJigaK/twitch-follower-checker/nextjs.yml?branch=main&event=push&label=CI)](https://github.com/NPJigaK/twitch-follower-checker/actions/workflows/nextjs.yml)
+[![Deployment](https://img.shields.io/github/deployments/NPJigaK/twitch-follower-checker/github-pages?label=deployment)](https://github.com/NPJigaK/twitch-follower-checker/actions/workflows/nextjs.yml)
+[![Website status](https://img.shields.io/website?url=https%3A%2F%2Ftwitch-follower-checker.devkey.jp&label=website)](https://twitch-follower-checker.devkey.jp/en)
+[![License: PolyForm Perimeter 1.0.1](https://img.shields.io/badge/license-PolyForm%20Perimeter%201.0.1-blue)](LICENSE)
+
+[![Node.js 24](https://img.shields.io/badge/Node.js-24-339933?logo=nodedotjs&logoColor=white)](.node-version)
+[![Yarn 4.18.0](https://img.shields.io/badge/Yarn-4.18.0-2C8EBB?logo=yarn&logoColor=white)](package.json)
+[![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen)](CONTRIBUTING.md)
+[![CLA required](https://img.shields.io/badge/contributions-CLA%20required-orange)](CONTRIBUTOR_LICENSE_AGREEMENT.md)
+
 The Twitch Follower Checker is a browser-based tool that effortlessly enables you to track new followers and unfollowers on your Twitch channel.
 Please check the [documentation](https://twitch-follower-checker.devkey.jp/en)!
 
