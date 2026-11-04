@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "baseline_commit": "b4a6f42c6f985ea906e1641890f1132454cee5bb",
+  "before_build": "fresh static build of exact git-archived main source with the same installed dependencies",
+  "after_build": "fresh static build of final application source on this PR branch",
+  "gzip_method": "Python gzip.compress per JS file, mtime=0; size estimate, not a measured delivery transfer",
+  "before": {
+    "javascript_files": 54,
+    "javascript_bytes": 2922060,
+    "javascript_gzip_bytes": 812489,
+    "root_route_chunk_bytes": 41906,
+    "root_route_chunk_gzip_bytes": 13500,
+    "css_files": 2
+  },
+  "after": {
+    "javascript_files": 54,
+    "javascript_bytes": 2932690,
+    "javascript_gzip_bytes": 817480,
+    "root_route_chunk_bytes": 45979,
+    "root_route_chunk_gzip_bytes": 14854,
+    "css_files": 2
+  },
+  "delta": {
+    "javascript_files": 0,
+    "javascript_bytes": 10630,
+    "javascript_gzip_bytes": 4991,
+    "root_route_chunk_bytes": 4073,
+    "root_route_chunk_gzip_bytes": 1354,
+    "css_files": 0
+  },
+  "interpretation": "JavaScript changes are expected. This is not an unchanged-artifact claim or a real-user loading-time benchmark. CSS, page components and dependencies are unchanged. The Twitch request chain of an already-successful refresh is unchanged; an unused-metadata case that previously failed now proceeds to followers. New analytics tag activation is not claimed.",
+  "css_size_sha256_equivalent": true
+}

@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "baseline_commit": "b4a6f42c6f985ea906e1641890f1132454cee5bb",
+  "fixture_policy": "Synthetic token, broadcaster, follower rows, timestamps, and API responses only. No real Twitch account, credential, response body, trace, HAR, or local profile path is included.",
+  "capture": {
+    "baseline": "Exact-main static export from baseline_commit",
+    "after": "Final static export after follower diagnostic changes",
+    "viewports": {
+      "desktop": { "width": 1280, "height": 900 },
+      "phone": { "width": 390, "height": 844 }
+    },
+    "states": "Normal success, existing HTTP 500 error, and empty optional user metadata recovery.",
+    "settling": "Before each capture the pointer was moved to the lower-right blank area, the page was allowed to settle for 500 ms, and Playwright screenshot animations were disabled.",
+    "comparison": "Compared byte length and SHA-256 first; only differing PNGs were decoded with sharp and compared as RGBA pixels. No masking or cropping was used."
+  },
+  "images": [
+    {
+      "case": "desktop normal success",
+      "before": { "file": "before-desktop-normal.png", "bytes": 38360, "sha256": "6c528c05fc1be0ce10e90435ca5ac4368dbb1707ef8250b1b07d8fdfbfc4d40e" },
+      "after": { "file": "after-desktop-normal.png", "bytes": 38360, "sha256": "6c528c05fc1be0ce10e90435ca5ac4368dbb1707ef8250b1b07d8fdfbfc4d40e" },
+      "identicalBytes": true,
+      "visualStateUnchanged": true
+    },
+    {
+      "case": "phone normal success",
+      "before": { "file": "before-phone-normal.png", "bytes": 26299, "sha256": "4e56244f16faaa162e1de2d65fe0ba8e33c240f8d47c85b682eedb8049bf6867" },
+      "after": { "file": "after-phone-normal.png", "bytes": 26299, "sha256": "4e56244f16faaa162e1de2d65fe0ba8e33c240f8d47c85b682eedb8049bf6867" },
+      "identicalBytes": true,
+      "visualStateUnchanged": true
+    },
+    {
+      "case": "desktop existing HTTP 500 error",
+      "before": { "file": "before-desktop-error.png", "bytes": 43536, "sha256": "286d58a0d57d0421f664aec3c46f1d6fef41db3e644c6d21ccc82af4bac6d3e0" },
+      "after": { "file": "after-desktop-error.png", "bytes": 43537, "sha256": "1d420930ad6129801e6743389865ab5ba8fa9b67774acd3626c32bc3c8336ed3" },
+      "pixelComparison": {
+        "width": 1280,
+        "height": 900,
+        "differingBytes": 8,
+        "differingPixels": 4,
+        "maxAbsoluteChannelDelta": 1,
+        "sumAbsoluteChannelDelta": 8,
+        "locations": [
+          { "x": 73, "y": 204, "before": [250, 215, 217, 255], "after": [251, 215, 217, 255] },
+          { "x": 71, "y": 205, "before": [252, 240, 240, 255], "after": [253, 241, 241, 255] },
+          { "x": 72, "y": 205, "before": [241, 182, 182, 255], "after": [242, 182, 183, 255] },
+          { "x": 73, "y": 205, "before": [233, 136, 136, 255], "after": [233, 137, 137, 255] }
+        ]
+      },
+      "visualStateUnchanged": true,
+      "interpretation": "The only difference is four red error-panel border pixels with a maximum channel delta of 1; there is no visible state, text, layout, hover, or ripple change."
+    },
+    {
+      "case": "phone existing HTTP 500 error",
+      "before": { "file": "before-phone-error.png", "bytes": 31923, "sha256": "d2f9fede8b4fb6b313e2570ce0bcc362f688f14538596fa6e649720f30c61bb0" },
+      "after": { "file": "after-phone-error.png", "bytes": 31923, "sha256": "d2f9fede8b4fb6b313e2570ce0bcc362f688f14538596fa6e649720f30c61bb0" },
+      "identicalBytes": true,
+      "visualStateUnchanged": true
+    },
+    {
+      "case": "desktop empty login/display_name recovery",
+      "before": { "file": "before-desktop-optional-metadata.png", "bytes": 33973, "sha256": "f41707cf8972d1d4d83e267d4665169f36eba8de3efc3361c2ed5d262267abd2", "state": "generic follower error; no follower rows" },
+      "after": { "file": "after-desktop-optional-metadata.png", "bytes": 38360, "sha256": "6c528c05fc1be0ce10e90435ca5ac4368dbb1707ef8250b1b07d8fdfbfc4d40e", "state": "Follower lists updated; synthetic rows rendered" },
+      "pixelComparison": { "width": 1280, "height": 900, "differingBytes": 713738, "differingPixels": 254019, "maxAbsoluteChannelDelta": 255, "sumAbsoluteChannelDelta": 18813022 },
+      "visualStateChangedAsExpected": true
+    },
+    {
+      "case": "phone empty login/display_name recovery",
+      "before": { "file": "before-phone-optional-metadata.png", "bytes": 24539, "sha256": "b803cffbb8d9ea384156ce8fbf3adf77e8b9a51758c3751797fc972646e27a9c", "state": "generic follower error; no follower rows" },
+      "after": { "file": "after-phone-optional-metadata.png", "bytes": 26299, "sha256": "4e56244f16faaa162e1de2d65fe0ba8e33c240f8d47c85b682eedb8049bf6867", "state": "Follower lists updated; synthetic rows rendered" },
+      "pixelComparison": { "dimensionsChanged": true, "before": { "width": 390, "height": 869 }, "after": { "width": 390, "height": 844 } },
+      "visualStateChangedAsExpected": true
+    }
+  ],
+  "interpretation": "With deterministic pointer and animation settling, desktop and phone normal-success captures and the phone HTTP 500-error capture are byte-identical. The desktop HTTP 500-error capture has only four red error-panel border pixels with a maximum channel delta of 1 and no visible UI/state change. The after-recovery capture is byte-identical to the after-normal success capture; the optional user metadata recovery itself intentionally changes from a generic error with no rows to the normal success grid."
+}

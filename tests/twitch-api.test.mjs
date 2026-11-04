@@ -3,6 +3,7 @@ import test from "node:test";
 
 const {
   REQUIRED_FOLLOWER_SCOPE,
+  TWITCH_DIAGNOSTIC_REASONS,
   TwitchRequestError,
   fetchAllFollowers,
   getAuthenticatedUser,
@@ -84,6 +85,30 @@ const assertTwitchError = async (promise, code, extra = {}) => {
     }
   );
 };
+
+test("diagnostic reasons are a fixed sanitized allowlist", () => {
+  assert.deepEqual(TWITCH_DIAGNOSTIC_REASONS, [
+    "response_shape",
+    "content_type",
+    "empty_body",
+    "malformed_json",
+    "json_shape",
+    "schema",
+    "user_collection",
+    "user_record",
+    "user_id",
+    "follower_record",
+    "follower_user_id",
+    "follower_user_login",
+    "follower_user_name",
+    "follower_followed_at",
+    "total",
+    "page_total",
+    "pagination_missing",
+    "pagination",
+    "cursor",
+  ]);
+});
 
 test("validateAccessToken accepts a valid user token even inside the one-hour window", async () => {
   const { calls, fetchImpl } = queuedFetch(jsonResponse(tokenBody()));
@@ -292,7 +317,8 @@ test("getAuthenticatedUser requires exactly one user and optionally checks token
       getAuthenticatedUser("token", "client-123", "different-user", {
         fetchImpl,
       }),
-      "permission_denied"
+      "permission_denied",
+      { status: 200, stage: "users", reason: "user_id" }
     );
   });
 
@@ -302,7 +328,8 @@ test("getAuthenticatedUser requires exactly one user and optionally checks token
       getAuthenticatedUser("token", "client-123", undefined, {
         fetchImpl: empty.fetchImpl,
       }),
-      "invalid_response"
+      "invalid_response",
+      { status: 200, stage: "users", reason: "user_collection" }
     );
 
     const multiple = queuedFetch(
@@ -312,8 +339,96 @@ test("getAuthenticatedUser requires exactly one user and optionally checks token
       getAuthenticatedUser("token", "client-123", undefined, {
         fetchImpl: multiple.fetchImpl,
       }),
-      "invalid_response"
+      "invalid_response",
+      { status: 200, stage: "users", reason: "user_collection" }
     );
+  });
+
+  await t.test("invalid subject ids remain rejected", async (t) => {
+    for (const value of [null, "", 123]) {
+      await t.test(String(value), async () => {
+        const { fetchImpl } = queuedFetch(
+          jsonResponse(userBody({ id: value }))
+        );
+        await assertTwitchError(
+          getAuthenticatedUser("token", "client-123", undefined, {
+            fetchImpl,
+          }),
+          "invalid_response",
+          { status: 200, stage: "users", reason: "user_id" }
+        );
+      });
+    }
+  });
+});
+
+test("getAuthenticatedUser ignores invalid optional metadata and emits one notice", async (t) => {
+  const cases = [
+    ["login empty string", "login", ""],
+    ["login null", "login", null],
+    ["login number", "login", 123],
+    ["display_name empty string", "display_name", ""],
+    ["display_name null", "display_name", null],
+    ["display_name number", "display_name", 123],
+  ];
+
+  for (const [name, field, value] of cases) {
+    await t.test(name, async () => {
+      const notices = [];
+      const { fetchImpl } = queuedFetch(
+        jsonResponse(userBody({ [field]: value }))
+      );
+      const user = await getAuthenticatedUser(
+        "token",
+        "client-123",
+        "user-123",
+        {
+          fetchImpl,
+          onNotice: (notice) => notices.push(notice),
+        }
+      );
+
+      assert.equal(user.id, "user-123");
+      assert.equal(user[field], undefined);
+      assert.equal(notices.length, 1);
+      assert.deepEqual(notices, ["user_metadata_ignored"]);
+    });
+  }
+
+  await t.test("both invalid optional fields still emit one notice", async () => {
+    const notices = [];
+    const { fetchImpl } = queuedFetch(
+      jsonResponse(userBody({ login: null, display_name: 123 }))
+    );
+    const user = await getAuthenticatedUser(
+      "token",
+      "client-123",
+      "user-123",
+      {
+        fetchImpl,
+        onNotice: (notice) => notices.push(notice),
+      }
+    );
+    assert.deepEqual(user, { id: "user-123" });
+    assert.deepEqual(notices, ["user_metadata_ignored"]);
+  });
+
+  await t.test("an observer exception cannot break identity resolution", async () => {
+    const { fetchImpl } = queuedFetch(
+      jsonResponse(userBody({ login: null, display_name: 123 }))
+    );
+    const user = await getAuthenticatedUser(
+      "token",
+      "client-123",
+      "user-123",
+      {
+        fetchImpl,
+        onNotice: () => {
+          throw new Error("observer sentinel must not escape");
+        },
+      }
+    );
+    assert.deepEqual(user, { id: "user-123" });
   });
 });
 
@@ -627,6 +742,187 @@ test("fetchAllFollowers distinguishes unavailable details from malformed/partial
         fetchImpl,
       }),
       "pagination_loop"
+    );
+  });
+});
+
+test("diagnostic context identifies stage and follower page without response PII", async (t) => {
+  await t.test("users parsed identity failure is a status-200 validation", async () => {
+    let captured;
+    const { fetchImpl } = queuedFetch(
+      jsonResponse({
+        data: [
+          {
+            id: null,
+            login: "sentinel-login",
+            display_name: "sentinel-display-name",
+          },
+        ],
+      })
+    );
+    await assert.rejects(
+      getAuthenticatedUser("secret-token", "client-123", undefined, {
+        fetchImpl,
+      }),
+      (error) => {
+        captured = error;
+        assert.ok(error instanceof TwitchRequestError);
+        assert.equal(error.code, "invalid_response");
+        assert.equal(error.status, 200);
+        assert.equal(error.stage, "users");
+        assert.equal(error.reason, "user_id");
+        assert.equal(error.page, undefined);
+        return true;
+      }
+    );
+    const serialized = JSON.stringify(captured);
+    for (const sentinel of [
+      "secret-token",
+      "client-123",
+      "sentinel-login",
+      "sentinel-display-name",
+      "https://api.twitch.tv",
+    ]) {
+      assert.ok(!serialized.includes(sentinel), sentinel);
+    }
+  });
+
+  await t.test("follower page two preserves page context for row validation", async () => {
+    let captured;
+    const { fetchImpl } = queuedFetch(
+      jsonResponse({
+        data: [follower("a")],
+        total: 2,
+        pagination: { cursor: "opaque-next" },
+      }),
+      jsonResponse({
+        data: [
+          follower("b", {
+            user_login: "sentinel-follower-login",
+            user_name: null,
+          }),
+        ],
+        total: 2,
+        pagination: {},
+      })
+    );
+    await assert.rejects(
+      fetchAllFollowers("secret-token", "client-123", "broadcaster-123", {
+        fetchImpl,
+      }),
+      (error) => {
+        captured = error;
+        assert.ok(error instanceof TwitchRequestError);
+        assert.equal(error.code, "invalid_response");
+        assert.equal(error.status, 200);
+        assert.equal(error.stage, "followers");
+        assert.equal(error.reason, "follower_user_name");
+        assert.equal(error.page, 2);
+        return true;
+      }
+    );
+    const serialized = JSON.stringify(captured);
+    for (const sentinel of [
+      "secret-token",
+      "client-123",
+      "broadcaster-123",
+      "sentinel-follower-login",
+      "opaque-next",
+    ]) {
+      assert.ok(!serialized.includes(sentinel), sentinel);
+    }
+  });
+
+  await t.test("response-boundary diagnostics retain the actual HTTP status", async (t) => {
+    const cases = [
+      [
+        "content type",
+        textResponse("sentinel-body", 200, { "content-type": "text/html" }),
+        "content_type",
+        200,
+      ],
+      [
+        "empty body",
+        textResponse("", 200, { "content-type": "application/json" }),
+        "empty_body",
+        200,
+      ],
+      [
+        "malformed JSON",
+        textResponse("sentinel-malformed", 200, {
+          "content-type": "application/json",
+        }),
+        "malformed_json",
+        200,
+      ],
+      [
+        "non-object JSON",
+        textResponse("null", 200, {
+          "content-type": "application/json",
+        }),
+        "json_shape",
+        200,
+      ],
+    ];
+
+    for (const [name, response, reason, status] of cases) {
+      await t.test(name, async () => {
+        const { fetchImpl } = queuedFetch(response);
+        await assert.rejects(
+          getAuthenticatedUser("token", "client-123", undefined, {
+            fetchImpl,
+          }),
+          (error) => {
+            assert.ok(error instanceof TwitchRequestError);
+            assert.equal(error.stage, "users");
+            assert.equal(error.reason, reason);
+            assert.equal(error.status, status);
+            return true;
+          }
+        );
+      });
+    }
+
+    const { fetchImpl } = queuedFetch(
+      new TypeError("sentinel-network-token")
+    );
+    await assert.rejects(
+      validateAccessToken("token", undefined, { fetchImpl }),
+      (error) => {
+        assert.ok(error instanceof TwitchRequestError);
+        assert.equal(error.code, "network");
+        assert.equal(error.stage, "validate");
+        assert.equal(error.status, undefined);
+        assert.equal(error.reason, undefined);
+        assert.ok(!JSON.stringify(error).includes("sentinel-network-token"));
+        return true;
+      }
+    );
+
+    const injected = queuedFetch(
+      new TwitchRequestError("network", "sentinel raw upstream body")
+    );
+    await assert.rejects(
+      getAuthenticatedUser("token", "client-123", undefined, {
+        fetchImpl: injected.fetchImpl,
+      }),
+      (error) => {
+        assert.ok(error instanceof TwitchRequestError);
+        assert.equal(error.stage, "users");
+        assert.equal(error.message, "Unable to reach Twitch.");
+        assert.ok(!JSON.stringify(error).includes("sentinel raw upstream body"));
+        return true;
+      }
+    );
+
+    await assertTwitchError(
+      getAuthenticatedUser("token", "", undefined, {
+        fetchImpl: async () => {
+          throw new Error("fetch must not run for invalid client id");
+        },
+      }),
+      "invalid_response",
+      { stage: "users", status: undefined, reason: undefined }
     );
   });
 });

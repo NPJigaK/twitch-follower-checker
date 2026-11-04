@@ -16,11 +16,14 @@ import {
   type CompleteFollowerSnapshot,
 } from "./followerRefreshWorkflow";
 import { RefreshCoordinator } from "./refreshCoordinator";
+import { reportRefreshTelemetry } from "./refreshTelemetry";
 import {
   fetchAllFollowers,
   getAuthenticatedUser,
   TwitchRequestError,
   type TwitchRequestErrorCode,
+  type TwitchDiagnosticReason,
+  type TwitchRequestStage,
 } from "./twitchApi";
 
 export type FollowerRefreshProblemCode =
@@ -36,6 +39,12 @@ export type FollowerRefreshProblem = Readonly<{
   message: string;
   retryAt: number | null;
   requiresReauthentication: boolean;
+  diagnostic?: Readonly<{
+    stage?: TwitchRequestStage;
+    reason?: TwitchDiagnosticReason;
+    page?: number;
+    status?: number;
+  }>;
 }>;
 
 const REFRESH_MESSAGES: Record<FollowerRefreshProblemCode, string> = {
@@ -79,12 +88,14 @@ const problem = (
   options: {
     retryAt?: number | null;
     requiresReauthentication?: boolean;
+    diagnostic?: FollowerRefreshProblem["diagnostic"];
   } = {}
 ): FollowerRefreshProblem => ({
   code,
   message: REFRESH_MESSAGES[code],
   retryAt: options.retryAt ?? null,
   requiresReauthentication: options.requiresReauthentication ?? false,
+  diagnostic: options.diagnostic,
 });
 
 const mapTwitchProblem = (cause: TwitchRequestError): FollowerRefreshProblem =>
@@ -97,6 +108,12 @@ const mapTwitchProblem = (cause: TwitchRequestError): FollowerRefreshProblem =>
         : null,
     requiresReauthentication:
       cause.code === "auth_invalid" || cause.code === "permission_denied",
+    diagnostic: {
+      stage: cause.stage,
+      reason: cause.reason,
+      page: cause.page,
+      status: cause.status,
+    },
   });
 
 const mapUnknownProblem = (cause: unknown): FollowerRefreshProblem =>
@@ -147,6 +164,8 @@ export const useNowAllFollowers = ({
     () =>
       new RefreshCoordinator<CompleteFollowerSnapshot, FollowerRefreshProblem>(
         async (signal) => {
+          let stage = "users";
+          let ignoredUserMetadata = false;
           const result = await runFollowerRefreshWorkflow<FollowerRefreshProblem>(
             {
               expectedBroadcasterId: authenticatedUserId,
@@ -155,18 +174,26 @@ export const useNowAllFollowers = ({
                   accessToken,
                   clientId,
                   authenticatedUserId,
-                  { signal: requestSignal }
+                  {
+                    signal: requestSignal,
+                    onNotice: () => {
+                      ignoredUserMetadata = true;
+                    },
+                  }
                 );
                 return user.id;
               },
-              getAllFollowers: (broadcasterId, requestSignal) =>
-                fetchAllFollowers(
+              getAllFollowers: (broadcasterId, requestSignal) => {
+                stage = "followers";
+                return fetchAllFollowers(
                   accessToken,
                   clientId,
                   broadcasterId,
                   { signal: requestSignal }
-                ),
+                );
+              },
               readBaseline: (broadcasterId) => {
+                stage = "baseline_read";
                 const storage = browserStorage();
                 if (storage === null) {
                   return {
@@ -198,6 +225,7 @@ export const useNowAllFollowers = ({
                 followers,
                 checkedAt
               ) => {
+                stage = "baseline_write";
                 const storage = browserStorage();
                 if (storage === null) {
                   return {
@@ -219,7 +247,10 @@ export const useNowAllFollowers = ({
                       error: mapCommitProblem(committed.error),
                     };
               },
-              diffFollowers,
+              diffFollowers: (current, baseline) => {
+                stage = "comparison";
+                return diffFollowers(current, baseline);
+              },
               now: () => new Date().toISOString(),
               mapError: mapUnknownProblem,
               abortedError: () => problem("aborted"),
@@ -229,6 +260,21 @@ export const useNowAllFollowers = ({
 
           if (result.ok && result.value.baselineInitialized) {
             committedSnapshotRef.current = result.value;
+          }
+          // A single-flight execution owns one terminal event. Unmount and
+          // superseded generations abort this signal and cannot report a late
+          // result (including the discarded Strict Mode development replay).
+          if (!signal.aborted) {
+            const diagnostic = result.ok ? undefined : result.error.diagnostic;
+            reportRefreshTelemetry({
+              outcome: result.ok ? "success" : "failure",
+              code: result.ok ? "none" : result.error.code,
+              stage: result.ok ? "complete" : diagnostic?.stage ?? stage,
+              reason: diagnostic?.reason,
+              page: diagnostic?.page,
+              status: result.ok ? 200 : diagnostic?.status,
+              ignoredUserMetadata,
+            });
           }
           return result;
         },

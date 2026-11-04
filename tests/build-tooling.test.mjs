@@ -211,14 +211,14 @@ test("the protected build keeps the aggregate cross-browser and device gate", ()
       env: { ...process.env, PLAYWRIGHT_TEST_PORT: "4211" },
     },
   ).replaceAll("\r\n", "\n");
-  assert.match(playwrightList, /Total: 73 tests in 2 files/);
+  assert.match(playwrightList, /Total: 103 tests in 2 files/);
   for (const [project] of expectedProjects) {
     const listedCount = playwrightList
       .split("\n")
       .filter((line) => line.includes(`[${project}]`)).length;
     assert.equal(
       listedCount,
-      project.endsWith("-desktop") ? 19 : 4,
+      project.endsWith("-desktop") ? 29 : 4,
       `${project} must retain its expected aggregate assignments`,
     );
   }

@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "source": "final static export",
+  "fixture_policy": "Synthetic token, broadcaster, and follower rows only; no real account data.",
+  "fixed_keys": [
+    "event",
+    "diagnostic_schema",
+    "app_version",
+    "outcome",
+    "code",
+    "stage",
+    "reason",
+    "page_bucket",
+    "status_class",
+    "compatibility"
+  ],
+  "dataLayer_queue_only": true,
+  "gtm_delivery_claim": false,
+  "examples": {
+    "normal": {
+      "event": "follower_refresh_result",
+      "diagnostic_schema": 1,
+      "app_version": "2.2.0",
+      "outcome": "success",
+      "code": "none",
+      "stage": "complete",
+      "reason": "none",
+      "page_bucket": "none",
+      "status_class": "2xx",
+      "compatibility": "none"
+    },
+    "http500": {
+      "event": "follower_refresh_result",
+      "diagnostic_schema": 1,
+      "app_version": "2.2.0",
+      "outcome": "failure",
+      "code": "server_error",
+      "stage": "followers",
+      "reason": "unknown",
+      "page_bucket": "1",
+      "status_class": "5xx",
+      "compatibility": "none"
+    },
+    "optional_metadata_recovery": {
+      "event": "follower_refresh_result",
+      "diagnostic_schema": 1,
+      "app_version": "2.2.0",
+      "outcome": "success",
+      "code": "none",
+      "stage": "complete",
+      "reason": "none",
+      "page_bucket": "none",
+      "status_class": "2xx",
+      "compatibility": "ignored_user_metadata"
+    }
+  },
+  "interpretation": "These are the fixed-shape events observed in the browser dataLayer for synthetic success, HTTP 500 failure, and optional-user-metadata recovery journeys. This file proves only local queue construction; it is not evidence that Google Tag Manager sent or that an analytics backend received any event."
+}

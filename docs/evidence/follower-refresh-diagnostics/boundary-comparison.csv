@@ -1,0 +1,103 @@
+endpoint,case,before_outcome,before_code,after_outcome,after_code
+followers,valid single page,accepted,none,accepted,none
+followers,valid empty zero snapshot,accepted,none,accepted,none
+followers,200 empty body,rejected,invalid_json,rejected,invalid_json
+followers,200 malformed JSON,rejected,invalid_json,rejected,invalid_json
+followers,200 JSON top-level array,rejected,invalid_response,rejected,invalid_response
+followers,200 JSON top-level null,rejected,invalid_response,rejected,invalid_response
+followers,200 JSON top-level string,rejected,invalid_response,rejected,invalid_response
+followers,200 JSON top-level number,rejected,invalid_response,rejected,invalid_response
+followers,200 HTML MIME,rejected,invalid_response,rejected,invalid_response
+followers,200 missing MIME,rejected,invalid_response,rejected,invalid_response
+followers,204 no content,rejected,invalid_response,rejected,invalid_response
+followers,201 JSON response,rejected,invalid_response,rejected,invalid_response
+followers,300 redirect response,rejected,invalid_response,rejected,invalid_response
+followers,followers 401,rejected,auth_invalid,rejected,auth_invalid
+followers,followers 403,rejected,permission_denied,rejected,permission_denied
+followers,followers 400,rejected,bad_request,rejected,bad_request
+followers,followers 404,rejected,bad_request,rejected,bad_request
+followers,followers 429,rejected,rate_limited,rejected,rate_limited
+followers,followers 500,rejected,server_error,rejected,server_error
+followers,data missing,rejected,follower_details_unavailable,rejected,follower_details_unavailable
+followers,data null,rejected,follower_details_unavailable,rejected,follower_details_unavailable
+followers,data object,rejected,follower_details_unavailable,rejected,follower_details_unavailable
+followers,total missing,rejected,invalid_response,rejected,invalid_response
+followers,total numeric string,rejected,invalid_response,rejected,invalid_response
+followers,total null,rejected,invalid_response,rejected,invalid_response
+followers,total float,rejected,invalid_response,rejected,invalid_response
+followers,total negative,rejected,invalid_response,rejected,invalid_response
+followers,total boolean,rejected,invalid_response,rejected,invalid_response
+followers,total lower than unique page rows,rejected,invalid_response,rejected,invalid_response
+followers,total greater than rows accepted,accepted,none,accepted,none
+followers,pagination missing,rejected,invalid_response,rejected,invalid_response
+followers,pagination null,rejected,invalid_response,rejected,invalid_response
+followers,pagination array,rejected,invalid_response,rejected,invalid_response
+followers,pagination empty cursor,rejected,invalid_response,rejected,invalid_response
+followers,pagination null cursor,rejected,invalid_response,rejected,invalid_response
+followers,pagination numeric cursor,rejected,invalid_response,rejected,invalid_response
+followers,pagination string object,rejected,invalid_response,rejected,invalid_response
+followers,repeated pagination cursor,rejected,pagination_loop,rejected,pagination_loop
+followers,first page empty positive total,rejected,follower_details_unavailable,rejected,follower_details_unavailable
+followers,later page empty terminal accepted after row,accepted,none,accepted,none
+followers,later page missing data,rejected,follower_details_unavailable,rejected,follower_details_unavailable
+followers,later page malformed JSON,rejected,invalid_json,rejected,invalid_json
+followers,later page 204,rejected,invalid_response,rejected,invalid_response
+followers,row null,rejected,invalid_response,rejected,invalid_response
+followers,row array,rejected,invalid_response,rejected,invalid_response
+followers,user_id missing,rejected,invalid_response,rejected,invalid_response
+followers,user_id empty string,rejected,invalid_response,rejected,invalid_response
+followers,user_id null,rejected,invalid_response,rejected,invalid_response
+followers,user_id number,rejected,invalid_response,rejected,invalid_response
+followers,user_login missing,rejected,invalid_response,rejected,invalid_response
+followers,user_login empty string,rejected,invalid_response,rejected,invalid_response
+followers,user_login null,rejected,invalid_response,rejected,invalid_response
+followers,user_login number,rejected,invalid_response,rejected,invalid_response
+followers,user_name missing,rejected,invalid_response,rejected,invalid_response
+followers,user_name empty string,rejected,invalid_response,rejected,invalid_response
+followers,user_name null,rejected,invalid_response,rejected,invalid_response
+followers,user_name number,rejected,invalid_response,rejected,invalid_response
+followers,followed_at missing,rejected,invalid_response,rejected,invalid_response
+followers,followed_at empty string,rejected,invalid_response,rejected,invalid_response
+followers,followed_at null,rejected,invalid_response,rejected,invalid_response
+followers,followed_at number,rejected,invalid_response,rejected,invalid_response
+followers,duplicate row accepted,accepted,none,accepted,none
+users,valid id and optional fields,accepted,none,accepted,none
+users,id only accepted,accepted,none,accepted,none
+users,login empty string,rejected,invalid_response,accepted,none
+users,login null,rejected,invalid_response,accepted,none
+users,login number,rejected,invalid_response,accepted,none
+users,display_name empty string,rejected,invalid_response,accepted,none
+users,display_name null,rejected,invalid_response,accepted,none
+users,display_name number,rejected,invalid_response,accepted,none
+users,user id missing,rejected,invalid_response,rejected,invalid_response
+users,user id null,rejected,invalid_response,rejected,invalid_response
+users,user id empty,rejected,invalid_response,rejected,invalid_response
+users,user id number,rejected,invalid_response,rejected,invalid_response
+users,user object null,rejected,invalid_response,rejected,invalid_response
+users,user id mismatch,rejected,permission_denied,rejected,permission_denied
+users,user data missing,rejected,invalid_response,rejected,invalid_response
+users,user data empty,rejected,invalid_response,rejected,invalid_response
+users,user data multiple,rejected,invalid_response,rejected,invalid_response
+users,users malformed JSON,rejected,invalid_json,rejected,invalid_json
+users,users HTML MIME,rejected,invalid_response,rejected,invalid_response
+users,users 204,rejected,invalid_response,rejected,invalid_response
+users,users 300,rejected,invalid_response,rejected,invalid_response
+users,users 401,rejected,auth_invalid,rejected,auth_invalid
+users,users 403,rejected,permission_denied,rejected,permission_denied
+users,users 400,rejected,bad_request,rejected,bad_request
+users,users 429,rejected,rate_limited,rejected,rate_limited
+users,users 500,rejected,server_error,rejected,server_error
+users,network TypeError,rejected,network,rejected,network
+validate,valid token,accepted,none,accepted,none
+validate,missing scope,rejected,permission_denied,rejected,permission_denied
+validate,expires zero,rejected,invalid_response,rejected,invalid_response
+validate,token malformed JSON,rejected,invalid_json,rejected,invalid_json
+validate,token HTML MIME,rejected,invalid_response,rejected,invalid_response
+validate,token 300,rejected,invalid_response,rejected,invalid_response
+validate,token 401,rejected,auth_invalid,rejected,auth_invalid
+validate,token 403,rejected,permission_denied,rejected,permission_denied
+validate,token 400,rejected,bad_request,rejected,bad_request
+validate,token 429,rejected,rate_limited,rejected,rate_limited
+validate,network TypeError,rejected,network,rejected,network
+followers,injected response with non-record headers,rejected,invalid_response,rejected,invalid_response
+followers,injected null response,rejected,invalid_response,rejected,invalid_response
