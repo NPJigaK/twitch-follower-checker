@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "collected_on_jst": "2026-11-05",
+  "collected_on_utc": "2026-11-04",
+  "baseline_commit": "b4a6f42c6f985ea906e1641890f1132454cee5bb",
+  "environment": {
+    "os": "Windows",
+    "playwright": "1.63.0",
+    "next": "15.5.25",
+    "react": "18.3.1",
+    "dependency_changes": false,
+    "twitch_requests": "intercepted synthetic fixtures only"
+  },
+  "checks": [
+    { "command": "yarn lint", "result": "passed" },
+    { "command": "yarn typecheck", "result": "passed" },
+    { "command": "yarn test", "result": "passed", "passed": 170, "failed": 0 },
+    { "command": "yarn verify:dependencies", "result": "passed" },
+    { "command": "yarn build", "result": "passed" },
+    { "command": "yarn verify:artifact", "result": "passed", "html_files": 29, "javascript_files": 54, "css_files": 2, "sitemap_urls": 25 },
+    { "command": "PLAYWRIGHT_TEST_PORT=4270 yarn test:e2e --reporter=line", "result": "passed", "passed": 103, "failed": 0, "duration_minutes_approximate": 6.1 },
+    { "command": "yarn compare:artifacts <validated-export> <final-rebuild>", "result": "passed", "javascript_css_and_manifest_hashes": "identical", "html": "identical after known Next.js build-ID normalization" },
+    { "command": "git diff --check", "result": "passed" }
+  ],
+  "playwright_projects": [
+    { "name": "chromium-desktop", "passed": 29 },
+    { "name": "firefox-desktop", "passed": 29 },
+    { "name": "webkit-desktop", "passed": 29 },
+    { "name": "chromium-phone-emulated", "passed": 4 },
+    { "name": "webkit-phone-emulated", "passed": 4 },
+    { "name": "chromium-tablet-emulated", "passed": 4 },
+    { "name": "webkit-tablet-emulated", "passed": 4 }
+  ],
+  "covered_journeys": [
+    "strict validated identity and negative identity fixtures",
+    "normal follower refresh and malformed unused user metadata recovery",
+    "follower pagination, dynamic totals and count-only rejection",
+    "baseline retention after failed initial or manual refresh",
+    "Check Done, filtering, grids, tab keyboard/ARIA and persisted baseline",
+    "one terminal event per single-flight execution",
+    "nonfatal absent, frozen and throwing dataLayer observers",
+    "aborted same-document navigation emits no stale terminal event",
+    "localized documentation, search and legacy routes",
+    "light/dark responsive views, emulated touch and rotation"
+  ],
+  "public_evidence_audit": {
+    "result": "passed",
+    "png_size_and_sha256_records_verified": 12,
+    "normalized_application_source_hashes_verified": 3,
+    "fixed_shape_browser_event_examples_verified": 3,
+    "private_profile_path_reporter_or_credential_marker_matches": 0,
+    "image_metadata_review": "No EXIF, XMP, ICC or text metadata; synthetic UI rows only"
+  },
+  "limitations": [
+    "Original reported response and cause remain unavailable and unconfirmed.",
+    "Playwright engines and device emulation do not certify branded browsers or physical devices.",
+    "Native Safari, iOS WebView and native assistive technology were not verified.",
+    "The new message is verified at dataLayer enqueue only; private GTM configuration and GA4 receipt were not changed or verified.",
+    "Aggregate E2E and captures precede trailing-blank-line cleanup only; final lint/typecheck/170 Node tests/build/artifact checks passed again and the rebuilt browser assets matched the validated export. Evidence-only documentation and PNG additions do not change the application.",
+    "No merge, deployment, live token use, or production analytics change was performed."
+  ]
+}

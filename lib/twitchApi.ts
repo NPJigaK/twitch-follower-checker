@@ -33,6 +33,33 @@ export interface AuthenticatedUser {
   display_name?: string;
 }
 
+export const TWITCH_DIAGNOSTIC_REASONS = [
+  "response_shape",
+  "content_type",
+  "empty_body",
+  "malformed_json",
+  "json_shape",
+  "schema",
+  "user_collection",
+  "user_record",
+  "user_id",
+  "follower_record",
+  "follower_user_id",
+  "follower_user_login",
+  "follower_user_name",
+  "follower_followed_at",
+  "total",
+  "page_total",
+  "pagination_missing",
+  "pagination",
+  "cursor",
+] as const;
+
+export type TwitchDiagnosticReason =
+  (typeof TWITCH_DIAGNOSTIC_REASONS)[number];
+
+export type TwitchRequestStage = "validate" | "users" | "followers";
+
 export type TwitchRequestErrorCode =
   | "auth_invalid"
   | "permission_denied"
@@ -51,6 +78,10 @@ export interface TwitchRequestErrorOptions {
   status?: number;
   /** Unix timestamp in seconds from Twitch's `Ratelimit-Reset` header. */
   rateLimitReset?: number;
+  stage?: TwitchRequestStage;
+  reason?: TwitchDiagnosticReason;
+  /** 1-based follower page number; omitted for non-paged requests. */
+  page?: number;
 }
 
 /**
@@ -61,6 +92,9 @@ export class TwitchRequestError extends Error {
   readonly code: TwitchRequestErrorCode;
   readonly status?: number;
   readonly rateLimitReset?: number;
+  readonly stage?: TwitchRequestStage;
+  readonly reason?: TwitchDiagnosticReason;
+  readonly page?: number;
 
   constructor(
     code: TwitchRequestErrorCode,
@@ -72,6 +106,14 @@ export class TwitchRequestError extends Error {
     this.code = code;
     this.status = options.status;
     this.rateLimitReset = options.rateLimitReset;
+    this.stage = options.stage;
+    this.reason = options.reason;
+    this.page =
+      options.page !== undefined &&
+      Number.isSafeInteger(options.page) &&
+      options.page > 0
+        ? options.page
+        : undefined;
     Object.setPrototypeOf(this, TwitchRequestError.prototype);
   }
 }
@@ -98,7 +140,22 @@ export interface TwitchRequestOptions {
   signal?: AbortSignal;
   /** Timeout for each HTTP request, including response-body consumption. */
   timeoutMs?: number;
+  onNotice?: (notice: "user_metadata_ignored") => void;
 }
+
+interface RequestContext {
+  stage: TwitchRequestStage;
+  page?: number;
+}
+
+const responseValidationOptions = (
+  context: RequestContext,
+  reason: TwitchDiagnosticReason
+): TwitchRequestErrorOptions => ({
+  ...context,
+  status: 200,
+  reason,
+});
 
 const ERROR_MESSAGES: Record<TwitchRequestErrorCode, string> = {
   auth_invalid: "Twitch authentication is invalid or expired.",
@@ -151,12 +208,41 @@ const createError = (
 ): TwitchRequestError =>
   new TwitchRequestError(code, ERROR_MESSAGES[code], options);
 
-const createTimeoutError = (): TwitchRequestError => createError("timeout");
+const withRequestContext = (
+  error: TwitchRequestError,
+  context?: RequestContext
+): TwitchRequestError => {
+  if (
+    context === undefined ||
+    (error.stage !== undefined &&
+      (context.page === undefined || error.page !== undefined))
+  ) {
+    return error;
+  }
+  return new TwitchRequestError(
+    error.code,
+    ERROR_MESSAGES[error.code] ?? ERROR_MESSAGES.invalid_response,
+    {
+      status: error.status,
+      rateLimitReset: error.rateLimitReset,
+      stage: error.stage ?? context.stage,
+      reason: error.reason,
+      page: error.page ?? context.page,
+    }
+  );
+};
 
-const createAbortedError = (): TwitchRequestError => createError("aborted");
+const createTimeoutError = (
+  context?: RequestContext
+): TwitchRequestError => createError("timeout", context);
+
+const createAbortedError = (
+  context?: RequestContext
+): TwitchRequestError => createError("aborted", context);
 
 const getFetchImplementation = (
-  fetchImpl?: FetchImplementation
+  fetchImpl?: FetchImplementation,
+  context?: RequestContext
 ): FetchImplementation => {
   if (fetchImpl) {
     return fetchImpl;
@@ -169,7 +255,7 @@ const getFetchImplementation = (
   // This is a configuration/runtime failure, but expose it through the same
   // sanitized network category rather than leaking an implementation error.
   return async () => {
-    throw createError("network");
+    throw createError("network", context);
   };
 };
 
@@ -234,23 +320,24 @@ const isAbortLike = (value: unknown): boolean => {
 const classifyTransportError = (
   value: unknown,
   requestSignal: RequestSignal,
-  parentSignal: AbortSignal | undefined
+  parentSignal: AbortSignal | undefined,
+  context?: RequestContext
 ): TwitchRequestError => {
   if (requestSignal.didTimeout()) {
-    return createTimeoutError();
+    return createTimeoutError(context);
   }
   if (parentSignal?.aborted || requestSignal.signal.aborted) {
-    return createAbortedError();
+    return createAbortedError(context);
   }
   if (value instanceof TwitchRequestError) {
-    return value;
+    return withRequestContext(value, context);
   }
   // An AbortError from an injected/alternate fetch implementation is only
   // considered cancellation when a caller actually cancelled this request.
   if (isAbortLike(value) && parentSignal?.aborted) {
-    return createAbortedError();
+    return createAbortedError(context);
   }
-  return createError("network");
+  return createError("network", context);
 };
 
 const parseRateLimitReset = (headers: ResponseHeaders): number | undefined => {
@@ -265,43 +352,46 @@ const parseRateLimitReset = (headers: ResponseHeaders): number | undefined => {
 
 const statusError = (
   status: number,
-  headers: ResponseHeaders
+  headers: ResponseHeaders,
+  context?: RequestContext
 ): TwitchRequestError => {
   if (status === 401) {
-    return createError("auth_invalid", { status });
+    return createError("auth_invalid", { ...context, status });
   }
   if (status === 403) {
-    return createError("permission_denied", { status });
+    return createError("permission_denied", { ...context, status });
   }
   if (status === 429) {
     return createError("rate_limited", {
+      ...context,
       status,
       rateLimitReset: parseRateLimitReset(headers),
     });
   }
   if (status >= 500 && status <= 599) {
-    return createError("server_error", { status });
+    return createError("server_error", { ...context, status });
   }
   if (status >= 400 && status <= 499) {
-    return createError("bad_request", { status });
+    return createError("bad_request", { ...context, status });
   }
-  return createError("invalid_response", { status });
+  return createError("invalid_response", { ...context, status });
 };
 
 const raceWithRequestCancellation = async <T>(
   operation: PromiseLike<T>,
   requestSignal: RequestSignal,
-  parentSignal: AbortSignal | undefined
+  parentSignal: AbortSignal | undefined,
+  context?: RequestContext
 ): Promise<T> => {
   let onAbort: (() => void) | undefined;
   const abortPromise = new Promise<T>((_, reject) => {
     onAbort = () => {
       reject(
         requestSignal.didTimeout()
-          ? createTimeoutError()
+          ? createTimeoutError(context)
           : parentSignal?.aborted
-            ? createAbortedError()
-            : createAbortedError()
+            ? createAbortedError(context)
+            : createAbortedError(context)
       );
     };
     if (requestSignal.signal.aborted) {
@@ -326,21 +416,24 @@ const raceWithRequestCancellation = async <T>(
 const readBodyWithCancellation = async (
   response: TwitchResponse,
   requestSignal: RequestSignal,
-  parentSignal: AbortSignal | undefined
+  parentSignal: AbortSignal | undefined,
+  context?: RequestContext
 ): Promise<string> =>
   raceWithRequestCancellation(
     // Resolve on a microtask so a non-conforming response.text implementation
     // that throws synchronously is handled by the normal transport path.
     Promise.resolve().then(() => response.text()),
     requestSignal,
-    parentSignal
+    parentSignal,
+    context
   );
 
 const requestJsonOnce = async (
   url: URL,
   token: string,
   clientId: string | undefined,
-  options: TwitchRequestOptions
+  options: TwitchRequestOptions,
+  context: RequestContext
 ): Promise<Record<string, unknown>> => {
   const timeoutMs =
     options.timeoutMs === undefined
@@ -349,7 +442,7 @@ const requestJsonOnce = async (
         ? options.timeoutMs
         : 0;
   const requestSignal = createRequestSignal(options.signal, timeoutMs);
-  const fetchImpl = getFetchImplementation(options.fetchImpl);
+  const fetchImpl = getFetchImplementation(options.fetchImpl, context);
 
   const headers: Record<string, string> = {
     Authorization: `Bearer ${token}`,
@@ -361,8 +454,8 @@ const requestJsonOnce = async (
   try {
     if (requestSignal.signal.aborted) {
       throw requestSignal.didTimeout()
-        ? createTimeoutError()
-        : createAbortedError();
+        ? createTimeoutError(context)
+        : createAbortedError(context);
     }
 
     let responseValue: unknown;
@@ -374,30 +467,42 @@ const requestJsonOnce = async (
           signal: requestSignal.signal,
         }),
         requestSignal,
-        options.signal
+        options.signal,
+        context
       );
     } catch (error) {
-      throw classifyTransportError(error, requestSignal, options.signal);
+      throw classifyTransportError(
+        error,
+        requestSignal,
+        options.signal,
+        context
+      );
     }
 
     if (!isResponseLike(responseValue)) {
-      throw createError("invalid_response");
+      throw createError("invalid_response", {
+        ...context,
+        reason: "response_shape",
+      });
     }
     const response = responseValue;
 
     if (requestSignal.signal.aborted) {
       throw requestSignal.didTimeout()
-        ? createTimeoutError()
-        : createAbortedError();
+        ? createTimeoutError(context)
+        : createAbortedError(context);
     }
 
     if (response.status !== 200) {
-      throw statusError(response.status, response.headers);
+      throw statusError(response.status, response.headers, context);
     }
 
     const contentType = response.headers.get("content-type");
     if (!contentType || !/\bapplication\/json\b/i.test(contentType)) {
-      throw createError("invalid_response");
+      throw createError(
+        "invalid_response",
+        responseValidationOptions(context, "content_type")
+      );
     }
 
     let text: string;
@@ -405,32 +510,47 @@ const requestJsonOnce = async (
       text = await readBodyWithCancellation(
         response,
         requestSignal,
-        options.signal
+        options.signal,
+        context
       );
     } catch (error) {
       if (error instanceof TwitchRequestError) {
-        throw error;
+        throw withRequestContext(error, context);
       }
-      throw classifyTransportError(error, requestSignal, options.signal);
+      throw classifyTransportError(
+        error,
+        requestSignal,
+        options.signal,
+        context
+      );
     }
 
     if (requestSignal.signal.aborted) {
       throw requestSignal.didTimeout()
-        ? createTimeoutError()
-        : createAbortedError();
+        ? createTimeoutError(context)
+        : createAbortedError(context);
     }
     if (typeof text !== "string" || text.trim() === "") {
-      throw createError("invalid_json");
+      throw createError(
+        "invalid_json",
+        responseValidationOptions(context, "empty_body")
+      );
     }
 
     let parsed: unknown;
     try {
       parsed = JSON.parse(text);
     } catch {
-      throw createError("invalid_json");
+      throw createError(
+        "invalid_json",
+        responseValidationOptions(context, "malformed_json")
+      );
     }
     if (!isRecord(parsed)) {
-      throw createError("invalid_response");
+      throw createError(
+        "invalid_response",
+        responseValidationOptions(context, "json_shape")
+      );
     }
     return parsed;
   } finally {
@@ -443,10 +563,11 @@ const requestJson = async (
   url: URL,
   token: string,
   clientId: string | undefined,
-  options: TwitchRequestOptions
+  options: TwitchRequestOptions,
+  context: RequestContext
 ): Promise<Record<string, unknown>> => {
   try {
-    return await requestJsonOnce(url, token, clientId, options);
+    return await requestJsonOnce(url, token, clientId, options, context);
   } catch (cause) {
     if (
       cause instanceof TwitchRequestError &&
@@ -454,27 +575,36 @@ const requestJson = async (
       cause.status === 503 &&
       !options.signal?.aborted
     ) {
-      return requestJsonOnce(url, token, clientId, options);
+      return requestJsonOnce(url, token, clientId, options, context);
     }
     throw cause;
   }
 };
 
-const requireToken = (token: string): void => {
+const requireToken = (
+  token: string,
+  options: TwitchRequestErrorOptions = {}
+): void => {
   if (!isNonEmptyString(token)) {
-    throw createError("auth_invalid");
+    throw createError("auth_invalid", options);
   }
 };
 
-const requireClientId = (clientId: string): void => {
+const requireClientId = (
+  clientId: string,
+  options: TwitchRequestErrorOptions = {}
+): void => {
   if (!isNonEmptyString(clientId)) {
-    throw createError("invalid_response");
+    throw createError("invalid_response", options);
   }
 };
 
-const requireId = (value: unknown): string => {
+const requireId = (
+  value: unknown,
+  options: TwitchRequestErrorOptions = {}
+): string => {
   if (!isNonEmptyString(value)) {
-    throw createError("invalid_response");
+    throw createError("invalid_response", options);
   }
   return value;
 };
@@ -485,35 +615,42 @@ export const validateAccessToken = async (
   expectedClientId?: string,
   options: TwitchRequestOptions = {}
 ): Promise<ValidatedToken> => {
-  requireToken(token);
+  const context: RequestContext = { stage: "validate" };
+  requireToken(token, context);
   const response = await requestJson(
     new URL(TWITCH_VALIDATE_URL),
     token,
     undefined,
-    options
+    options,
+    context
   );
 
-  const tokenClientId = requireId(response.client_id);
+  const responseOptions = (reason: TwitchDiagnosticReason) =>
+    responseValidationOptions(context, reason);
+  const tokenClientId = requireId(
+    response.client_id,
+    responseOptions("schema")
+  );
   if (expectedClientId !== undefined && tokenClientId !== expectedClientId) {
     // The token may be valid in isolation, but it cannot authorize this
     // application. Treat it as unusable authentication so the UI offers a
     // fresh Twitch authorization instead of an endless retry loop.
-    throw createError("auth_invalid");
+    throw createError("auth_invalid", responseOptions("schema"));
   }
 
   if (
     !Array.isArray(response.scopes) ||
     response.scopes.some((scope) => !isNonEmptyString(scope))
   ) {
-    throw createError("invalid_response");
+    throw createError("invalid_response", responseOptions("schema"));
   }
   if (!response.scopes.includes(REQUIRED_FOLLOWER_SCOPE)) {
-    throw createError("permission_denied");
+    throw createError("permission_denied", responseOptions("schema"));
   }
 
-  const userId = requireId(response.user_id);
+  const userId = requireId(response.user_id, responseOptions("user_id"));
   if (!isPositiveInteger(response.expires_in)) {
-    throw createError("invalid_response");
+    throw createError("invalid_response", responseOptions("schema"));
   }
 
   return {
@@ -531,34 +668,57 @@ export const getAuthenticatedUser = async (
   expectedUserId?: string,
   options: TwitchRequestOptions = {}
 ): Promise<AuthenticatedUser> => {
-  requireToken(token);
-  requireClientId(clientId);
+  const context: RequestContext = { stage: "users" };
+  requireToken(token, context);
+  requireClientId(clientId, context);
 
   const response = await requestJson(
     new URL(`${TWITCH_API_BASE_URL}/users`),
     token,
     clientId,
-    options
+    options,
+    context
   );
   if (!Array.isArray(response.data) || response.data.length !== 1) {
-    throw createError("invalid_response");
+    throw createError(
+      "invalid_response",
+      responseValidationOptions(context, "user_collection")
+    );
   }
   const rawUser = response.data[0];
   if (!isRecord(rawUser)) {
-    throw createError("invalid_response");
+    throw createError(
+      "invalid_response",
+      responseValidationOptions(context, "user_record")
+    );
   }
 
-  const id = requireId(rawUser.id);
+  const responseOptions = (reason: TwitchDiagnosticReason) =>
+    responseValidationOptions(context, reason);
+  const id = requireId(rawUser.id, responseOptions("user_id"));
   if (expectedUserId !== undefined && id !== expectedUserId) {
-    throw createError("permission_denied");
+    throw createError("permission_denied", responseOptions("user_id"));
   }
 
   const user: AuthenticatedUser = { id };
-  if (rawUser.login !== undefined) {
-    user.login = requireId(rawUser.login);
+  const loginPresent = hasOwn(rawUser, "login");
+  const displayNamePresent = hasOwn(rawUser, "display_name");
+  const login = isNonEmptyString(rawUser.login) ? rawUser.login : undefined;
+  const displayName = isNonEmptyString(rawUser.display_name)
+    ? rawUser.display_name
+    : undefined;
+  if ((loginPresent && login === undefined) || (displayNamePresent && displayName === undefined)) {
+    try {
+      options.onNotice?.("user_metadata_ignored");
+    } catch {
+      // Observability hooks must never affect authentication.
+    }
   }
-  if (rawUser.display_name !== undefined) {
-    user.display_name = requireId(rawUser.display_name);
+  if (login !== undefined) {
+    user.login = login;
+  }
+  if (displayName !== undefined) {
+    user.display_name = displayName;
   }
   return user;
 };
@@ -569,39 +729,78 @@ interface ParsedFollowerPage {
   total: number;
 }
 
-const parseFollower = (value: unknown): Follower => {
+const parseFollower = (
+  value: unknown,
+  context: RequestContext
+): Follower => {
   if (!isRecord(value)) {
-    throw createError("invalid_response");
+    throw createError(
+      "invalid_response",
+      responseValidationOptions(context, "follower_record")
+    );
   }
+  const responseOptions = (reason: TwitchDiagnosticReason) =>
+    responseValidationOptions(context, reason);
   return {
-    user_id: requireId(value.user_id),
-    user_login: requireId(value.user_login),
-    user_name: requireId(value.user_name),
-    followed_at: requireId(value.followed_at),
+    user_id: requireId(
+      value.user_id,
+      responseOptions("follower_user_id")
+    ),
+    user_login: requireId(
+      value.user_login,
+      responseOptions("follower_user_login")
+    ),
+    user_name: requireId(
+      value.user_name,
+      responseOptions("follower_user_name")
+    ),
+    followed_at: requireId(
+      value.followed_at,
+      responseOptions("follower_followed_at")
+    ),
   };
 };
 
 const parseFollowerPage = (
-  response: Record<string, unknown>
+  response: Record<string, unknown>,
+  context: RequestContext
 ): ParsedFollowerPage => {
   if (!isNonNegativeInteger(response.total)) {
-    throw createError("invalid_response");
+    throw createError(
+      "invalid_response",
+      responseValidationOptions(context, "page_total")
+    );
   }
   if (!Array.isArray(response.data)) {
     // A successful response with only `total` is not an empty follower list;
     // treating it as [] would corrupt the baseline.
-    throw createError("follower_details_unavailable");
+    throw createError(
+      "follower_details_unavailable",
+      responseValidationOptions(context, "schema")
+    );
   }
-  if (!hasOwn(response, "pagination") || !isRecord(response.pagination)) {
-    throw createError("invalid_response");
+  if (!hasOwn(response, "pagination")) {
+    throw createError(
+      "invalid_response",
+      responseValidationOptions(context, "pagination_missing")
+    );
+  }
+  if (!isRecord(response.pagination)) {
+    throw createError(
+      "invalid_response",
+      responseValidationOptions(context, "pagination")
+    );
   }
 
-  const followers = response.data.map(parseFollower);
+  const followers = response.data.map((value) => parseFollower(value, context));
   const pagination = response.pagination;
   let nextCursor: string | undefined;
   if (hasOwn(pagination, "cursor")) {
     if (!isNonEmptyString(pagination.cursor)) {
-      throw createError("invalid_response");
+      throw createError(
+        "invalid_response",
+        responseValidationOptions(context, "cursor")
+      );
     }
     nextCursor = pagination.cursor;
   }
@@ -610,7 +809,10 @@ const parseFollowerPage = (
     followers.map((follower) => follower.user_id)
   ).size;
   if (response.total < uniquePageFollowerCount) {
-    throw createError("invalid_response");
+    throw createError(
+      "invalid_response",
+      responseValidationOptions(context, "page_total")
+    );
   }
 
   return { followers, nextCursor, total: response.total };
@@ -649,21 +851,30 @@ export const fetchAllFollowers = async (
   broadcasterId: string,
   options: TwitchRequestOptions = {}
 ): Promise<Follower[]> => {
-  requireToken(token);
-  requireClientId(clientId);
-  requireClientId(broadcasterId);
+  const context: RequestContext = { stage: "followers" };
+  requireToken(token, context);
+  requireClientId(clientId, context);
+  requireClientId(broadcasterId, context);
 
   const allFollowers: Follower[] = [];
   const seenUserIds = new Set<string>();
   const visitedCursors = new Set<string>();
   let maximumReportedTotal = 0;
   let cursor: string | undefined;
+  let pageNumber = 1;
 
   while (true) {
     const isFirstPage = cursor === undefined;
+    const pageContext: RequestContext = {
+      stage: "followers",
+      page: pageNumber,
+    };
     if (cursor !== undefined) {
       if (visitedCursors.has(cursor)) {
-        throw createError("pagination_loop");
+        throw createError(
+          "pagination_loop",
+          { ...pageContext, reason: "cursor" }
+        );
       }
       visitedCursors.add(cursor);
     }
@@ -672,16 +883,20 @@ export const fetchAllFollowers = async (
       makeFollowersUrl(broadcasterId, cursor),
       token,
       clientId,
-      options
+      options,
+      pageContext
     );
-    const page = parseFollowerPage(response);
+    const page = parseFollowerPage(response, pageContext);
     maximumReportedTotal = Math.max(maximumReportedTotal, page.total);
 
     // Twitch documents count-only responses when follower details are not
     // authorized. An empty first page with a positive total is indistinguishable
     // from that response and must never be accepted as an empty baseline.
     if (isFirstPage && page.followers.length === 0 && page.total > 0) {
-      throw createError("follower_details_unavailable");
+      throw createError(
+        "follower_details_unavailable",
+        responseValidationOptions(pageContext, "total")
+      );
     }
 
     for (const follower of page.followers) {
@@ -696,10 +911,14 @@ export const fetchAllFollowers = async (
 
     if (page.nextCursor === undefined) {
       if (allFollowers.length === 0 && maximumReportedTotal > 0) {
-        throw createError("follower_details_unavailable");
+        throw createError(
+          "follower_details_unavailable",
+          responseValidationOptions(pageContext, "total")
+        );
       }
       return allFollowers;
     }
     cursor = page.nextCursor;
+    pageNumber += 1;
   }
 };

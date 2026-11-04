@@ -38,6 +38,21 @@ const BROADCASTER_ID = "channel-e2e";
 const SNAPSHOT_KEY = `previousFollowersKey:v1:${encodeURIComponent(BROADCASTER_ID)}`;
 const BASELINE_CHECKED_AT = "2026-01-01T00:00:00.000Z";
 const OPAQUE_CURSOR = "opaque+cursor&with=reserved=1#fixture";
+const REFRESH_TELEMETRY_EVENT = "follower_refresh_result";
+const REFRESH_TELEMETRY_KEYS = [
+  "app_version",
+  "code",
+  "compatibility",
+  "diagnostic_schema",
+  "event",
+  "outcome",
+  "page_bucket",
+  "reason",
+  "stage",
+  "status_class",
+].sort();
+const TELEMETRY_PRIVACY_SENTINEL =
+  "synthetic-private-sentinel-do-not-emit";
 const EXPECTED_FOLLOWER_SEARCH_HREFS = [
   "/de/how_to_use/#follower-pr%C3%BCfen",
   "/de/how_to_use/#follower-liste",
@@ -184,8 +199,10 @@ const isSeparatelyAuditedNetworkMessage = (
 
 class TwitchMock {
   private nextFollowerStatus: number | null = null;
+  private nextFollowerPageStatus: number | null = null;
   private nextTerminalFollowerTotal: number | null = null;
   private nextEmptyPositiveTotal: number | null = null;
+  private nextUserPayload: Readonly<Record<string, unknown>> | null = null;
   private nextFollowerHold:
     | Readonly<{ started: Deferred; release: Deferred }>
     | null = null;
@@ -197,6 +214,14 @@ class TwitchMock {
 
   failNextFollowerRequest(status: number): void {
     this.nextFollowerStatus = status;
+  }
+
+  failNextFollowerPage(status: number): void {
+    this.nextFollowerPageStatus = status;
+  }
+
+  returnNextUserPayload(payload: Readonly<Record<string, unknown>>): void {
+    this.nextUserPayload = payload;
   }
 
   reportNextTerminalFollowerTotal(total: number): void {
@@ -253,16 +278,20 @@ class TwitchMock {
       if (url.search !== "") {
         this.contractFailures.push("unexpected users request query");
       }
+      const nextUserPayload = this.nextUserPayload;
+      this.nextUserPayload = null;
       await route.fulfill({
         status: 200,
         json: {
-          data: [
-            {
-              id: BROADCASTER_ID,
-              login: "channel_e2e",
-              display_name: "Channel E2E",
-            },
-          ],
+          ...(nextUserPayload ?? {
+            data: [
+              {
+                id: BROADCASTER_ID,
+                login: "channel_e2e",
+                display_name: "Channel E2E",
+              },
+            ],
+          }),
         },
       });
       return;
@@ -304,6 +333,16 @@ class TwitchMock {
       await route.fulfill({
         status,
         json: { error: "synthetic failure" },
+      });
+      return;
+    }
+
+    if (hasAfter && this.nextFollowerPageStatus !== null) {
+      const status = this.nextFollowerPageStatus;
+      this.nextFollowerPageStatus = null;
+      await route.fulfill({
+        status,
+        json: { error: "synthetic later-page failure" },
       });
       return;
     }
@@ -524,6 +563,57 @@ const applicationStatus = (page: Page) =>
 
 const applicationAlert = (page: Page) =>
   page.locator('div[role="alert"][aria-atomic="true"]');
+
+const clearRefreshTelemetryEvents = async (page: Page): Promise<void> => {
+  await page.evaluate((eventName) => {
+    const dataLayer = (window as unknown as { dataLayer?: unknown }).dataLayer;
+    if (!Array.isArray(dataLayer)) {
+      return;
+    }
+    for (let index = dataLayer.length - 1; index >= 0; index -= 1) {
+      const entry = dataLayer[index];
+      if (
+        entry !== null &&
+        typeof entry === "object" &&
+        (entry as { event?: unknown }).event === eventName
+      ) {
+        dataLayer.splice(index, 1);
+      }
+    }
+  }, REFRESH_TELEMETRY_EVENT);
+};
+
+const readRefreshTelemetryEvents = async (
+  page: Page
+): Promise<Array<Record<string, unknown>>> =>
+  page.evaluate((eventName) => {
+    const dataLayer = (window as unknown as { dataLayer?: unknown }).dataLayer;
+    if (!Array.isArray(dataLayer)) {
+      return [];
+    }
+    return dataLayer.filter(
+      (entry): entry is Record<string, unknown> =>
+        entry !== null &&
+        typeof entry === "object" &&
+        (entry as { event?: unknown }).event === eventName
+    );
+  }, REFRESH_TELEMETRY_EVENT);
+
+const expectSafeRefreshTelemetryEvent = (
+  event: Record<string, unknown>,
+  expected: Record<string, unknown>
+): void => {
+  expect(Object.keys(event).sort()).toEqual(REFRESH_TELEMETRY_KEYS);
+  expect(event).toMatchObject({
+    event: REFRESH_TELEMETRY_EVENT,
+    diagnostic_schema: 1,
+    app_version: "2.2.0",
+    ...expected,
+  });
+  const serialized = JSON.stringify(event);
+  expect(serialized).not.toContain(SYNTHETIC_TOKEN);
+  expect(serialized).not.toContain(TELEMETRY_PRIVACY_SENTINEL);
+};
 
 const expectTouchControlInViewport = async (control: Locator): Promise<void> => {
   await control.scrollIntoViewIfNeeded();
@@ -1397,5 +1487,364 @@ test("an empty positive response remains fail-closed with a specific recovery me
   expect(await page.evaluate((key) => localStorage.getItem(key), SNAPSHOT_KEY)).toBe(
     baselineBeforeFailure
   );
+  await audit.assertClean();
+});
+
+for (const [label, metadata] of [
+  ["empty optional metadata", { login: "", display_name: "" }],
+  ["null optional metadata", { login: null, display_name: null }],
+  [
+    "malformed optional metadata",
+    {
+      login: { privateValue: TELEMETRY_PRIVACY_SENTINEL },
+      display_name: { privateValue: TELEMETRY_PRIVACY_SENTINEL },
+    },
+  ],
+] as const) {
+  test(`valid user id with ${label} still completes a normal refresh`, async ({
+    page,
+  }) => {
+    const { audit, twitch } = await openAuthenticatedApp(page);
+    await clearRefreshTelemetryEvents(page);
+
+    twitch.returnNextUserPayload({
+      data: [
+        {
+          id: BROADCASTER_ID,
+          ...metadata,
+        },
+      ],
+    });
+    await page.getByRole("button", { name: "Refresh follower lists" }).click();
+
+    await expect(applicationStatus(page)).toHaveText("Follower lists updated.");
+    await expect(
+      activePanel(page, "Follower List").getByText("Retained Viewer", {
+        exact: true,
+      })
+    ).toBeVisible();
+    const events = await readRefreshTelemetryEvents(page);
+    expect(events).toHaveLength(1);
+    expectSafeRefreshTelemetryEvent(events[0], {
+      outcome: "success",
+      code: "none",
+      stage: "complete",
+      reason: "none",
+      page_bucket: "none",
+      status_class: "2xx",
+      compatibility: "ignored_user_metadata",
+    });
+    await audit.assertClean();
+  });
+}
+
+test("strict authenticated-user identity mismatch rejects before followers and preserves storage", async ({
+  page,
+}) => {
+  const { audit, twitch } = await openAuthenticatedApp(page);
+  const persistedBefore = await page.evaluate((key) => ({
+    snapshot: localStorage.getItem(key),
+    checkedDate: localStorage.getItem("lastCheckedDate"),
+  }), SNAPSHOT_KEY);
+  const followerRequestsBefore = twitch.followerRequests.length;
+  await clearRefreshTelemetryEvents(page);
+
+  twitch.returnNextUserPayload({
+    data: [
+      {
+        id: "different-channel-id",
+        login: "different_channel",
+        display_name: "Different Channel",
+      },
+    ],
+  });
+  await page.getByRole("button", { name: "Refresh follower lists" }).click();
+
+  await expect(
+    page.getByText("Authenticate with Twitch", { exact: true })
+  ).toBeVisible();
+  await expect(
+    page.getByText(
+      "This app needs permission to read your followers. Please authenticate with Twitch again.",
+      { exact: true }
+    )
+  ).toBeVisible();
+  expect(twitch.followerRequests.length).toBe(followerRequestsBefore);
+  expect(
+    await page.evaluate((key) => ({
+      snapshot: localStorage.getItem(key),
+      checkedDate: localStorage.getItem("lastCheckedDate"),
+    }), SNAPSHOT_KEY)
+  ).toEqual(persistedBefore);
+
+  const events = await readRefreshTelemetryEvents(page);
+  expect(events).toHaveLength(1);
+  expectSafeRefreshTelemetryEvent(events[0], {
+    outcome: "failure",
+    code: "permission_denied",
+    stage: "users",
+    reason: "user_id",
+    page_bucket: "none",
+    status_class: "2xx",
+    compatibility: "none",
+  });
+  await audit.assertClean();
+});
+
+test("invalid authenticated-user id rejects before followers and preserves storage", async ({
+  page,
+}) => {
+  const { audit, twitch } = await openAuthenticatedApp(page);
+  const persistedBefore = await page.evaluate((key) => ({
+    snapshot: localStorage.getItem(key),
+    checkedDate: localStorage.getItem("lastCheckedDate"),
+  }), SNAPSHOT_KEY);
+  const followerRequestsBefore = twitch.followerRequests.length;
+  await clearRefreshTelemetryEvents(page);
+
+  twitch.returnNextUserPayload({
+    data: [
+      {
+        id: "",
+        login: "channel_e2e",
+        display_name: "Channel E2E",
+      },
+    ],
+  });
+  await page.getByRole("button", { name: "Refresh follower lists" }).click();
+
+  await expect(applicationAlert(page)).toContainText(
+    "Twitch returned an unexpected response. Your previous follower lists were kept."
+  );
+  await expect(
+    activePanel(page, "Follower List").getByText("Retained Viewer", {
+      exact: true,
+    })
+  ).toBeVisible();
+  expect(twitch.followerRequests.length).toBe(followerRequestsBefore);
+  expect(
+    await page.evaluate((key) => ({
+      snapshot: localStorage.getItem(key),
+      checkedDate: localStorage.getItem("lastCheckedDate"),
+    }), SNAPSHOT_KEY)
+  ).toEqual(persistedBefore);
+
+  const events = await readRefreshTelemetryEvents(page);
+  expect(events).toHaveLength(1);
+  expectSafeRefreshTelemetryEvent(events[0], {
+    outcome: "failure",
+    code: "invalid_response",
+    stage: "users",
+    reason: "user_id",
+    page_bucket: "none",
+    status_class: "2xx",
+    compatibility: "none",
+  });
+  await audit.assertClean();
+});
+
+test("a later follower page failure preserves the baseline and reports coarse stage diagnostics", async ({
+  page,
+}) => {
+  const { audit, twitch } = await openAuthenticatedApp(page, {
+    allowedConsoleHttpStatuses: [500],
+  });
+  const persistedBefore = await page.evaluate((key) => ({
+    snapshot: localStorage.getItem(key),
+    checkedDate: localStorage.getItem("lastCheckedDate"),
+  }), SNAPSHOT_KEY);
+  const followerRequestsBefore = twitch.followerRequests.length;
+  await clearRefreshTelemetryEvents(page);
+
+  twitch.failNextFollowerPage(500);
+  await page.getByRole("button", { name: "Refresh follower lists" }).click();
+  await expect(applicationAlert(page)).toContainText(
+    "Twitch is temporarily unavailable. Your previous follower lists were kept."
+  );
+  await expect(applicationAlert(page)).toContainText(
+    "Showing the last successfully loaded follower lists."
+  );
+  await expect(
+    activePanel(page, "Follower List").getByText("Retained Viewer", {
+      exact: true,
+    })
+  ).toBeVisible();
+  expect(twitch.followerRequests.length).toBe(followerRequestsBefore + 2);
+  expect(twitch.followerRequests.slice(-2)).toEqual([
+    { hasAfter: false, after: null },
+    { hasAfter: true, after: OPAQUE_CURSOR },
+  ]);
+  expect(
+    await page.evaluate((key) => ({
+      snapshot: localStorage.getItem(key),
+      checkedDate: localStorage.getItem("lastCheckedDate"),
+    }), SNAPSHOT_KEY)
+  ).toEqual(persistedBefore);
+
+  const events = await readRefreshTelemetryEvents(page);
+  expect(events).toHaveLength(1);
+  expectSafeRefreshTelemetryEvent(events[0], {
+    outcome: "failure",
+    code: "server_error",
+    stage: "followers",
+    reason: "unknown",
+    page_bucket: "2_3",
+    status_class: "5xx",
+    compatibility: "none",
+  });
+  await audit.assertClean();
+});
+
+test("single-flight refresh emits one terminal event for duplicate refresh attempts", async ({
+  page,
+}) => {
+  const { audit, twitch } = await openAuthenticatedApp(page);
+  await clearRefreshTelemetryEvents(page);
+  const followerRequestsBefore = twitch.followerRequests.length;
+  const hold = twitch.holdNextFollowerRequest();
+  await page.getByRole("button", { name: "Refresh follower lists" }).click();
+  await hold.started;
+
+  await page.evaluate(() => {
+    const button = document.querySelector(
+      'button[aria-label="Refreshing follower lists"]'
+    );
+    if (!(button instanceof HTMLButtonElement)) {
+      throw new Error("refresh button was not in the loading state");
+    }
+    button.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    button.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+  });
+  hold.release();
+
+  await expect(applicationStatus(page)).toHaveText("Follower lists updated.");
+  expect(twitch.followerRequests.length).toBe(followerRequestsBefore + 2);
+  const events = await readRefreshTelemetryEvents(page);
+  expect(events).toHaveLength(1);
+  expectSafeRefreshTelemetryEvent(events[0], {
+    outcome: "success",
+    code: "none",
+    stage: "complete",
+    reason: "none",
+    page_bucket: "none",
+    status_class: "2xx",
+    compatibility: "none",
+  });
+  await audit.assertClean();
+});
+
+test("a throwing telemetry observer cannot break a successful refresh", async ({
+  page,
+}) => {
+  const { audit } = await openAuthenticatedApp(page);
+  await clearRefreshTelemetryEvents(page);
+  await page.evaluate(() => {
+    const dataLayer = (window as unknown as { dataLayer?: { push?: unknown } })
+      .dataLayer;
+    if (!dataLayer || typeof dataLayer.push !== "function") {
+      throw new Error("dataLayer was not initialized");
+    }
+    dataLayer.push = () => {
+      throw new Error("synthetic telemetry observer failure");
+    };
+  });
+
+  await page.getByRole("button", { name: "Refresh follower lists" }).click();
+  await expect(applicationStatus(page)).toHaveText("Follower lists updated.");
+  await expect(
+    activePanel(page, "Follower List").getByText("Retained Viewer", {
+      exact: true,
+    })
+  ).toBeVisible();
+  await audit.assertClean();
+});
+
+test("a frozen telemetry observer cannot break a failed refresh", async ({
+  page,
+}) => {
+  const { audit, twitch } = await openAuthenticatedApp(page, {
+    allowedConsoleHttpStatuses: [500],
+  });
+  await clearRefreshTelemetryEvents(page);
+  await page.evaluate(() => {
+    Object.defineProperty(window, "dataLayer", {
+      configurable: true,
+      value: Object.freeze([]),
+    });
+  });
+  twitch.failNextFollowerRequest(500);
+
+  await page.getByRole("button", { name: "Refresh follower lists" }).click();
+  await expect(applicationAlert(page)).toContainText(
+    "Twitch is temporarily unavailable. Your previous follower lists were kept."
+  );
+  await expect(
+    activePanel(page, "Follower List").getByText("Retained Viewer", {
+      exact: true,
+    })
+  ).toBeVisible();
+  await audit.assertClean();
+});
+
+test("an aborted unmounted refresh emits no stale terminal telemetry", async ({
+  page,
+}) => {
+  const { audit, twitch } = await openAuthenticatedApp(page);
+  const persistedBefore = await page.evaluate((key) => ({
+    snapshot: localStorage.getItem(key),
+    checkedDate: localStorage.getItem("lastCheckedDate"),
+  }), SNAPSHOT_KEY);
+  await clearRefreshTelemetryEvents(page);
+  await page.evaluate(() => {
+    const dataLayer = (window as unknown as { dataLayer?: unknown }).dataLayer;
+    if (Array.isArray(dataLayer)) {
+      dataLayer.push({ event: "synthetic-cancellation-marker" });
+    }
+  });
+  const hold = twitch.holdNextFollowerRequest();
+  await page.getByRole("button", { name: "Refresh follower lists" }).click();
+  await hold.started;
+
+  try {
+    // Keep the same document/dataLayer alive while using Next's client-side
+    // route transition; a full reload would hide a stale event by replacing
+    // the observer queue altogether.
+    const docsLink = page.locator('a[data-docs-link="primary"]');
+    await expect(docsLink).toBeVisible();
+    await docsLink.evaluate((element) => {
+      element.setAttribute("href", "/en");
+      element.removeAttribute("target");
+      element.removeAttribute("rel");
+    });
+    await docsLink.click();
+    await expect(page).toHaveURL(/\/en\/?$/);
+    await page.waitForLoadState("networkidle");
+  } finally {
+    hold.release();
+  }
+
+  expect(
+    await page.evaluate((key) => ({
+      snapshot: localStorage.getItem(key),
+      checkedDate: localStorage.getItem("lastCheckedDate"),
+    }), SNAPSHOT_KEY)
+  ).toEqual(persistedBefore);
+  // The app was unmounted before the held request settled. No terminal event
+  // from the discarded generation may be observable after the navigation.
+  expect(await readRefreshTelemetryEvents(page)).toEqual([]);
+  expect(
+    await page.evaluate(() => {
+      const dataLayer = (window as unknown as { dataLayer?: unknown }).dataLayer;
+      return Array.isArray(dataLayer)
+        ? dataLayer.filter(
+            (entry) =>
+              entry !== null &&
+              typeof entry === "object" &&
+              (entry as { event?: unknown }).event ===
+                "synthetic-cancellation-marker"
+          ).length
+        : 0;
+    })
+  ).toBe(1);
   await audit.assertClean();
 });

@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "date": "2026-11-05",
+  "baseline_commit": "b4a6f42c6f985ea906e1641890f1132454cee5bb",
+  "fixture_policy": "Only synthetic identities, tokens, follower rows and provider responses. No real account was accessed. Raw response bodies, credentials, local profile paths and trace/HAR archives are excluded from committed evidence.",
+  "local_boundary_corpus": {
+    "total": 102,
+    "native_response_cases": 100,
+    "nonconforming_injected_fetch_cases": 2,
+    "changed_acceptance_cases": [
+      {
+        "endpoint": "users",
+        "case": "login empty string",
+        "before_outcome": "rejected",
+        "before_code": "invalid_response",
+        "after_outcome": "accepted",
+        "after_code": "none"
+      },
+      {
+        "endpoint": "users",
+        "case": "login null",
+        "before_outcome": "rejected",
+        "before_code": "invalid_response",
+        "after_outcome": "accepted",
+        "after_code": "none"
+      },
+      {
+        "endpoint": "users",
+        "case": "login number",
+        "before_outcome": "rejected",
+        "before_code": "invalid_response",
+        "after_outcome": "accepted",
+        "after_code": "none"
+      },
+      {
+        "endpoint": "users",
+        "case": "display_name empty string",
+        "before_outcome": "rejected",
+        "before_code": "invalid_response",
+        "after_outcome": "accepted",
+        "after_code": "none"
+      },
+      {
+        "endpoint": "users",
+        "case": "display_name null",
+        "before_outcome": "rejected",
+        "before_code": "invalid_response",
+        "after_outcome": "accepted",
+        "after_code": "none"
+      },
+      {
+        "endpoint": "users",
+        "case": "display_name number",
+        "before_outcome": "rejected",
+        "before_code": "invalid_response",
+        "after_outcome": "accepted",
+        "after_code": "none"
+      }
+    ],
+    "unchanged_outcome_and_code_cases": 96,
+    "unchanged_followers_cases": 64,
+    "unchanged_token_validation_cases": 11,
+    "interpretation": "This compares outcome/code acceptance boundaries, not byte equality of enriched errors, provider-permitted shapes, real-world incidence, or proof of the original reporter cause. Candidate success in the six cases is an intended change from baseline expectations."
+  },
+  "public_regression_tests": [
+    "tests/twitch-api.test.mjs",
+    "tests/refresh-telemetry.test.mjs",
+    "tests/e2e/dependency-regression.pw.ts"
+  ],
+  "gtm_status": "New allowlisted messages are enqueued locally. Private GTM tag configuration and GA4 receiving-property activation are outside the local/PR task and are not claimed verified.",
+  "application_source_utf8_lf_sha256": {
+    "lib/twitchApi.ts": "83b19c9ce2f3034f29b9294c2e8c4613f17126c423d617904018a1a2cf7ee613",
+    "lib/accessTwitch.ts": "4313d9aed5bb9ff6ee8196679bcfae5c15f2039771aecd33bc2b1f1fa238bf15",
+    "lib/refreshTelemetry.ts": "0f9d7ad3356289bbfeca280b49fbaab5c97f30896b4a89180f76dac5ddf0011a"
+  }
+}
